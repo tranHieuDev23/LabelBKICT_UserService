@@ -84,3 +84,6 @@ web_modules/
 
 # Build directory
 dist
+
+# Protobuf generated files
+src/proto/gen
