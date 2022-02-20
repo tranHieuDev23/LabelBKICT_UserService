@@ -1,5 +1,4 @@
 syntax = "proto3";
-package org.bkict.label.user_service;
 
 service UserService {
     rpc CreateUser(CreateUserRequest) returns (CreateUserResponse) {}
