@@ -1,26 +1,26 @@
 export interface BlacklistedTokenDataAccessor {
-    CreateBlacklistedToken(tokenID: number, expireAt: number): Promise<void>;
-    DeleteExpiredBlacklistedToken(requestTime: number): Promise<number>;
-    GetBlacklistedToken(tokenID: number): Promise<number>;
+    createBlacklistedToken(tokenID: number, expireAt: number): Promise<void>;
+    deleteExpiredBlacklistedToken(requestTime: number): Promise<number>;
+    getBlacklistedToken(tokenID: number): Promise<number>;
 }
 
 export class BlacklistedTokenDataAccessorImpl
     implements BlacklistedTokenDataAccessor
 {
-    public async CreateBlacklistedToken(
+    public async createBlacklistedToken(
         tokenID: number,
         expireAt: number
     ): Promise<void> {
         throw new Error("Method not implemented.");
     }
 
-    public async DeleteExpiredBlacklistedToken(
+    public async deleteExpiredBlacklistedToken(
         requestTime: number
     ): Promise<number> {
         throw new Error("Method not implemented.");
     }
 
-    public async GetBlacklistedToken(tokenID: number): Promise<number> {
+    public async getBlacklistedToken(tokenID: number): Promise<number> {
         throw new Error("Method not implemented.");
     }
 }

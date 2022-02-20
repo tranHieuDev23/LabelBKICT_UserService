@@ -16,11 +16,12 @@ export enum UserListSortOrder {
 }
 
 export interface UserDataAccessor {
-    CreateUser(username: string, displayName: string): Promise<number>;
-    UpdateUser(user: User): Promise<void>;
-    GetUser(userID: number): Promise<User>;
-    GetUserCount(): Promise<number>;
-    GetUserList(
+    createUser(username: string, displayName: string): Promise<number>;
+    updateUser(user: User): Promise<void>;
+    getUserByUserID(userID: number): Promise<User>;
+    getUserByUsername(username: string): Promise<User>;
+    getUserCount(): Promise<number>;
+    getUserList(
         offset: number,
         limit: number,
         sortOrder: UserListSortOrder
@@ -28,26 +29,30 @@ export interface UserDataAccessor {
 }
 
 export class UserDataAccessorImpl implements UserDataAccessor {
-    public async CreateUser(
+    public async createUser(
         username: string,
         displayName: string
     ): Promise<number> {
         throw new Error("Method not implemented.");
     }
 
-    public async UpdateUser(user: User): Promise<void> {
+    public async updateUser(user: User): Promise<void> {
         throw new Error("Method not implemented.");
     }
 
-    public async GetUser(userID: number): Promise<User> {
+    public async getUserByUserID(userID: number): Promise<User> {
         throw new Error("Method not implemented.");
     }
 
-    public async GetUserCount(): Promise<number> {
+    public async getUserByUsername(username: string): Promise<User> {
         throw new Error("Method not implemented.");
     }
 
-    public async GetUserList(
+    public async getUserCount(): Promise<number> {
+        throw new Error("Method not implemented.");
+    }
+
+    public async getUserList(
         offset: number,
         limit: number,
         sortOrder: UserListSortOrder

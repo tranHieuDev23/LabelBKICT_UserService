@@ -7,36 +7,36 @@ export class UserPermission {
 }
 
 export interface UserPermissionDataAccessor {
-    CreateUserPermission(
+    createUserPermission(
         permissionName: string,
         description: string
     ): Promise<number>;
-    UpdateUserPermission(userPermission: UserPermission): Promise<void>;
-    DeleteUserPermission(id: number): Promise<void>;
-    GetUserPermissionList(): Promise<UserPermission[]>;
+    updateUserPermission(userPermission: UserPermission): Promise<void>;
+    deleteUserPermission(id: number): Promise<void>;
+    getUserPermissionList(): Promise<UserPermission[]>;
 }
 
 export class UserPermissionDataAccessorImpl
     implements UserPermissionDataAccessor
 {
-    public async CreateUserPermission(
+    public async createUserPermission(
         permissionName: string,
         description: string
     ): Promise<number> {
         throw new Error("Method not implemented.");
     }
 
-    public async UpdateUserPermission(
+    public async updateUserPermission(
         userPermission: UserPermission
     ): Promise<void> {
         throw new Error("Method not implemented.");
     }
 
-    public async DeleteUserPermission(id: number): Promise<void> {
+    public async deleteUserPermission(id: number): Promise<void> {
         throw new Error("Method not implemented.");
     }
 
-    public async GetUserPermissionList(): Promise<UserPermission[]> {
+    public async getUserPermissionList(): Promise<UserPermission[]> {
         throw new Error("Method not implemented.");
     }
 }

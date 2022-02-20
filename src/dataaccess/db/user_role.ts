@@ -14,11 +14,11 @@ export enum UserRoleListSortOrder {
 }
 
 export interface UserRoleDataAccessor {
-    CreateUserRole(displayName: string, description: string): Promise<number>;
-    UpdateUserRole(userRole: UserRole): Promise<void>;
-    DeleteUserRole(id: number): Promise<void>;
-    GetUserRoleCount(): Promise<number>;
-    GetUserRoleList(
+    createUserRole(displayName: string, description: string): Promise<number>;
+    updateUserRole(userRole: UserRole): Promise<void>;
+    deleteUserRole(id: number): Promise<void>;
+    getUserRoleCount(): Promise<number>;
+    getUserRoleList(
         offset: number,
         limit: number,
         sortOrder: UserRoleListSortOrder
@@ -26,26 +26,26 @@ export interface UserRoleDataAccessor {
 }
 
 export class UserRoleDataAccessorImpl implements UserRoleDataAccessor {
-    public async CreateUserRole(
+    public async createUserRole(
         displayName: string,
         description: string
     ): Promise<number> {
         throw new Error("Method not implemented.");
     }
 
-    public async UpdateUserRole(userRole: UserRole): Promise<void> {
+    public async updateUserRole(userRole: UserRole): Promise<void> {
         throw new Error("Method not implemented.");
     }
 
-    public async DeleteUserRole(id: number): Promise<void> {
+    public async deleteUserRole(id: number): Promise<void> {
         throw new Error("Method not implemented.");
     }
 
-    public async GetUserRoleCount(): Promise<number> {
+    public async getUserRoleCount(): Promise<number> {
         throw new Error("Method not implemented.");
     }
 
-    public async GetUserRoleList(
+    public async getUserRoleList(
         offset: number,
         limit: number,
         sortOrder: UserRoleListSortOrder

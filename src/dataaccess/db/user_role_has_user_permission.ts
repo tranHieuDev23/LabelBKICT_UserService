@@ -1,15 +1,15 @@
 import { UserPermission } from "./user_permission";
 
 export interface UserRoleHasUserPermissionDataAccessor {
-    CreateUserRoleHasUserPermission(
+    createUserRoleHasUserPermission(
         userRoleID: number,
         userPermissionID: number
     ): Promise<void>;
-    DeleteUserRoleHasUserPermission(
+    deleteUserRoleHasUserPermission(
         userRoleID: number,
         userPermissionID: number
     ): Promise<void>;
-    GetUserPermissionListOfUserRoleList(
+    getUserPermissionListOfUserRoleList(
         userRoleIDList: number[]
     ): Promise<UserPermission[][]>;
 }
@@ -17,21 +17,21 @@ export interface UserRoleHasUserPermissionDataAccessor {
 export class UserRoleHasUserPermissionDataAccessorImpl
     implements UserRoleHasUserPermissionDataAccessor
 {
-    public async CreateUserRoleHasUserPermission(
+    public async createUserRoleHasUserPermission(
         userRoleID: number,
         userPermissionID: number
     ): Promise<void> {
         throw new Error("Method not implemented.");
     }
 
-    public async DeleteUserRoleHasUserPermission(
+    public async deleteUserRoleHasUserPermission(
         userRoleID: number,
         userPermissionID: number
     ): Promise<void> {
         throw new Error("Method not implemented.");
     }
 
-    public async GetUserPermissionListOfUserRoleList(
+    public async getUserPermissionListOfUserRoleList(
         userRoleIDList: number[]
     ): Promise<UserPermission[][]> {
         throw new Error("Method not implemented.");
