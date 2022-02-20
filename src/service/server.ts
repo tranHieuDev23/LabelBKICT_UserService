@@ -4,13 +4,13 @@ import {
     ServerCredentials,
 } from "@grpc/grpc-js";
 import { loadSync } from "@grpc/proto-loader";
-import { UserServiceHandlers } from "../proto/gen/UserService";
 import { ProtoGrpcType } from "../proto/gen/user_service";
+import { UserServiceHandlersFactory } from "./handler";
 
 export class UserServiceGRPCServer {
     constructor(
         private readonly protoPath: string,
-        private readonly handler: UserServiceHandlers
+        private readonly handlerFactory: UserServiceHandlersFactory
     ) {}
 
     public start(port: number): void {
@@ -19,7 +19,7 @@ export class UserServiceGRPCServer {
         const server = new Server();
         server.addService(
             userServiceProtoGrpc.UserService.service,
-            this.handler
+            this.handlerFactory.getUserServiceHandlers()
         );
 
         server.bind(`127.0.0.1:${port}`, ServerCredentials.createInsecure());

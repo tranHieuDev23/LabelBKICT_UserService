@@ -115,13 +115,13 @@ message GetUserListResponse {
 }
 
 message CreateUserPasswordRequest {
-    UserPassword user_password = 1;
+    UserPassword password = 1;
 }
 
 message CreateUserPasswordResponse {}
 
 message UpdateUserPasswordRequest {
-    UserPassword user_password = 1;
+    UserPassword password = 1;
 }
 
 message UpdateUserPasswordResponse {}
