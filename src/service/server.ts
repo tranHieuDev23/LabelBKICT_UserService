@@ -4,17 +4,18 @@ import {
     ServerCredentials,
 } from "@grpc/grpc-js";
 import { loadSync } from "@grpc/proto-loader";
+import { GRPCServerConfig } from "../config";
 import { ProtoGrpcType } from "../proto/gen/user_service";
 import { UserServiceHandlersFactory } from "./handler";
 
 export class UserServiceGRPCServer {
     constructor(
-        private readonly protoPath: string,
-        private readonly handlerFactory: UserServiceHandlersFactory
+        private readonly handlerFactory: UserServiceHandlersFactory,
+        private readonly grpcServerConfig: GRPCServerConfig
     ) {}
 
-    public start(port: number): void {
-        const userServiceProtoGrpc = this.loadUserServiceProtoGrpc();
+    public loadProtoAndStart(protoPath: string): void {
+        const userServiceProtoGrpc = this.loadUserServiceProtoGrpc(protoPath);
 
         const server = new Server();
         server.addService(
@@ -22,14 +23,17 @@ export class UserServiceGRPCServer {
             this.handlerFactory.getUserServiceHandlers()
         );
 
-        server.bind(`127.0.0.1:${port}`, ServerCredentials.createInsecure());
+        server.bind(
+            `127.0.0.1:${this.grpcServerConfig.port}`,
+            ServerCredentials.createInsecure()
+        );
         server.start();
         process.once("SIGINT", server.tryShutdown);
         process.once("SIGTERM", server.tryShutdown);
     }
 
-    private loadUserServiceProtoGrpc(): ProtoGrpcType {
-        const packageDefinition = loadSync(this.protoPath, {
+    private loadUserServiceProtoGrpc(protoPath: string): ProtoGrpcType {
+        const packageDefinition = loadSync(protoPath, {
             keepCase: true,
             enums: String,
             defaults: true,
