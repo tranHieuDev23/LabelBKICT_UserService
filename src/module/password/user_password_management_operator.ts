@@ -1,7 +1,6 @@
 import {
     UserDataAccessor,
     UserPasswordDataAccessor,
-    UserPasswordDataAccessorImpl,
 } from "../../dataaccess/db";
 import { User } from "../../proto/gen/User";
 
@@ -15,7 +14,7 @@ export interface UserPasswordManagementOperator {
 }
 
 export class UserPasswordManagementOperatorImpl
-    implements UserPasswordDataAccessorImpl
+    implements UserPasswordManagementOperator
 {
     constructor(
         private readonly userPasswordDM: UserPasswordDataAccessor,
@@ -30,7 +29,10 @@ export class UserPasswordManagementOperatorImpl
         throw new Error("Method not implemented.");
     }
 
-    public getUserPasswordHash(ofUserID: number): Promise<string> {
+    public loginWithPassword(
+        username: string,
+        password: string
+    ): Promise<{ user: User; token: string }> {
         throw new Error("Method not implemented.");
     }
 }
