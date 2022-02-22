@@ -3,6 +3,7 @@ import {
     BlacklistedTokenDataAccessorImpl,
     BLACKLISTED_TOKEN_DATA_ACCESSOR_TOKEN,
 } from "./blacklisted_token";
+import { KNEX_INSTANCE_TOKEN, newKnexInstance } from "./knex";
 import { UserDataAccessorImpl, USER_DATA_ACCESSOR_TOKEN } from "./user";
 import {
     UserHasUserRoleDataAccessorImpl,
@@ -34,6 +35,10 @@ export * from "./user_role_has_user_permission";
 export * from "./blacklisted_token";
 
 export function bindToContainer(container: Container): void {
+    container
+        .bind(KNEX_INSTANCE_TOKEN)
+        .toInstance(newKnexInstance)
+        .inSingletonScope();
     container
         .bind(USER_DATA_ACCESSOR_TOKEN)
         .toInstance(UserDataAccessorImpl)
