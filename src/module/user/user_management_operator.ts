@@ -1,4 +1,8 @@
-import { UserDataAccessor } from "../../dataaccess/db";
+import { injected, token } from "brandi";
+import {
+    UserDataAccessor,
+    USER_DATA_ACCESSOR_TOKEN,
+} from "../../dataaccess/db";
 import { User } from "../../proto/gen/User";
 import { _UserListSortOrder_Values } from "../../proto/gen/UserListSortOrder";
 
@@ -34,3 +38,9 @@ export class UserManagementOperatorImpl implements UserManagementOperator {
         throw new Error("Method not implemented.");
     }
 }
+
+injected(UserManagementOperatorImpl, USER_DATA_ACCESSOR_TOKEN);
+
+export const USER_MANAGEMENT_OPERATOR_TOKEN = token<UserManagementOperator>(
+    "UserManagementOperator"
+);

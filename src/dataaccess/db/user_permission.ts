@@ -1,3 +1,5 @@
+import { injected, token } from "brandi";
+
 export class UserPermission {
     constructor(
         public id: number,
@@ -40,3 +42,8 @@ export class UserPermissionDataAccessorImpl
         throw new Error("Method not implemented.");
     }
 }
+
+injected(UserPermissionDataAccessorImpl);
+
+export const USER_PERMISSION_DATA_ACCESSOR_TOKEN =
+    token<UserPermissionDataAccessor>("UserPermissionDataAccessor");

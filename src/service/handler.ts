@@ -1,8 +1,24 @@
-import { UserPasswordManagementOperator } from "../module/password";
-import { UserPermissionManagementOperator } from "../module/permission";
-import { UserRoleManagementOperator } from "../module/role";
-import { TokenManagementOperator } from "../module/token";
-import { UserManagementOperator } from "../module/user";
+import { injected, token } from "brandi";
+import {
+    UserPasswordManagementOperator,
+    USER_PASSWORD_MANAGEMENT_OPERATOR_TOKEN,
+} from "../module/password";
+import {
+    UserPermissionManagementOperator,
+    USER_PERMISSION_MANAGEMENT_OPERATOR_TOKEN,
+} from "../module/permission";
+import {
+    UserRoleManagementOperator,
+    USER_ROLE_MANAGEMENT_OPERATOR_TOKEN,
+} from "../module/role";
+import {
+    TokenManagementOperator,
+    TOKEN_MANAGEMENT_OPERATOR_TOKEN,
+} from "../module/token";
+import {
+    UserManagementOperator,
+    USER_MANAGEMENT_OPERATOR_TOKEN,
+} from "../module/user";
 import { UserServiceHandlers } from "../proto/gen/UserService";
 
 export class UserServiceHandlersFactory {
@@ -43,3 +59,15 @@ export class UserServiceHandlersFactory {
         return handler;
     }
 }
+
+injected(
+    UserServiceHandlersFactory,
+    USER_MANAGEMENT_OPERATOR_TOKEN,
+    USER_PASSWORD_MANAGEMENT_OPERATOR_TOKEN,
+    TOKEN_MANAGEMENT_OPERATOR_TOKEN,
+    USER_ROLE_MANAGEMENT_OPERATOR_TOKEN,
+    USER_PERMISSION_MANAGEMENT_OPERATOR_TOKEN
+);
+
+export const USER_SERVICE_HANDLERS_FACTORY_TOKEN =
+    token<UserServiceHandlersFactory>("UserServiceHandlersFactory");

@@ -1,7 +1,11 @@
+import { injected, token } from "brandi";
 import {
     UserHasUserRoleDataAccessor,
     UserPermissionDataAccessor,
     UserRoleHasUserPermissionDataAccessor,
+    USER_HAS_USER_ROLE_DATA_ACCESSOR_TOKEN,
+    USER_PERMISSION_DATA_ACCESSOR_TOKEN,
+    USER_ROLE_HAS_USER_PERMISSION_DATA_ACCESSOR_TOKEN,
 } from "../../dataaccess/db";
 import { UserPermission } from "../../proto/gen/UserPermission";
 
@@ -83,3 +87,13 @@ export class UserPermissionManagementOperatorImpl
         throw new Error("Method not implemented.");
     }
 }
+
+injected(
+    UserPermissionManagementOperatorImpl,
+    USER_PERMISSION_DATA_ACCESSOR_TOKEN,
+    USER_ROLE_HAS_USER_PERMISSION_DATA_ACCESSOR_TOKEN,
+    USER_HAS_USER_ROLE_DATA_ACCESSOR_TOKEN
+);
+
+export const USER_PERMISSION_MANAGEMENT_OPERATOR_TOKEN =
+    token<UserPermissionManagementOperator>("UserPermissionManagementOperator");

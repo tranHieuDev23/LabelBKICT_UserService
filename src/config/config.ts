@@ -1,3 +1,4 @@
+import { token } from "brandi";
 import { GRPCServerConfig } from "./grpc_service";
 
 export class UserServiceConfig {
@@ -9,3 +10,6 @@ export class UserServiceConfig {
         return config;
     }
 }
+
+export const USER_SERVICE_CONFIG_TOKEN =
+    token<UserServiceConfig>("UserServiceConfig");

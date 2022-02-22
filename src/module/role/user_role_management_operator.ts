@@ -1,6 +1,9 @@
+import { injected, token } from "brandi";
 import {
     UserHasUserRoleDataAccessor,
     UserRoleDataAccessor,
+    USER_HAS_USER_ROLE_DATA_ACCESSOR_TOKEN,
+    USER_ROLE_DATA_ACCESSOR_TOKEN,
 } from "../../dataaccess/db";
 import { UserRole } from "../../proto/gen/UserRole";
 import { _UserRoleListSortOrder_Values } from "../../proto/gen/UserRoleListSortOrder";
@@ -62,3 +65,12 @@ export class UserRoleManagementOperatorImpl
         throw new Error("Method not implemented.");
     }
 }
+
+injected(
+    UserRoleManagementOperatorImpl,
+    USER_ROLE_DATA_ACCESSOR_TOKEN,
+    USER_HAS_USER_ROLE_DATA_ACCESSOR_TOKEN
+);
+
+export const USER_ROLE_MANAGEMENT_OPERATOR_TOKEN =
+    token<UserRoleManagementOperator>("UserRoleManagementOperator");

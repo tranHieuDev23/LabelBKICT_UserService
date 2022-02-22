@@ -1,6 +1,9 @@
+import { injected, token } from "brandi";
 import {
     BlacklistedTokenDataAccessor,
+    BLACKLISTED_TOKEN_DATA_ACCESSOR_TOKEN,
     UserDataAccessor,
+    USER_DATA_ACCESSOR_TOKEN,
 } from "../../dataaccess/db";
 import { User } from "../../proto/gen/User";
 
@@ -23,3 +26,13 @@ export class TokenManagementOperatorImpl implements TokenManagementOperator {
         throw new Error("Method not implemented.");
     }
 }
+
+injected(
+    TokenManagementOperatorImpl,
+    BLACKLISTED_TOKEN_DATA_ACCESSOR_TOKEN,
+    USER_DATA_ACCESSOR_TOKEN
+);
+
+export const TOKEN_MANAGEMENT_OPERATOR_TOKEN = token<TokenManagementOperator>(
+    "TokenManagementOperator"
+);

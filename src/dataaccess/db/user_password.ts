@@ -1,3 +1,5 @@
+import { injected, token } from "brandi";
+
 export interface UserPasswordDataAccessor {
     createUserPassword(ofUserID: number, hash: string): Promise<void>;
     updateUserPassword(ofUserID: number, hash: string): Promise<void>;
@@ -23,3 +25,8 @@ export class UserPasswordDataAccessorImpl implements UserPasswordDataAccessor {
         throw new Error("Method not implemented.");
     }
 }
+
+injected(UserPasswordDataAccessorImpl);
+
+export const USER_PASSWORD_DATA_ACCESSOR_TOKEN =
+    token<UserPasswordDataAccessor>("UserPasswordDataAccessor");

@@ -1,3 +1,4 @@
+import { injected, token } from "brandi";
 import { UserRole } from "./user_role";
 
 export interface UserHasUserRoleDataAccessor {
@@ -29,3 +30,8 @@ export class UserHasUserRoleDataAccessorImpl
         throw new Error("Method not implemented.");
     }
 }
+
+injected(UserHasUserRoleDataAccessorImpl);
+
+export const USER_HAS_USER_ROLE_DATA_ACCESSOR_TOKEN =
+    token<UserHasUserRoleDataAccessor>("UserHasUserRoleDataAccessor");

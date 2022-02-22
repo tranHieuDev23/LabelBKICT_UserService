@@ -1,6 +1,9 @@
+import { injected, token } from "brandi";
 import {
     UserDataAccessor,
     UserPasswordDataAccessor,
+    USER_DATA_ACCESSOR_TOKEN,
+    USER_PASSWORD_DATA_ACCESSOR_TOKEN,
 } from "../../dataaccess/db";
 import { User } from "../../proto/gen/User";
 
@@ -36,3 +39,12 @@ export class UserPasswordManagementOperatorImpl
         throw new Error("Method not implemented.");
     }
 }
+
+injected(
+    UserPasswordManagementOperatorImpl,
+    USER_PASSWORD_DATA_ACCESSOR_TOKEN,
+    USER_DATA_ACCESSOR_TOKEN
+);
+
+export const USER_PASSWORD_MANAGEMENT_OPERATOR_TOKEN =
+    token<UserPasswordManagementOperator>("UserPasswordManagementOperator");

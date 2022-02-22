@@ -4,14 +4,18 @@ import {
     ServerCredentials,
 } from "@grpc/grpc-js";
 import { loadSync } from "@grpc/proto-loader";
-import { GRPCServerConfig } from "../config";
+import { injected, token } from "brandi";
+import {
+    UserServiceHandlersFactory,
+    USER_SERVICE_HANDLERS_FACTORY_TOKEN,
+} from "./handler";
+import { UserServiceConfig, USER_SERVICE_CONFIG_TOKEN } from "../config";
 import { ProtoGrpcType } from "../proto/gen/user_service";
-import { UserServiceHandlersFactory } from "./handler";
 
 export class UserServiceGRPCServer {
     constructor(
         private readonly handlerFactory: UserServiceHandlersFactory,
-        private readonly grpcServerConfig: GRPCServerConfig
+        private readonly userServiceConfig: UserServiceConfig
     ) {}
 
     public loadProtoAndStart(protoPath: string): void {
@@ -23,13 +27,17 @@ export class UserServiceGRPCServer {
             this.handlerFactory.getUserServiceHandlers()
         );
 
-        server.bind(
-            `127.0.0.1:${this.grpcServerConfig.port}`,
-            ServerCredentials.createInsecure()
+        server.bindAsync(
+            `127.0.0.1:${this.userServiceConfig.grpcServerConfig.port}`,
+            ServerCredentials.createInsecure(),
+            (error) => {
+                if (error) {
+                    console.error(error);
+                    return;
+                }
+                server.start();
+            }
         );
-        server.start();
-        process.once("SIGINT", server.tryShutdown);
-        process.once("SIGTERM", server.tryShutdown);
     }
 
     private loadUserServiceProtoGrpc(protoPath: string): ProtoGrpcType {
@@ -45,3 +53,13 @@ export class UserServiceGRPCServer {
         return userServicePackageDefinition as ProtoGrpcType;
     }
 }
+
+injected(
+    UserServiceGRPCServer,
+    USER_SERVICE_HANDLERS_FACTORY_TOKEN,
+    USER_SERVICE_CONFIG_TOKEN
+);
+
+export const USER_SERVICE_GRPC_SERVER_TOKEN = token<UserServiceGRPCServer>(
+    "UserServiceGRPCServer"
+);

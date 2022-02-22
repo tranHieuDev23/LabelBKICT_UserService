@@ -1,3 +1,4 @@
+import { injected, token } from "brandi";
 import { UserPermission } from "./user_permission";
 
 export interface UserRoleHasUserPermissionDataAccessor {
@@ -37,3 +38,10 @@ export class UserRoleHasUserPermissionDataAccessorImpl
         throw new Error("Method not implemented.");
     }
 }
+
+injected(UserRoleHasUserPermissionDataAccessorImpl);
+
+export const USER_ROLE_HAS_USER_PERMISSION_DATA_ACCESSOR_TOKEN =
+    token<UserRoleHasUserPermissionDataAccessor>(
+        "UserRoleHasUserPermissionDataAccessor"
+    );

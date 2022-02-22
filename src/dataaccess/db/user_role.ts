@@ -1,3 +1,5 @@
+import { injected, token } from "brandi";
+
 export class UserRole {
     constructor(
         public id: number,
@@ -53,3 +55,9 @@ export class UserRoleDataAccessorImpl implements UserRoleDataAccessor {
         throw new Error("Method not implemented.");
     }
 }
+
+injected(UserRoleDataAccessorImpl);
+
+export const USER_ROLE_DATA_ACCESSOR_TOKEN = token<UserRoleDataAccessor>(
+    "UserRoleDataAccessor"
+);
