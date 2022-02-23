@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "api-knex": "TS_NODE_COMPILER_OPTIONS='{ \"module\": \"commonjs\" }' knex --knexfile=./knexfile.ts",
-    "generate": "./node_modules/.bin/proto-loader-gen-types --longs=Number --enums=String --defaults --oneofs --grpcLib=@grpc/grpc-js --outDir=src/proto/gen src/proto/**/*.proto",
+    "generate": "./node_modules/.bin/proto-loader-gen-types --longs=Number --enums=Number --defaults --oneofs --grpcLib=@grpc/grpc-js --outDir=src/proto/gen src/proto/**/*.proto",
     "build": "npm run generate && tsc --build",
     "lint": "npx eslint ./src --ext .js,.jsx,.ts,.tsx",
     "clean": "rm -r ./src/proto/gen && tsc --build --clean",
@@ -15,6 +15,7 @@
   "license": "MIT",
   "devDependencies": {
     "@tsconfig/node16": "^1.0.2",
+    "@types/validator": "^13.7.1",
     "@typescript-eslint/eslint-plugin": "^5.12.0",
     "@typescript-eslint/parser": "^5.12.0",
     "eslint": "^7.18.0",
@@ -29,6 +30,7 @@
     "brandi": "^4.0.1",
     "dotenv": "^16.0.0",
     "knex": "^1.0.3",
-    "pg": "^8.7.3"
+    "pg": "^8.7.3",
+    "validator": "^13.7.0"
   }
 }

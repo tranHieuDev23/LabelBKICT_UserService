@@ -106,7 +106,7 @@ message UpdateUserResponse {
 message GetUserListRequest {
     uint32 start_from = 1;
     uint32 limit = 2;
-    UserListSortOrder sort_order = 3;
+    UserListSortOrder.Values sort_order = 3;
 }
 
 message GetUserListResponse {
@@ -177,7 +177,7 @@ message DeleteUserRoleResponse {}
 message GetUserRoleListRequest {
     uint32 offset = 1;
     uint32 limit = 2;
-    UserRoleListSortOrder sort_order = 3;
+    UserRoleListSortOrder.Values sort_order = 3;
 }
 
 message GetUserRoleListResponse {

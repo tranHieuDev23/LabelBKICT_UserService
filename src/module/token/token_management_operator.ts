@@ -8,7 +8,9 @@ import {
 import { User } from "../../proto/gen/User";
 
 export interface TokenManagementOperator {
-    getUserFromToken(token: string): Promise<User>;
+    getUserFromToken(
+        token: string
+    ): Promise<{ user: User; newToken: string | undefined }>;
     blacklistToken(token: string): Promise<void>;
 }
 
@@ -18,7 +20,9 @@ export class TokenManagementOperatorImpl implements TokenManagementOperator {
         private readonly userDM: UserDataAccessor
     ) {}
 
-    getUserFromToken(token: string): Promise<User> {
+    getUserFromToken(
+        token: string
+    ): Promise<{ user: User; newToken: string | undefined }> {
         throw new Error("Method not implemented.");
     }
 
