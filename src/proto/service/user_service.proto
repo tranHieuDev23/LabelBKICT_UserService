@@ -104,7 +104,7 @@ message UpdateUserResponse {
 }
 
 message GetUserListRequest {
-    uint32 start_from = 1;
+    uint32 offset = 1;
     uint32 limit = 2;
     UserListSortOrder.Values sort_order = 3;
 }
