@@ -44,7 +44,7 @@ export class UserServiceGRPCServer {
         const packageDefinition = loadSync(protoPath, {
             keepCase: true,
             enums: String,
-            defaults: true,
+            defaults: false,
             oneofs: true,
         });
         const userServicePackageDefinition = loadPackageDefinition(

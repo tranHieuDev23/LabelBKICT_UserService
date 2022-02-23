@@ -20,15 +20,13 @@ export class TokenManagementOperatorImpl implements TokenManagementOperator {
         private readonly userDM: UserDataAccessor
     ) {}
 
-    getUserFromToken(
+    public async getUserFromToken(
         token: string
     ): Promise<{ user: User; newToken: string | undefined }> {
         throw new Error("Method not implemented.");
     }
 
-    blacklistToken(token: string): Promise<void> {
-        throw new Error("Method not implemented.");
-    }
+    public async blacklistToken(token: string): Promise<void> {}
 }
 
 injected(

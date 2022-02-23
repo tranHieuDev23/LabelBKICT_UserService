@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "api-knex": "TS_NODE_COMPILER_OPTIONS='{ \"module\": \"commonjs\" }' knex --knexfile=./knexfile.ts",
-    "generate": "./node_modules/.bin/proto-loader-gen-types --longs=Number --enums=Number --defaults --oneofs --grpcLib=@grpc/grpc-js --outDir=src/proto/gen src/proto/**/*.proto",
+    "generate": "./node_modules/.bin/proto-loader-gen-types --longs=Number --enums=Number --oneofs --grpcLib=@grpc/grpc-js --outDir=src/proto/gen src/proto/**/*.proto",
     "build": "npm run generate && tsc --build",
     "lint": "npx eslint ./src --ext .js,.jsx,.ts,.tsx",
     "clean": "rm -r ./src/proto/gen && tsc --build --clean",

@@ -106,13 +106,13 @@ export class UserServiceHandlersFactory {
 
             GetUserList: async (call, callback) => {
                 const req = call.request;
-                if (req.startFrom === null) {
+                if (req.startFrom === undefined) {
                     req.startFrom = 0;
                 }
-                if (req.limit === null) {
+                if (req.limit === undefined) {
                     req.limit = DEFAULT_USER_LIST_LIMIT;
                 }
-                if (req.sortOrder === null) {
+                if (req.sortOrder === undefined) {
                     req.sortOrder = _UserListSortOrder_Values.ID_ASCENDING;
                 }
 
@@ -139,19 +139,19 @@ export class UserServiceHandlersFactory {
 
             CreateUserPassword: async (call, callback) => {
                 const req = call.request;
-                if (req.password === null) {
+                if (req.password === undefined) {
                     return callback({
                         message: "password is required",
                         code: status.INVALID_ARGUMENT,
                     });
                 }
-                if (req.password.ofUserId === null) {
+                if (req.password.ofUserId === undefined) {
                     return callback({
                         message: "password.of_user_id is required",
                         code: status.INVALID_ARGUMENT,
                     });
                 }
-                if (req.password.password === null) {
+                if (req.password.password === undefined) {
                     return callback({
                         message: "password.password is required",
                         code: status.INVALID_ARGUMENT,
@@ -163,7 +163,7 @@ export class UserServiceHandlersFactory {
                         req.password.ofUserId,
                         req.password.password
                     );
-                    return callback(null);
+                    return callback(null, {});
                 } catch (e) {
                     if (e instanceof ErrorWithStatus) {
                         return callback({
@@ -176,19 +176,19 @@ export class UserServiceHandlersFactory {
 
             UpdateUserPassword: async (call, callback) => {
                 const req = call.request;
-                if (req.password === null) {
+                if (req.password === undefined) {
                     return callback({
                         message: "password is required",
                         code: status.INVALID_ARGUMENT,
                     });
                 }
-                if (req.password.ofUserId === null) {
+                if (req.password.ofUserId === undefined) {
                     return callback({
                         message: "password.of_user_id is required",
                         code: status.INVALID_ARGUMENT,
                     });
                 }
-                if (req.password.password === null) {
+                if (req.password.password === undefined) {
                     return callback({
                         message: "password.password is required",
                         code: status.INVALID_ARGUMENT,
@@ -200,7 +200,7 @@ export class UserServiceHandlersFactory {
                         req.password.ofUserId,
                         req.password.password
                     );
-                    return callback(null);
+                    return callback(null, {});
                 } catch (e) {
                     if (e instanceof ErrorWithStatus) {
                         return callback({
@@ -213,13 +213,13 @@ export class UserServiceHandlersFactory {
 
             LoginWithPassword: async (call, callback) => {
                 const req = call.request;
-                if (req.username === null) {
+                if (req.username === undefined) {
                     return callback({
                         message: "username is required",
                         code: status.INVALID_ARGUMENT,
                     });
                 }
-                if (req.password === null) {
+                if (req.password === undefined) {
                     return callback({
                         message: "password is required",
                         code: status.INVALID_ARGUMENT,
@@ -248,7 +248,7 @@ export class UserServiceHandlersFactory {
 
             GetUserFromToken: async (call, callback) => {
                 const req = call.request;
-                if (req.token === null) {
+                if (req.token === undefined) {
                     return callback({
                         message: "token is required",
                         code: status.INVALID_ARGUMENT,
@@ -276,7 +276,7 @@ export class UserServiceHandlersFactory {
 
             BlacklistToken: async (call, callback) => {
                 const req = call.request;
-                if (req.token === null) {
+                if (req.token === undefined) {
                     return callback({
                         message: "token is required",
                         code: status.INVALID_ARGUMENT,
@@ -287,7 +287,7 @@ export class UserServiceHandlersFactory {
                     await this.tokenManagementOperator.blacklistToken(
                         req.token
                     );
-                    return callback(null);
+                    return callback(null, {});
                 } catch (e) {
                     if (e instanceof ErrorWithStatus) {
                         return callback({
