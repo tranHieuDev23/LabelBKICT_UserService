@@ -46,8 +46,8 @@ export class UserDataAccessorImpl implements UserDataAccessor {
     ): Promise<number> {
         return await this.knex
             .insert({
-                ColNameUserServiceUserUsername: username,
-                ColNameUserServiceUserDisplayName: displayName,
+                [ColNameUserServiceUserUsername]: username,
+                [ColNameUserServiceUserDisplayName]: displayName,
             })
             .returning(ColNameUserServiceUserID)
             .into(TabNameUserServiceUser);
@@ -57,8 +57,8 @@ export class UserDataAccessorImpl implements UserDataAccessor {
         await this.knex
             .table(TabNameUserServiceUser)
             .update({
-                ColNameUserServiceUserUsername: user.username,
-                ColNameUserServiceUserDisplayName: user.displayName,
+                [ColNameUserServiceUserUsername]: user.username,
+                [ColNameUserServiceUserDisplayName]: user.displayName,
             })
             .where({
                 ColNameUserServiceUserID: user.userID,
@@ -70,7 +70,7 @@ export class UserDataAccessorImpl implements UserDataAccessor {
             .select()
             .from(TabNameUserServiceUser)
             .where({
-                ColNameUserServiceUserID: userID,
+                [ColNameUserServiceUserID]: userID,
             });
         if (rows.length == 0) {
             throw new Error("user not found");
@@ -86,7 +86,7 @@ export class UserDataAccessorImpl implements UserDataAccessor {
             .select()
             .from(TabNameUserServiceUser)
             .where({
-                ColNameUserServiceUserUsername: username,
+                [ColNameUserServiceUserUsername]: username,
             });
         if (rows.length == 0) {
             throw new Error("user not found");
