@@ -43,13 +43,13 @@ export class UserServiceHandlersFactory {
         const handler: UserServiceHandlers = {
             CreateUser: async (call, callback) => {
                 const req = call.request;
-                if (!req.username) {
+                if (req.username === undefined) {
                     return callback({
                         message: "username is required",
                         code: status.INVALID_ARGUMENT,
                     });
                 }
-                if (!req.displayName) {
+                if (req.displayName === undefined) {
                     return callback({
                         message: "display_name is required",
                         code: status.INVALID_ARGUMENT,
@@ -62,13 +62,7 @@ export class UserServiceHandlersFactory {
                             req.username,
                             req.displayName
                         );
-                    return callback(null, {
-                        user: {
-                            id: createdUser.id,
-                            username: createdUser.username,
-                            displayName: createdUser.displayName,
-                        },
-                    });
+                    return callback(null, { user: createdUser });
                 } catch (e) {
                     this.handleError(e, callback);
                 }
@@ -76,7 +70,7 @@ export class UserServiceHandlersFactory {
 
             UpdateUser: async (call, callback) => {
                 const req = call.request;
-                if (!req.user) {
+                if (req.user === undefined) {
                     return callback({
                         message: "user is required",
                         code: status.INVALID_ARGUMENT,
@@ -86,13 +80,7 @@ export class UserServiceHandlersFactory {
                 try {
                     const updatedUser =
                         await this.userManagementOperator.updateUser(req.user);
-                    return callback(null, {
-                        user: {
-                            id: updatedUser.id,
-                            username: updatedUser.username,
-                            displayName: updatedUser.displayName,
-                        },
-                    });
+                    return callback(null, { user: updatedUser });
                 } catch (e) {
                     this.handleError(e, callback);
                 }
@@ -117,10 +105,7 @@ export class UserServiceHandlersFactory {
                             req.limit,
                             req.sortOrder
                         );
-                    return callback(null, {
-                        totalUserCount: totalUserCount,
-                        userList: userList,
-                    });
+                    return callback(null, { totalUserCount, userList });
                 } catch (e) {
                     this.handleError(e, callback);
                 }
@@ -211,10 +196,7 @@ export class UserServiceHandlersFactory {
                             req.username,
                             req.password
                         );
-                    return callback(null, {
-                        user: user,
-                        token: token,
-                    });
+                    return callback(null, { user, token });
                 } catch (e) {
                     this.handleError(e, callback);
                 }
@@ -234,10 +216,7 @@ export class UserServiceHandlersFactory {
                         await this.tokenManagementOperator.getUserFromToken(
                             req.token
                         );
-                    return callback(null, {
-                        user: user,
-                        newToken: newToken,
-                    });
+                    return callback(null, { user, newToken });
                 } catch (e) {
                     this.handleError(e, callback);
                 }
@@ -280,9 +259,7 @@ export class UserServiceHandlersFactory {
                             req.displayName,
                             req.description
                         );
-                    return callback(null, {
-                        userRole: createdUserRole,
-                    });
+                    return callback(null, { userRole: createdUserRole });
                 } catch (e) {
                     this.handleError(e, callback);
                 }
@@ -302,9 +279,7 @@ export class UserServiceHandlersFactory {
                         await this.userRoleManagementOperator.updateUserRole(
                             req.userRole
                         );
-                    return callback(null, {
-                        userRole: updatedUserRole,
-                    });
+                    return callback(null, { userRole: updatedUserRole });
                 } catch (e) {
                     this.handleError(e, callback);
                 }
@@ -348,10 +323,7 @@ export class UserServiceHandlersFactory {
                             req.limit,
                             req.sortOrder
                         );
-                    return callback(null, {
-                        totalUserRoleCount: totalUserRoleCount,
-                        userRoleList: userRoleList,
-                    });
+                    return callback(null, { totalUserRoleCount, userRoleList });
                 } catch (e) {
                     this.handleError(e, callback);
                 }
@@ -611,9 +583,7 @@ export class UserServiceHandlersFactory {
                         await this.userPermissionManagementOperator.getUserPermissionListOfUser(
                             req.userId
                         );
-                    return callback(null, {
-                        userPermissionList: userPermissionList,
-                    });
+                    return callback(null, { userPermissionList });
                 } catch (e) {
                     return this.handleError(e, callback);
                 }
@@ -623,6 +593,7 @@ export class UserServiceHandlersFactory {
     }
 
     private handleError(e: unknown, callback: sendUnaryData<any>) {
+        console.log(e);
         if (e instanceof ErrorWithStatus) {
             return callback({
                 message: e.error.message,

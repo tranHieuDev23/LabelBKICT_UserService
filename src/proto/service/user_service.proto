@@ -35,7 +35,7 @@ service UserService {
 
 // Business objects
 message User {
-    uint64 id = 1;
+    uint32 id = 1;
     string username = 2;
     string display_name = 3;
 }
@@ -52,12 +52,12 @@ message UserListSortOrder {
 }
 
 message UserPassword {
-    uint64 of_user_id = 2;
+    uint32 of_user_id = 2;
     string password = 3;
 }
 
 message UserRole {
-    uint64 id = 1;
+    uint32 id = 1;
     string display_name = 2;
     string description = 3;
 }
@@ -76,7 +76,7 @@ message UserRoleListSortOrder {
 }
 
 message UserPermission {
-    uint64 id = 1;
+    uint32 id = 1;
     string permission_name = 2;
     string description = 3;
 }
@@ -169,7 +169,7 @@ message UpdateUserRoleResponse {
 }
 
 message DeleteUserRoleRequest {
-    uint64 id = 1;
+    uint32 id = 1;
 }
 
 message DeleteUserRoleResponse {}
@@ -186,21 +186,21 @@ message GetUserRoleListResponse {
 }
 
 message AddUserRoleToUserRequest {
-    uint64 user_id = 1;
-    uint64 user_role_id = 2;
+    uint32 user_id = 1;
+    uint32 user_role_id = 2;
 }
 
 message AddUserRoleToUserResponse {}
 
 message RemoveUserRoleFromUserRequest {
-    uint64 user_id = 1;
-    uint64 user_role_id = 2;
+    uint32 user_id = 1;
+    uint32 user_role_id = 2;
 }
 
 message RemoveUserRoleFromUserResponse {}
 
 message GetUserRoleListOfUserListRequest {
-    repeated uint64 user_id_list = 1;
+    repeated uint32 user_id_list = 1;
 }
 
 message GetUserRoleListOfUserListResponse {
@@ -225,7 +225,7 @@ message UpdateUserPermissionResponse {
 }
 
 message DeleteUserPermissionRequest {
-    uint64 id = 1;
+    uint32 id = 1;
 }
 
 message DeleteUserPermissionResponse {}
@@ -237,21 +237,21 @@ message GetUserPermissionListResponse {
 }
 
 message AddUserPermissionToUserRoleRequest {
-    uint64 user_role_id = 1;
-    uint64 user_permission_id = 2;
+    uint32 user_role_id = 1;
+    uint32 user_permission_id = 2;
 }
 
 message AddUserPermissionToUserRoleResponse {}
 
 message RemoveUserPermissionFromUserRoleRequest {
-    uint64 user_role_id = 1;
-    uint64 user_permission_id = 2;
+    uint32 user_role_id = 1;
+    uint32 user_permission_id = 2;
 }
 
 message RemoveUserPermissionFromUserRoleResponse {}
 
 message GetUserPermissionListOfUserRoleListRequest {
-    repeated uint64 user_role_id_list = 1;
+    repeated uint32 user_role_id_list = 1;
 }
 
 message GetUserPermissionListOfUserRoleListResponse {
@@ -259,7 +259,7 @@ message GetUserPermissionListOfUserRoleListResponse {
 }
 
 message GetUserPermissionListOfUserRequest {
-    uint64 user_id = 1;
+    uint32 user_id = 1;
 }
 
 message GetUserPermissionListOfUserResponse {

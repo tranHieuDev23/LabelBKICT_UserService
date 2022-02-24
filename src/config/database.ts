@@ -1,6 +1,6 @@
 export class DatabaseConfig {
     public host = "127.0.0.1";
-    public port = 20000;
+    public port = 5432;
     public user = "postgres";
     public password = "admin";
     public database = "label_bkict_db";

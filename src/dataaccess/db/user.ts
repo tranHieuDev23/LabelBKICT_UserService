@@ -1,10 +1,12 @@
+import { status } from "@grpc/grpc-js";
 import { injected, token } from "brandi";
 import { Knex } from "knex";
+import { ErrorWithStatus } from "../../utils";
 import { KNEX_INSTANCE_TOKEN } from "./knex";
 
 export class User {
     constructor(
-        public userID: number,
+        public id: number,
         public username: string,
         public displayName: string
     ) {}
@@ -22,14 +24,19 @@ export enum UserListSortOrder {
 export interface UserDataAccessor {
     createUser(username: string, displayName: string): Promise<number>;
     updateUser(user: User): Promise<void>;
-    getUserByUserID(userID: number): Promise<User>;
-    getUserByUsername(username: string): Promise<User>;
+    getUserByUserID(userID: number): Promise<User | null>;
+    getUserByUserIDWithXLock(userID: number): Promise<User | null>;
+    getUserByUsername(username: string): Promise<User | null>;
+    getUserByUsernameWithXLock(username: string): Promise<User | null>;
     getUserCount(): Promise<number>;
     getUserList(
         offset: number,
         limit: number,
         sortOrder: UserListSortOrder
     ): Promise<User[]>;
+    withTransaction<T>(
+        cb: (dataAccessor: UserDataAccessor) => Promise<T>
+    ): Promise<T>;
 }
 
 const TabNameUserServiceUser = "user_service_user_tab";
@@ -44,61 +51,186 @@ export class UserDataAccessorImpl implements UserDataAccessor {
         username: string,
         displayName: string
     ): Promise<number> {
-        return await this.knex
-            .insert({
-                [ColNameUserServiceUserUsername]: username,
-                [ColNameUserServiceUserDisplayName]: displayName,
-            })
-            .returning(ColNameUserServiceUserID)
-            .into(TabNameUserServiceUser);
+        try {
+            const rows = await this.knex
+                .insert({
+                    [ColNameUserServiceUserUsername]: username,
+                    [ColNameUserServiceUserDisplayName]: displayName,
+                })
+                .returning(ColNameUserServiceUserID)
+                .into(TabNameUserServiceUser);
+            return +rows[0][ColNameUserServiceUserID];
+        } catch (e) {
+            if (e instanceof Error) {
+                throw new ErrorWithStatus(e, status.INTERNAL);
+            } else {
+                throw e;
+            }
+        }
     }
 
     public async updateUser(user: User): Promise<void> {
-        await this.knex
-            .table(TabNameUserServiceUser)
-            .update({
-                [ColNameUserServiceUserUsername]: user.username,
-                [ColNameUserServiceUserDisplayName]: user.displayName,
-            })
-            .where({
-                ColNameUserServiceUserID: user.userID,
-            });
+        try {
+            await this.knex
+                .table(TabNameUserServiceUser)
+                .update({
+                    [ColNameUserServiceUserUsername]: user.username,
+                    [ColNameUserServiceUserDisplayName]: user.displayName,
+                })
+                .where({
+                    ColNameUserServiceUserID: user.id,
+                });
+        } catch (e) {
+            if (e instanceof Error) {
+                throw new ErrorWithStatus(e, status.INTERNAL);
+            } else {
+                throw e;
+            }
+        }
     }
 
-    public async getUserByUserID(userID: number): Promise<User> {
-        const rows = await this.knex
-            .select()
-            .from(TabNameUserServiceUser)
-            .where({
-                [ColNameUserServiceUserID]: userID,
-            });
+    public async getUserByUserID(userID: number): Promise<User | null> {
+        let rows: Record<string, any>[];
+        try {
+            rows = await this.knex
+                .select()
+                .from(TabNameUserServiceUser)
+                .where({
+                    [ColNameUserServiceUserID]: userID,
+                });
+        } catch (e) {
+            if (e instanceof Error) {
+                throw new ErrorWithStatus(e, status.INTERNAL);
+            } else {
+                throw e;
+            }
+        }
+
         if (rows.length == 0) {
-            throw new Error("user not found");
+            return null;
         }
+
         if (rows.length > 1) {
-            throw new Error("more than one user was found");
+            throw new ErrorWithStatus(
+                new Error("more than one user was found"),
+                status.INTERNAL
+            );
         }
+
         return this.getUserFromRow(rows[0]);
     }
 
-    public async getUserByUsername(username: string): Promise<User> {
-        const rows = await this.knex
-            .select()
-            .from(TabNameUserServiceUser)
-            .where({
-                [ColNameUserServiceUserUsername]: username,
-            });
+    public async getUserByUserIDWithXLock(
+        userID: number
+    ): Promise<User | null> {
+        let rows: Record<string, any>[];
+        try {
+            rows = await this.knex
+                .select()
+                .from(TabNameUserServiceUser)
+                .where({
+                    [ColNameUserServiceUserID]: userID,
+                })
+                .forUpdate();
+        } catch (e) {
+            if (e instanceof Error) {
+                throw new ErrorWithStatus(e, status.INTERNAL);
+            } else {
+                throw e;
+            }
+        }
+
         if (rows.length == 0) {
-            throw new Error("user not found");
+            return null;
         }
+
         if (rows.length > 1) {
-            throw new Error("more than one user was found");
+            throw new ErrorWithStatus(
+                new Error("more than one user was found"),
+                status.INTERNAL
+            );
         }
+
+        return this.getUserFromRow(rows[0]);
+    }
+
+    public async getUserByUsername(username: string): Promise<User | null> {
+        let rows: Record<string, any>[];
+        try {
+            rows = await this.knex
+                .select()
+                .from(TabNameUserServiceUser)
+                .where({
+                    [ColNameUserServiceUserUsername]: username,
+                });
+        } catch (e) {
+            if (e instanceof Error) {
+                throw new ErrorWithStatus(e, status.INTERNAL);
+            } else {
+                throw e;
+            }
+        }
+
+        if (rows.length == 0) {
+            return null;
+        }
+
+        if (rows.length > 1) {
+            throw new ErrorWithStatus(
+                new Error("more than one user was found"),
+                status.INTERNAL
+            );
+        }
+
+        return this.getUserFromRow(rows[0]);
+    }
+
+    public async getUserByUsernameWithXLock(
+        username: string
+    ): Promise<User | null> {
+        let rows: Record<string, any>[];
+        try {
+            rows = await this.knex
+                .select()
+                .from(TabNameUserServiceUser)
+                .where({
+                    [ColNameUserServiceUserUsername]: username,
+                })
+                .forUpdate();
+        } catch (e) {
+            if (e instanceof Error) {
+                throw new ErrorWithStatus(e, status.INTERNAL);
+            } else {
+                throw e;
+            }
+        }
+
+        if (rows.length == 0) {
+            return null;
+        }
+
+        if (rows.length > 1) {
+            throw new ErrorWithStatus(
+                new Error("more than one user was found"),
+                status.INTERNAL
+            );
+        }
+
         return this.getUserFromRow(rows[0]);
     }
 
     public async getUserCount(): Promise<number> {
-        const rows = await this.knex.count().from(TabNameUserServiceUser);
+        let rows: Record<string, any>[];
+        try {
+            rows = await this.knex.count().from(TabNameUserServiceUser);
+        } catch (e) {
+            if (e instanceof Error) {
+                throw new ErrorWithStatus(e, status.INTERNAL);
+            } else {
+                throw e;
+            }
+        }
+
         return +rows[0]["count"];
     }
 
@@ -198,7 +330,18 @@ export class UserDataAccessorImpl implements UserDataAccessor {
         }
 
         queryBuilder = queryBuilder.limit(1);
-        const rows = await queryBuilder;
+
+        let rows: Record<string, any>[];
+        try {
+            rows = await queryBuilder;
+        } catch (e) {
+            if (e instanceof Error) {
+                throw new ErrorWithStatus(e, status.INTERNAL);
+            } else {
+                throw e;
+            }
+        }
+
         if (rows.length == 0) {
             return null;
         }
@@ -345,7 +488,25 @@ export class UserDataAccessorImpl implements UserDataAccessor {
         }
 
         queryBuilder = queryBuilder.limit(limit);
-        return await queryBuilder;
+
+        try {
+            return await queryBuilder;
+        } catch (e) {
+            if (e instanceof Error) {
+                throw new ErrorWithStatus(e, status.INTERNAL);
+            } else {
+                throw e;
+            }
+        }
+    }
+
+    public async withTransaction<T>(
+        cb: (dataAccessor: UserDataAccessor) => Promise<T>
+    ): Promise<T> {
+        return this.knex.transaction(async (tx) => {
+            const txDataAccessor = new UserDataAccessorImpl(tx);
+            return cb(txDataAccessor);
+        });
     }
 
     private getUserFromRow(row: Record<string, any>): User {
