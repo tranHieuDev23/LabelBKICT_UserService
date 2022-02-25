@@ -1,3 +1,5 @@
+import { token } from "brandi";
+
 export class GRPCServerConfig {
     public port = 20000;
 
@@ -9,3 +11,5 @@ export class GRPCServerConfig {
         return config;
     }
 }
+
+export const GRPC_SERVER_CONFIG = token<GRPCServerConfig>("GRPCServerConfig");

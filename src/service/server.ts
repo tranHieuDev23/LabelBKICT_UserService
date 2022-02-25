@@ -9,13 +9,17 @@ import {
     UserServiceHandlersFactory,
     USER_SERVICE_HANDLERS_FACTORY_TOKEN,
 } from "./handler";
-import { UserServiceConfig, USER_SERVICE_CONFIG_TOKEN } from "../config";
+import {
+    GRPCServerConfig,
+    GRPC_SERVER_CONFIG,
+    USER_SERVICE_CONFIG_TOKEN,
+} from "../config";
 import { ProtoGrpcType } from "../proto/gen/user_service";
 
 export class UserServiceGRPCServer {
     constructor(
         private readonly handlerFactory: UserServiceHandlersFactory,
-        private readonly userServiceConfig: UserServiceConfig
+        private readonly grpcServerConfig: GRPCServerConfig
     ) {}
 
     public loadProtoAndStart(protoPath: string): void {
@@ -28,7 +32,7 @@ export class UserServiceGRPCServer {
         );
 
         server.bindAsync(
-            `127.0.0.1:${this.userServiceConfig.grpcServerConfig.port}`,
+            `127.0.0.1:${this.grpcServerConfig.port}`,
             ServerCredentials.createInsecure(),
             (error) => {
                 if (error) {
@@ -57,7 +61,7 @@ export class UserServiceGRPCServer {
 injected(
     UserServiceGRPCServer,
     USER_SERVICE_HANDLERS_FACTORY_TOKEN,
-    USER_SERVICE_CONFIG_TOKEN
+    GRPC_SERVER_CONFIG
 );
 
 export const USER_SERVICE_GRPC_SERVER_TOKEN = token<UserServiceGRPCServer>(

@@ -1,3 +1,5 @@
+import { token } from "brandi";
+
 export class DatabaseConfig {
     public host = "127.0.0.1";
     public port = 5432;
@@ -25,3 +27,5 @@ export class DatabaseConfig {
         return config;
     }
 }
+
+export const DATABASE_CONFIG_TOKEN = token<DatabaseConfig>("DatabaseConfig");

@@ -9,7 +9,7 @@
     "build": "npm run generate && tsc --build",
     "lint": "npx eslint ./src --ext .js,.jsx,.ts,.tsx",
     "clean": "rm -r ./src/proto/gen && tsc --build --clean",
-    "start": "NODE_ENV=production node dist/main.js"
+    "start": "node dist/main.js"
   },
   "author": "tranhieu23.code@outlook.com",
   "license": "MIT",
@@ -31,6 +31,7 @@
     "dotenv": "^16.0.0",
     "knex": "^1.0.3",
     "pg": "^8.7.3",
-    "validator": "^13.7.0"
+    "validator": "^13.7.0",
+    "winston": "^3.6.0"
   }
 }
