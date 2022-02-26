@@ -68,7 +68,7 @@ export class UserDataAccessorImpl implements UserDataAccessor {
                 { displayName },
                 { error }
             );
-            throw ErrorWithStatus.WrapWithStatus(error, status.INTERNAL);
+            throw ErrorWithStatus.wrapWithStatus(error, status.INTERNAL);
         }
     }
 
@@ -85,7 +85,7 @@ export class UserDataAccessorImpl implements UserDataAccessor {
                 });
         } catch (error) {
             this.logger.error("failed to update user", { user }, { error });
-            throw ErrorWithStatus.WrapWithStatus(error, status.INTERNAL);
+            throw ErrorWithStatus.wrapWithStatus(error, status.INTERNAL);
         }
     }
 
@@ -104,7 +104,7 @@ export class UserDataAccessorImpl implements UserDataAccessor {
                 { userID },
                 { error }
             );
-            throw ErrorWithStatus.WrapWithStatus(error, status.INTERNAL);
+            throw ErrorWithStatus.wrapWithStatus(error, status.INTERNAL);
         }
 
         if (rows.length == 0) {
@@ -143,7 +143,7 @@ export class UserDataAccessorImpl implements UserDataAccessor {
                 { userID },
                 { error }
             );
-            throw ErrorWithStatus.WrapWithStatus(error, status.INTERNAL);
+            throw ErrorWithStatus.wrapWithStatus(error, status.INTERNAL);
         }
 
         if (rows.length == 0) {
@@ -179,7 +179,7 @@ export class UserDataAccessorImpl implements UserDataAccessor {
                 { username },
                 { error }
             );
-            throw ErrorWithStatus.WrapWithStatus(error, status.INTERNAL);
+            throw ErrorWithStatus.wrapWithStatus(error, status.INTERNAL);
         }
 
         if (rows.length == 0) {
@@ -218,7 +218,7 @@ export class UserDataAccessorImpl implements UserDataAccessor {
                 { username },
                 { error }
             );
-            throw ErrorWithStatus.WrapWithStatus(error, status.INTERNAL);
+            throw ErrorWithStatus.wrapWithStatus(error, status.INTERNAL);
         }
 
         if (rows.length == 0) {
@@ -245,7 +245,7 @@ export class UserDataAccessorImpl implements UserDataAccessor {
             rows = await this.knex.count().from(TabNameUserServiceUser);
         } catch (error) {
             this.logger.error("failed to get user count", { error });
-            throw ErrorWithStatus.WrapWithStatus(error, status.INTERNAL);
+            throw ErrorWithStatus.wrapWithStatus(error, status.INTERNAL);
         }
 
         return +rows[0]["count"];
@@ -355,7 +355,7 @@ export class UserDataAccessorImpl implements UserDataAccessor {
             this.logger.error("failed to get user list pagination keyset", {
                 error,
             });
-            throw ErrorWithStatus.WrapWithStatus(error, status.INTERNAL);
+            throw ErrorWithStatus.wrapWithStatus(error, status.INTERNAL);
         }
 
         if (rows.length == 0) {
@@ -511,7 +511,7 @@ export class UserDataAccessorImpl implements UserDataAccessor {
             this.logger.error("failed to get user list", {
                 error,
             });
-            throw ErrorWithStatus.WrapWithStatus(error, status.INTERNAL);
+            throw ErrorWithStatus.wrapWithStatus(error, status.INTERNAL);
         }
     }
 

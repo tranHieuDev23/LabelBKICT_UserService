@@ -8,7 +8,7 @@ export class ErrorWithStatus extends Error {
         super(message);
     }
 
-    public static WrapWithStatus(e: any, status: status): ErrorWithStatus {
+    public static wrapWithStatus(e: any, status: status): ErrorWithStatus {
         if (e instanceof Error) {
             return new ErrorWithStatus(e.message, status);
         }
