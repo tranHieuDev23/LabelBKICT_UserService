@@ -596,7 +596,7 @@ export class UserServiceHandlersFactory {
         console.log(e);
         if (e instanceof ErrorWithStatus) {
             return callback({
-                message: e.error.message,
+                message: e.message,
                 code: e.status,
             });
         } else if (e instanceof Error) {

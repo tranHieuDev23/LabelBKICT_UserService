@@ -1,7 +1,8 @@
 import { status } from "@grpc/grpc-js";
 import { injected, token } from "brandi";
 import { Knex } from "knex";
-import { ErrorWithStatus } from "../../utils";
+import { Logger } from "winston";
+import { ErrorWithStatus, LOGGER_TOKEN } from "../../utils";
 import { KNEX_INSTANCE_TOKEN } from "./knex";
 
 export class User {
@@ -45,7 +46,7 @@ const ColNameUserServiceUserUsername = "username";
 const ColNameUserServiceUserDisplayName = "display_name";
 
 export class UserDataAccessorImpl implements UserDataAccessor {
-    constructor(private readonly knex: Knex) {}
+    constructor(private readonly knex: Knex, private readonly logger: Logger) {}
 
     public async createUser(
         username: string,
@@ -60,8 +61,14 @@ export class UserDataAccessorImpl implements UserDataAccessor {
                 .returning(ColNameUserServiceUserID)
                 .into(TabNameUserServiceUser);
             return +rows[0][ColNameUserServiceUserID];
-        } catch (e) {
-            throw ErrorWithStatus.WrapWithStatus(e, status.INTERNAL);
+        } catch (error) {
+            this.logger.error(
+                "failed to create user",
+                { username },
+                { displayName },
+                { error }
+            );
+            throw ErrorWithStatus.WrapWithStatus(error, status.INTERNAL);
         }
     }
 
@@ -76,8 +83,9 @@ export class UserDataAccessorImpl implements UserDataAccessor {
                 .where({
                     ColNameUserServiceUserID: user.id,
                 });
-        } catch (e) {
-            throw ErrorWithStatus.WrapWithStatus(e, status.INTERNAL);
+        } catch (error) {
+            this.logger.error("failed to update user", { user }, { error });
+            throw ErrorWithStatus.WrapWithStatus(error, status.INTERNAL);
         }
     }
 
@@ -90,15 +98,24 @@ export class UserDataAccessorImpl implements UserDataAccessor {
                 .where({
                     [ColNameUserServiceUserID]: userID,
                 });
-        } catch (e) {
-            throw ErrorWithStatus.WrapWithStatus(e, status.INTERNAL);
+        } catch (error) {
+            this.logger.error(
+                "failed to get user by user_id",
+                { userID },
+                { error }
+            );
+            throw ErrorWithStatus.WrapWithStatus(error, status.INTERNAL);
         }
 
         if (rows.length == 0) {
+            this.logger.debug("no user with user_id found", { userID });
             return null;
         }
 
         if (rows.length > 1) {
+            this.logger.error("more than one user with user_id found", {
+                userID,
+            });
             throw new ErrorWithStatus(
                 "more than one user was found",
                 status.INTERNAL
@@ -120,15 +137,24 @@ export class UserDataAccessorImpl implements UserDataAccessor {
                     [ColNameUserServiceUserID]: userID,
                 })
                 .forUpdate();
-        } catch (e) {
-            throw ErrorWithStatus.WrapWithStatus(e, status.INTERNAL);
+        } catch (error) {
+            this.logger.error(
+                "failed to get user by user_id",
+                { userID },
+                { error }
+            );
+            throw ErrorWithStatus.WrapWithStatus(error, status.INTERNAL);
         }
 
         if (rows.length == 0) {
+            this.logger.debug("no user with user_id found", { userID });
             return null;
         }
 
         if (rows.length > 1) {
+            this.logger.error("more than one user with user_id found", {
+                userID,
+            });
             throw new ErrorWithStatus(
                 "more than one user was found",
                 status.INTERNAL
@@ -147,15 +173,24 @@ export class UserDataAccessorImpl implements UserDataAccessor {
                 .where({
                     [ColNameUserServiceUserUsername]: username,
                 });
-        } catch (e) {
-            throw ErrorWithStatus.WrapWithStatus(e, status.INTERNAL);
+        } catch (error) {
+            this.logger.error(
+                "failed to get user by username",
+                { username },
+                { error }
+            );
+            throw ErrorWithStatus.WrapWithStatus(error, status.INTERNAL);
         }
 
         if (rows.length == 0) {
+            this.logger.debug("no user with username found", { username });
             return null;
         }
 
         if (rows.length > 1) {
+            this.logger.error("more than one user with username found", {
+                username,
+            });
             throw new ErrorWithStatus(
                 "more than one user was found",
                 status.INTERNAL
@@ -177,15 +212,24 @@ export class UserDataAccessorImpl implements UserDataAccessor {
                     [ColNameUserServiceUserUsername]: username,
                 })
                 .forUpdate();
-        } catch (e) {
-            throw ErrorWithStatus.WrapWithStatus(e, status.INTERNAL);
+        } catch (error) {
+            this.logger.error(
+                "failed to get user by username",
+                { username },
+                { error }
+            );
+            throw ErrorWithStatus.WrapWithStatus(error, status.INTERNAL);
         }
 
         if (rows.length == 0) {
+            this.logger.debug("no user with username found", { username });
             return null;
         }
 
         if (rows.length > 1) {
+            this.logger.error("more than one user with username found", {
+                username,
+            });
             throw new ErrorWithStatus(
                 "more than one user was found",
                 status.INTERNAL
@@ -199,8 +243,9 @@ export class UserDataAccessorImpl implements UserDataAccessor {
         let rows: Record<string, any>[];
         try {
             rows = await this.knex.count().from(TabNameUserServiceUser);
-        } catch (e) {
-            throw ErrorWithStatus.WrapWithStatus(e, status.INTERNAL);
+        } catch (error) {
+            this.logger.error("failed to get user count", { error });
+            throw ErrorWithStatus.WrapWithStatus(error, status.INTERNAL);
         }
 
         return +rows[0]["count"];
@@ -306,8 +351,11 @@ export class UserDataAccessorImpl implements UserDataAccessor {
         let rows: Record<string, any>[];
         try {
             rows = await queryBuilder;
-        } catch (e) {
-            throw ErrorWithStatus.WrapWithStatus(e, status.INTERNAL);
+        } catch (error) {
+            this.logger.error("failed to get user list pagination keyset", {
+                error,
+            });
+            throw ErrorWithStatus.WrapWithStatus(error, status.INTERNAL);
         }
 
         if (rows.length == 0) {
@@ -459,8 +507,11 @@ export class UserDataAccessorImpl implements UserDataAccessor {
 
         try {
             return await queryBuilder;
-        } catch (e) {
-            throw ErrorWithStatus.WrapWithStatus(e, status.INTERNAL);
+        } catch (error) {
+            this.logger.error("failed to get user list", {
+                error,
+            });
+            throw ErrorWithStatus.WrapWithStatus(error, status.INTERNAL);
         }
     }
 
@@ -468,7 +519,7 @@ export class UserDataAccessorImpl implements UserDataAccessor {
         cb: (dataAccessor: UserDataAccessor) => Promise<T>
     ): Promise<T> {
         return this.knex.transaction(async (tx) => {
-            const txDataAccessor = new UserDataAccessorImpl(tx);
+            const txDataAccessor = new UserDataAccessorImpl(tx, this.logger);
             return cb(txDataAccessor);
         });
     }
@@ -482,7 +533,7 @@ export class UserDataAccessorImpl implements UserDataAccessor {
     }
 }
 
-injected(UserDataAccessorImpl, KNEX_INSTANCE_TOKEN);
+injected(UserDataAccessorImpl, KNEX_INSTANCE_TOKEN, LOGGER_TOKEN);
 
 export const USER_DATA_ACCESSOR_TOKEN =
     token<UserDataAccessor>("UserDataAccessor");

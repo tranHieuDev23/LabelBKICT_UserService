@@ -1,4 +1,6 @@
 import { Container } from "brandi";
+import dotenv from "dotenv";
+import * as utils from "../utils";
 import * as config from "../config";
 import * as db from "../dataaccess/db";
 import * as password from "../module/password";
@@ -9,7 +11,12 @@ import * as user from "../module/user";
 import * as service from "../service";
 
 export function startGRPCServer(dotenvPath: string) {
+    dotenv.config({
+        path: dotenvPath,
+    });
+
     const container = new Container();
+    utils.bindToContainer(container);
     config.bindToContainer(container);
     db.bindToContainer(container);
     password.bindToContainer(container);

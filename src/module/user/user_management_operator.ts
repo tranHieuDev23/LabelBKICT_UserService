@@ -1,6 +1,7 @@
 import { status } from "@grpc/grpc-js";
 import { injected, token } from "brandi";
 import validator from "validator";
+import { Logger } from "winston";
 import {
     UserDataAccessor,
     UserListSortOrder,
@@ -8,7 +9,7 @@ import {
 } from "../../dataaccess/db";
 import { User } from "../../proto/gen/User";
 import { _UserListSortOrder_Values } from "../../proto/gen/UserListSortOrder";
-import { ErrorWithStatus } from "../../utils";
+import { ErrorWithStatus, LOGGER_TOKEN } from "../../utils";
 
 export interface UserManagementOperator {
     createUser(username: string, displayName: string): Promise<User>;
@@ -21,13 +22,17 @@ export interface UserManagementOperator {
 }
 
 export class UserManagementOperatorImpl implements UserManagementOperator {
-    constructor(private readonly userDM: UserDataAccessor) {}
+    constructor(
+        private readonly userDM: UserDataAccessor,
+        private readonly logger: Logger
+    ) {}
 
     public async createUser(
         username: string,
         displayName: string
     ): Promise<User> {
         if (!this.isValidUsername(username)) {
+            this.logger.error("invalid username", { username });
             throw new ErrorWithStatus(
                 `invalid username ${username}`,
                 status.INVALID_ARGUMENT
@@ -36,6 +41,7 @@ export class UserManagementOperatorImpl implements UserManagementOperator {
 
         displayName = this.sanitizeDisplayName(displayName);
         if (!this.isValidDisplayName(displayName)) {
+            this.logger.error("invalid display name", { displayName });
             throw new ErrorWithStatus(
                 `invalid display name ${displayName}`,
                 status.INVALID_ARGUMENT
@@ -47,6 +53,9 @@ export class UserManagementOperatorImpl implements UserManagementOperator {
                 username
             );
             if (userRecord !== null) {
+                this.logger.error("username has already been taken", {
+                    username,
+                });
                 throw new ErrorWithStatus(
                     `username ${username} has already been taken`,
                     status.ALREADY_EXISTS
@@ -67,6 +76,7 @@ export class UserManagementOperatorImpl implements UserManagementOperator {
 
     public async updateUser(user: User): Promise<User> {
         if (user.id === undefined) {
+            this.logger.error("user.id is required");
             throw new ErrorWithStatus(
                 `user.id is required`,
                 status.INVALID_ARGUMENT
@@ -76,6 +86,9 @@ export class UserManagementOperatorImpl implements UserManagementOperator {
 
         if (user.username !== undefined) {
             if (!this.isValidUsername(user.username)) {
+                this.logger.error("invalid username", {
+                    username: user.username,
+                });
                 throw new ErrorWithStatus(
                     `invalid username ${user.username}`,
                     status.INVALID_ARGUMENT
@@ -86,6 +99,9 @@ export class UserManagementOperatorImpl implements UserManagementOperator {
         if (user.displayName !== undefined) {
             user.displayName = this.sanitizeDisplayName(user.displayName);
             if (!this.isValidDisplayName(user.displayName)) {
+                this.logger.error("invalid username", {
+                    displayName: user.displayName,
+                });
                 throw new ErrorWithStatus(
                     `invalid display name ${user.displayName}`,
                     status.INVALID_ARGUMENT
@@ -98,6 +114,9 @@ export class UserManagementOperatorImpl implements UserManagementOperator {
                 userID
             );
             if (userRecord === null) {
+                this.logger.error("no user with user_id found", {
+                    userID: user.id,
+                });
                 throw new ErrorWithStatus(
                     `no user with id ${user.id} found`,
                     status.NOT_FOUND
@@ -164,6 +183,7 @@ export class UserManagementOperatorImpl implements UserManagementOperator {
             case _UserListSortOrder_Values.DISPLAY_NAME_DESCENDING:
                 return UserListSortOrder.DISPLAY_NAME_DESCENDING;
             default:
+                this.logger.error("invalid sort_order value", { sortOrder });
                 throw new ErrorWithStatus(
                     `invalid sort_order value ${sortOrder}`,
                     status.INVALID_ARGUMENT
@@ -172,7 +192,7 @@ export class UserManagementOperatorImpl implements UserManagementOperator {
     }
 }
 
-injected(UserManagementOperatorImpl, USER_DATA_ACCESSOR_TOKEN);
+injected(UserManagementOperatorImpl, USER_DATA_ACCESSOR_TOKEN, LOGGER_TOKEN);
 
 export const USER_MANAGEMENT_OPERATOR_TOKEN = token<UserManagementOperator>(
     "UserManagementOperator"
