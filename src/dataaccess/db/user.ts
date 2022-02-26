@@ -61,11 +61,7 @@ export class UserDataAccessorImpl implements UserDataAccessor {
                 .into(TabNameUserServiceUser);
             return +rows[0][ColNameUserServiceUserID];
         } catch (e) {
-            if (e instanceof Error) {
-                throw new ErrorWithStatus(e, status.INTERNAL);
-            } else {
-                throw e;
-            }
+            throw ErrorWithStatus.WrapWithStatus(e, status.INTERNAL);
         }
     }
 
@@ -81,11 +77,7 @@ export class UserDataAccessorImpl implements UserDataAccessor {
                     ColNameUserServiceUserID: user.id,
                 });
         } catch (e) {
-            if (e instanceof Error) {
-                throw new ErrorWithStatus(e, status.INTERNAL);
-            } else {
-                throw e;
-            }
+            throw ErrorWithStatus.WrapWithStatus(e, status.INTERNAL);
         }
     }
 
@@ -99,11 +91,7 @@ export class UserDataAccessorImpl implements UserDataAccessor {
                     [ColNameUserServiceUserID]: userID,
                 });
         } catch (e) {
-            if (e instanceof Error) {
-                throw new ErrorWithStatus(e, status.INTERNAL);
-            } else {
-                throw e;
-            }
+            throw ErrorWithStatus.WrapWithStatus(e, status.INTERNAL);
         }
 
         if (rows.length == 0) {
@@ -112,7 +100,7 @@ export class UserDataAccessorImpl implements UserDataAccessor {
 
         if (rows.length > 1) {
             throw new ErrorWithStatus(
-                new Error("more than one user was found"),
+                "more than one user was found",
                 status.INTERNAL
             );
         }
@@ -133,11 +121,7 @@ export class UserDataAccessorImpl implements UserDataAccessor {
                 })
                 .forUpdate();
         } catch (e) {
-            if (e instanceof Error) {
-                throw new ErrorWithStatus(e, status.INTERNAL);
-            } else {
-                throw e;
-            }
+            throw ErrorWithStatus.WrapWithStatus(e, status.INTERNAL);
         }
 
         if (rows.length == 0) {
@@ -146,7 +130,7 @@ export class UserDataAccessorImpl implements UserDataAccessor {
 
         if (rows.length > 1) {
             throw new ErrorWithStatus(
-                new Error("more than one user was found"),
+                "more than one user was found",
                 status.INTERNAL
             );
         }
@@ -164,11 +148,7 @@ export class UserDataAccessorImpl implements UserDataAccessor {
                     [ColNameUserServiceUserUsername]: username,
                 });
         } catch (e) {
-            if (e instanceof Error) {
-                throw new ErrorWithStatus(e, status.INTERNAL);
-            } else {
-                throw e;
-            }
+            throw ErrorWithStatus.WrapWithStatus(e, status.INTERNAL);
         }
 
         if (rows.length == 0) {
@@ -177,7 +157,7 @@ export class UserDataAccessorImpl implements UserDataAccessor {
 
         if (rows.length > 1) {
             throw new ErrorWithStatus(
-                new Error("more than one user was found"),
+                "more than one user was found",
                 status.INTERNAL
             );
         }
@@ -198,11 +178,7 @@ export class UserDataAccessorImpl implements UserDataAccessor {
                 })
                 .forUpdate();
         } catch (e) {
-            if (e instanceof Error) {
-                throw new ErrorWithStatus(e, status.INTERNAL);
-            } else {
-                throw e;
-            }
+            throw ErrorWithStatus.WrapWithStatus(e, status.INTERNAL);
         }
 
         if (rows.length == 0) {
@@ -211,7 +187,7 @@ export class UserDataAccessorImpl implements UserDataAccessor {
 
         if (rows.length > 1) {
             throw new ErrorWithStatus(
-                new Error("more than one user was found"),
+                "more than one user was found",
                 status.INTERNAL
             );
         }
@@ -224,11 +200,7 @@ export class UserDataAccessorImpl implements UserDataAccessor {
         try {
             rows = await this.knex.count().from(TabNameUserServiceUser);
         } catch (e) {
-            if (e instanceof Error) {
-                throw new ErrorWithStatus(e, status.INTERNAL);
-            } else {
-                throw e;
-            }
+            throw ErrorWithStatus.WrapWithStatus(e, status.INTERNAL);
         }
 
         return +rows[0]["count"];
@@ -335,11 +307,7 @@ export class UserDataAccessorImpl implements UserDataAccessor {
         try {
             rows = await queryBuilder;
         } catch (e) {
-            if (e instanceof Error) {
-                throw new ErrorWithStatus(e, status.INTERNAL);
-            } else {
-                throw e;
-            }
+            throw ErrorWithStatus.WrapWithStatus(e, status.INTERNAL);
         }
 
         if (rows.length == 0) {
@@ -492,11 +460,7 @@ export class UserDataAccessorImpl implements UserDataAccessor {
         try {
             return await queryBuilder;
         } catch (e) {
-            if (e instanceof Error) {
-                throw new ErrorWithStatus(e, status.INTERNAL);
-            } else {
-                throw e;
-            }
+            throw ErrorWithStatus.WrapWithStatus(e, status.INTERNAL);
         }
     }
 

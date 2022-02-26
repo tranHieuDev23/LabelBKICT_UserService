@@ -29,7 +29,7 @@ export class UserManagementOperatorImpl implements UserManagementOperator {
     ): Promise<User> {
         if (!this.isValidUsername(username)) {
             throw new ErrorWithStatus(
-                new Error(`invalid username ${username}`),
+                `invalid username ${username}`,
                 status.INVALID_ARGUMENT
             );
         }
@@ -37,7 +37,7 @@ export class UserManagementOperatorImpl implements UserManagementOperator {
         displayName = this.sanitizeDisplayName(displayName);
         if (!this.isValidDisplayName(displayName)) {
             throw new ErrorWithStatus(
-                new Error(`invalid display name ${displayName}`),
+                `invalid display name ${displayName}`,
                 status.INVALID_ARGUMENT
             );
         }
@@ -48,7 +48,7 @@ export class UserManagementOperatorImpl implements UserManagementOperator {
             );
             if (userRecord !== null) {
                 throw new ErrorWithStatus(
-                    new Error(`username ${username} has already been taken`),
+                    `username ${username} has already been taken`,
                     status.ALREADY_EXISTS
                 );
             }
@@ -68,7 +68,7 @@ export class UserManagementOperatorImpl implements UserManagementOperator {
     public async updateUser(user: User): Promise<User> {
         if (user.id === undefined) {
             throw new ErrorWithStatus(
-                new Error(`user.id is required`),
+                `user.id is required`,
                 status.INVALID_ARGUMENT
             );
         }
@@ -77,7 +77,7 @@ export class UserManagementOperatorImpl implements UserManagementOperator {
         if (user.username !== undefined) {
             if (!this.isValidUsername(user.username)) {
                 throw new ErrorWithStatus(
-                    new Error(`invalid username ${user.username}`),
+                    `invalid username ${user.username}`,
                     status.INVALID_ARGUMENT
                 );
             }
@@ -87,7 +87,7 @@ export class UserManagementOperatorImpl implements UserManagementOperator {
             user.displayName = this.sanitizeDisplayName(user.displayName);
             if (!this.isValidDisplayName(user.displayName)) {
                 throw new ErrorWithStatus(
-                    new Error(`invalid display name ${user.displayName}`),
+                    `invalid display name ${user.displayName}`,
                     status.INVALID_ARGUMENT
                 );
             }
@@ -99,7 +99,7 @@ export class UserManagementOperatorImpl implements UserManagementOperator {
             );
             if (userRecord === null) {
                 throw new ErrorWithStatus(
-                    new Error(`no user with id ${user.id} found`),
+                    `no user with id ${user.id} found`,
                     status.NOT_FOUND
                 );
             }
@@ -165,7 +165,7 @@ export class UserManagementOperatorImpl implements UserManagementOperator {
                 return UserListSortOrder.DISPLAY_NAME_DESCENDING;
             default:
                 throw new ErrorWithStatus(
-                    new Error(`invalid sort_order value ${sortOrder}`),
+                    `invalid sort_order value ${sortOrder}`,
                     status.INVALID_ARGUMENT
                 );
         }
