@@ -5,7 +5,7 @@ import { LogConfig, LOG_CONFIG_TOKEN } from "../config";
 
 export function initializeLogger(logConfig: LogConfig): Logger {
     const logger = createLogger({
-        format: format.json(),
+        format: format.combine(format.timestamp(), format.json()),
         defaultMeta: {
             service: "user-service",
         },
