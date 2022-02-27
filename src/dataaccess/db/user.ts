@@ -81,7 +81,7 @@ export class UserDataAccessorImpl implements UserDataAccessor {
                     [ColNameUserServiceUserDisplayName]: user.displayName,
                 })
                 .where({
-                    ColNameUserServiceUserID: user.id,
+                    [ColNameUserServiceUserID]: user.id,
                 });
         } catch (error) {
             this.logger.error("failed to update user", { user }, { error });
