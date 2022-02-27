@@ -38,10 +38,13 @@
   "dependencies": {
     "@grpc/grpc-js": "^1.5.5",
     "@grpc/proto-loader": "^0.6.9",
+    "@types/jsonwebtoken": "^8.5.8",
     "bcrypt": "^5.0.1",
     "brandi": "^4.0.1",
     "dotenv": "^16.0.0",
+    "jsonwebtoken": "^8.5.1",
     "knex": "^1.0.3",
+    "nodejs-snowflake": "^2.0.0",
     "pg": "^8.7.3",
     "validator": "^13.7.0",
     "winston": "^3.6.0"

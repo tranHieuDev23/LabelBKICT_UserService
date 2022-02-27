@@ -6,6 +6,7 @@ import {
     USER_DATA_ACCESSOR_TOKEN,
 } from "../../dataaccess/db";
 import { User } from "../../proto/gen/User";
+import { TokenGenerator, TOKEN_GENERATOR_TOKEN } from "./generator";
 
 export interface TokenManagementOperator {
     getUserFromToken(
@@ -17,7 +18,8 @@ export interface TokenManagementOperator {
 export class TokenManagementOperatorImpl implements TokenManagementOperator {
     constructor(
         private readonly blacklistedTokenDM: BlacklistedTokenDataAccessor,
-        private readonly userDM: UserDataAccessor
+        private readonly userDM: UserDataAccessor,
+        private readonly tokenGenerator: TokenGenerator
     ) {}
 
     public async getUserFromToken(
@@ -32,7 +34,8 @@ export class TokenManagementOperatorImpl implements TokenManagementOperator {
 injected(
     TokenManagementOperatorImpl,
     BLACKLISTED_TOKEN_DATA_ACCESSOR_TOKEN,
-    USER_DATA_ACCESSOR_TOKEN
+    USER_DATA_ACCESSOR_TOKEN,
+    TOKEN_GENERATOR_TOKEN
 );
 
 export const TOKEN_MANAGEMENT_OPERATOR_TOKEN = token<TokenManagementOperator>(
