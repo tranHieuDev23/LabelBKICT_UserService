@@ -11,6 +11,7 @@ import {
 import { User } from "../../proto/gen/User";
 import { ErrorWithStatus, LOGGER_TOKEN } from "../../utils";
 import { Hasher, HASHER_TOKEN } from "./hasher";
+import { TokenGenerator, TOKEN_GENERATOR_TOKEN } from "../token/generator";
 
 export interface UserPasswordManagementOperator {
     createUserPassword(userID: number, password: string): Promise<void>;
@@ -28,6 +29,7 @@ export class UserPasswordManagementOperatorImpl
         private readonly userPasswordDM: UserPasswordDataAccessor,
         private readonly userDM: UserDataAccessor,
         private readonly hasher: Hasher,
+        private readonly tokenGenerator: TokenGenerator,
         private readonly logger: Logger
     ) {}
 
@@ -118,7 +120,35 @@ export class UserPasswordManagementOperatorImpl
         username: string,
         password: string
     ): Promise<{ user: User; token: string }> {
-        throw new Error("Method not implemented.");
+        const user = await this.userDM.getUserByUsername(username);
+        if (user === null) {
+            this.logger.error("no user with username found", { username });
+            throw new ErrorWithStatus(
+                `no user with username ${username} found`,
+                status.NOT_FOUND
+            );
+        }
+
+        const hash = await this.userPasswordDM.getUserPasswordHash(user.id);
+        if (hash === null) {
+            this.logger.error("user doesn't have password", {
+                userID: user.id,
+            });
+            throw new ErrorWithStatus(
+                "user doesn't have password",
+                status.NOT_FOUND
+            );
+        }
+
+        if (!(await this.hasher.isEqual(password, hash))) {
+            throw new ErrorWithStatus(
+                "incorrect password",
+                status.UNAUTHENTICATED
+            );
+        }
+
+        const token = await this.tokenGenerator.generate(user.id);
+        return { user, token };
     }
 
     private isValidPassword(password: string): boolean {
@@ -131,6 +161,7 @@ injected(
     USER_PASSWORD_DATA_ACCESSOR_TOKEN,
     USER_DATA_ACCESSOR_TOKEN,
     HASHER_TOKEN,
+    TOKEN_GENERATOR_TOKEN,
     LOGGER_TOKEN
 );
 

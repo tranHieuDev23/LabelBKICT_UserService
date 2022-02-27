@@ -593,7 +593,6 @@ export class UserServiceHandlersFactory {
     }
 
     private handleError(e: unknown, callback: sendUnaryData<any>) {
-        console.log(e);
         if (e instanceof ErrorWithStatus) {
             return callback({
                 message: e.message,
