@@ -9,6 +9,7 @@ export interface UserPasswordDataAccessor {
     createUserPassword(ofUserID: number, hash: string): Promise<void>;
     updateUserPassword(ofUserID: number, hash: string): Promise<void>;
     getUserPasswordHash(ofUserID: number): Promise<string | null>;
+    getUserPasswordHashWithXLock(ofUserID: number): Promise<string | null>;
     withTransaction<T>(
         execFunc: (dataAccessor: UserPasswordDataAccessor) => Promise<T>
     ): Promise<T>;
@@ -66,6 +67,33 @@ export class UserPasswordDataAccessorImpl implements UserPasswordDataAccessor {
                 .where({
                     [ColNameUserServiceUserPasswordOfUserID]: ofUserID,
                 });
+        } catch (error) {
+            this.logger.error("failed to get user password hash", { error });
+            throw ErrorWithStatus.wrapWithStatus(error, status.INTERNAL);
+        }
+
+        if (rows.length === 0) {
+            this.logger.debug("no user password of user_id found", {
+                userID: ofUserID,
+            });
+            return null;
+        }
+
+        return rows[0][ColNameUserServiceUserPasswordHash];
+    }
+
+    public async getUserPasswordHashWithXLock(
+        ofUserID: number
+    ): Promise<string | null> {
+        let rows;
+        try {
+            rows = await this.knex
+                .select([ColNameUserServiceUserPasswordHash])
+                .from(TabNameUserServiceUserPassword)
+                .where({
+                    [ColNameUserServiceUserPasswordOfUserID]: ofUserID,
+                })
+                .forUpdate();
         } catch (error) {
             this.logger.error("failed to get user password hash", { error });
             throw ErrorWithStatus.wrapWithStatus(error, status.INTERNAL);

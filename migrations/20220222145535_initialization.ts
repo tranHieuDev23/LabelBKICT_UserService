@@ -13,7 +13,7 @@ export async function up(knex: Knex): Promise<void> {
     if (!(await knex.schema.hasTable(TabNameUserServiceUser))) {
         await knex.schema.createTable(TabNameUserServiceUser, (tab) => {
             tab.increments("id", { primaryKey: true });
-            tab.string("username", 64).notNullable();
+            tab.string("username", 64).notNullable().unique();
             tab.string("display_name", 256).notNullable();
 
             tab.index(["username"], "user_service_user_username_idx");
@@ -37,7 +37,7 @@ export async function up(knex: Knex): Promise<void> {
         await knex.schema.createTable(
             TabNameUserServiceBlacklistedToken,
             (tab) => {
-                tab.integer("id").notNullable();
+                tab.bigInteger("id").notNullable();
                 tab.bigInteger("expire_at").notNullable();
 
                 tab.primary(["id"]);

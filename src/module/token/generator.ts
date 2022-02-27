@@ -85,10 +85,12 @@ export class JWTGenerator implements TokenGenerator {
                         );
                     }
 
-                    return new DecodeTokenResult(
-                        +decoded["jti"],
-                        +decoded["sub"],
-                        +decoded["exp"]
+                    resolve(
+                        new DecodeTokenResult(
+                            +decoded["jti"],
+                            +decoded["sub"],
+                            +decoded["exp"]
+                        )
                     );
                 }
             );

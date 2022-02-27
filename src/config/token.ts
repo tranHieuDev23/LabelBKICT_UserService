@@ -4,6 +4,7 @@ export class TokenConfig {
     public jwtPrivateKey = "";
     public jwtPublicKey = "";
     public jwtExpireTime = "7d";
+    public jwtRenewTime = "1d";
 
     public static fromEnv(): TokenConfig {
         const config = new TokenConfig();
@@ -15,6 +16,9 @@ export class TokenConfig {
         }
         if (process.env.JWT_EXPIRE_TIME !== undefined) {
             config.jwtExpireTime = process.env.JWT_EXPIRE_TIME;
+        }
+        if (process.env.JWT_RENEW_TIME !== undefined) {
+            config.jwtRenewTime = process.env.JWT_RENEW_TIME;
         }
         return config;
     }

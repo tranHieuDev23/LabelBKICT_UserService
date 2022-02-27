@@ -216,7 +216,10 @@ export class UserServiceHandlersFactory {
                         await this.tokenManagementOperator.getUserFromToken(
                             req.token
                         );
-                    return callback(null, { user, newToken });
+                    return callback(null, {
+                        user,
+                        newToken: newToken === null ? undefined : newToken,
+                    });
                 } catch (e) {
                     this.handleError(e, callback);
                 }

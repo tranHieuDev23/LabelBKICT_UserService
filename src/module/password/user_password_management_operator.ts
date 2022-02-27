@@ -58,7 +58,7 @@ export class UserPasswordManagementOperatorImpl
 
         const hash = await this.hasher.hash(password);
         return this.userPasswordDM.withTransaction(async (dm) => {
-            const oldHash = await dm.getUserPasswordHash(ofUserID);
+            const oldHash = await dm.getUserPasswordHashWithXLock(ofUserID);
             if (oldHash !== null) {
                 this.logger.error("user with user_id already has a password", {
                     userID: ofUserID,
@@ -98,7 +98,7 @@ export class UserPasswordManagementOperatorImpl
 
         const hash = await this.hasher.hash(password);
         return this.userPasswordDM.withTransaction(async (dm) => {
-            const oldHash = await dm.getUserPasswordHash(ofUserID);
+            const oldHash = await dm.getUserPasswordHashWithXLock(ofUserID);
             if (oldHash === null) {
                 this.logger.error(
                     "user with user_id does not have a password",
