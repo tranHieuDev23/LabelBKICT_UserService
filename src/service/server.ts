@@ -9,11 +9,7 @@ import {
     UserServiceHandlersFactory,
     USER_SERVICE_HANDLERS_FACTORY_TOKEN,
 } from "./handler";
-import {
-    GRPCServerConfig,
-    GRPC_SERVER_CONFIG,
-    USER_SERVICE_CONFIG_TOKEN,
-} from "../config";
+import { GRPCServerConfig, GRPC_SERVER_CONFIG } from "../config";
 import { ProtoGrpcType } from "../proto/gen/user_service";
 import { Logger } from "winston";
 import { LOGGER_TOKEN } from "../utils";
