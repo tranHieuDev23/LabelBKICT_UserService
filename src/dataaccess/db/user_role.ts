@@ -94,13 +94,13 @@ export class UserRoleDataAccessorImpl implements UserRoleDataAccessor {
 
     public async deleteUserRole(id: number): Promise<void> {
         try {
-            const rows = await this.knex
-                .delete("*")
+            const deletedCount = await this.knex
+                .delete()
                 .from(TabNameUserServiceUserRole)
                 .where({
                     [ColNameUserServiceUserRoleID]: id,
                 });
-            if (rows.length === 0) {
+            if (deletedCount === 0) {
                 this.logger.error("no user role with user_role_id found", {
                     userRoleID: id,
                 });

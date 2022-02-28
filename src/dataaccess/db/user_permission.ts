@@ -90,13 +90,13 @@ export class UserPermissionDataAccessorImpl
 
     public async deleteUserPermission(id: number): Promise<void> {
         try {
-            const rows = await this.knex
-                .delete("*")
+            const deletedCount = await this.knex
+                .delete()
                 .from(TabNameUserServiceUserPermission)
                 .where({
                     [ColNameUserServiceUserPermissionID]: id,
                 });
-            if (rows.length === 0) {
+            if (deletedCount === 0) {
                 this.logger.error(
                     "no user permission with user_permission_id found",
                     { userPermissionID: id }
