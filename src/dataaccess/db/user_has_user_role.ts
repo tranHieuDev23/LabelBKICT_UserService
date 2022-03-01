@@ -141,7 +141,8 @@ export class UserHasUserRoleDataAccessorImpl
                 .where({
                     [ColNameUserServiceUserHasUserRoleUserID]: userID,
                     [ColNameUserServiceUserHasUserRoleUserRoleID]: userRoleID,
-                });
+                })
+                .forUpdate();
 
             if (rows.length == 0) {
                 this.logger.debug(
