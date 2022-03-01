@@ -88,7 +88,7 @@ export async function up(knex: Knex): Promise<void> {
             TabNameUserServiceUserPermission,
             (tab) => {
                 tab.increments("id", { primaryKey: true });
-                tab.string("permission_name", 256).notNullable();
+                tab.string("permission_name", 256).notNullable().unique();
                 tab.string("description", 256).notNullable();
             }
         );

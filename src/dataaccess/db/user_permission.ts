@@ -21,8 +21,14 @@ export interface UserPermissionDataAccessor {
     updateUserPermission(userPermission: UserPermission): Promise<void>;
     deleteUserPermission(id: number): Promise<void>;
     getUserPermissionList(): Promise<UserPermission[]>;
-    getUserPermission(id: number): Promise<UserPermission | null>;
-    getUserPermissionWithXLock(id: number): Promise<UserPermission | null>;
+    getUserPermissionByID(id: number): Promise<UserPermission | null>;
+    getUserPermissionByIDWithXLock(id: number): Promise<UserPermission | null>;
+    getUserPermissionByPermissionName(
+        permissionName: string
+    ): Promise<UserPermission | null>;
+    getUserPermissionByPermissionNameWithXLock(
+        permissionName: string
+    ): Promise<UserPermission | null>;
     withTransaction<T>(
         execFunc: (dataAccessor: UserPermissionDataAccessor) => Promise<T>
     ): Promise<T>;
@@ -128,7 +134,9 @@ export class UserPermissionDataAccessorImpl
         }
     }
 
-    public async getUserPermission(id: number): Promise<UserPermission | null> {
+    public async getUserPermissionByID(
+        id: number
+    ): Promise<UserPermission | null> {
         try {
             const rows = await this.knex
                 .select()
@@ -158,12 +166,12 @@ export class UserPermissionDataAccessorImpl
 
             return this.getUserPermissionFromRow(rows[0]);
         } catch (error) {
-            this.logger.error("failed to get user permission list", { error });
+            this.logger.error("failed to get user permission", { error });
             throw ErrorWithStatus.wrapWithStatus(error, status.INTERNAL);
         }
     }
 
-    public async getUserPermissionWithXLock(
+    public async getUserPermissionByIDWithXLock(
         id: number
     ): Promise<UserPermission | null> {
         try {
@@ -196,7 +204,82 @@ export class UserPermissionDataAccessorImpl
 
             return this.getUserPermissionFromRow(rows[0]);
         } catch (error) {
-            this.logger.error("failed to get user permission list", { error });
+            this.logger.error("failed to get user permission", { error });
+            throw ErrorWithStatus.wrapWithStatus(error, status.INTERNAL);
+        }
+    }
+
+    public async getUserPermissionByPermissionName(
+        permissionName: string
+    ): Promise<UserPermission | null> {
+        try {
+            const rows = await this.knex
+                .select()
+                .from(TabNameUserServiceUserPermission)
+                .where({
+                    [ColNameUserServiceUserPermissionPermissionName]:
+                        permissionName,
+                });
+
+            if (rows.length == 0) {
+                this.logger.debug("no user role with permission_name found", {
+                    permissionName,
+                });
+                return null;
+            }
+
+            if (rows.length > 1) {
+                this.logger.error(
+                    "more than one user with permission_name found",
+                    { permissionName }
+                );
+                throw new ErrorWithStatus(
+                    "more than one user role was found",
+                    status.INTERNAL
+                );
+            }
+
+            return this.getUserPermissionFromRow(rows[0]);
+        } catch (error) {
+            this.logger.error("failed to get user permission", { error });
+            throw ErrorWithStatus.wrapWithStatus(error, status.INTERNAL);
+        }
+    }
+
+    public async getUserPermissionByPermissionNameWithXLock(
+        permissionName: string
+    ): Promise<UserPermission | null> {
+        try {
+            const rows = await this.knex
+                .select()
+                .from(TabNameUserServiceUserPermission)
+                .where({
+                    [ColNameUserServiceUserPermissionPermissionName]:
+                        permissionName,
+                })
+                .forUpdate();
+
+            if (rows.length == 0) {
+                this.logger.debug("no user role with permission_name found", {
+                    permissionName,
+                });
+                return null;
+            }
+
+            if (rows.length > 1) {
+                this.logger.error(
+                    "more than one user with permission_name found",
+                    { permissionName }
+                );
+                throw new ErrorWithStatus(
+                    "more than one user role was found",
+                    status.INTERNAL
+                );
+            }
+
+            return this.getUserPermissionFromRow(rows[0]);
+        } catch (error) {
+            this.logger.error("failed to get user permission", { error });
             throw ErrorWithStatus.wrapWithStatus(error, status.INTERNAL);
         }
     }

@@ -45,18 +45,20 @@ export class UserRoleManagementOperatorImpl
     ): Promise<UserRole> {
         displayName = this.sanitizeUserRoleDisplayName(displayName);
         if (!this.isValidUserRoleDisplayName(displayName)) {
-            this.logger.error("invalid display name", { displayName });
+            this.logger.error("invalid user role display name", {
+                displayName,
+            });
             throw new ErrorWithStatus(
-                "invalid display name",
+                "invalid user role display name",
                 status.INVALID_ARGUMENT
             );
         }
 
         description = this.sanitizeUserRoleDescription(description);
         if (!this.isValidUserRoleDescription(description)) {
-            this.logger.error("invalid description", { description });
+            this.logger.error("invalid user role description", { description });
             throw new ErrorWithStatus(
-                "invalid description",
+                "invalid user role description",
                 status.INVALID_ARGUMENT
             );
         }
@@ -87,11 +89,11 @@ export class UserRoleManagementOperatorImpl
                 userRole.displayName
             );
             if (!this.isValidUserRoleDisplayName(userRole.displayName)) {
-                this.logger.error("invalid display name", {
+                this.logger.error("invalid user role display name", {
                     displayName: userRole.displayName,
                 });
                 throw new ErrorWithStatus(
-                    "invalid display name",
+                    "invalid user role display name",
                     status.INVALID_ARGUMENT
                 );
             }
@@ -102,11 +104,11 @@ export class UserRoleManagementOperatorImpl
                 userRole.description
             );
             if (!this.isValidUserRoleDescription(userRole.description)) {
-                this.logger.error("invalid description", {
+                this.logger.error("invalid user role description", {
                     description: userRole.description,
                 });
                 throw new ErrorWithStatus(
-                    "invalid description",
+                    "invalid user role description",
                     status.INVALID_ARGUMENT
                 );
             }
