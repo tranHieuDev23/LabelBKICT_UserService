@@ -33,9 +33,9 @@ export class UserRoleManagementOperatorImpl
     implements UserRoleManagementOperator
 {
     constructor(
-        private readonly userRoleDataAccessor: UserRoleDataAccessor,
-        private readonly userDataAccessor: UserDataAccessor,
-        private readonly userHasUserRoleDataAccessor: UserHasUserRoleDataAccessor,
+        private readonly userRoleDM: UserRoleDataAccessor,
+        private readonly userDM: UserDataAccessor,
+        private readonly userHasUserRoleDM: UserHasUserRoleDataAccessor,
         private readonly logger: Logger
     ) {}
 
@@ -61,7 +61,7 @@ export class UserRoleManagementOperatorImpl
             );
         }
 
-        const userRoleID = await this.userRoleDataAccessor.createUserRole(
+        const userRoleID = await this.userRoleDM.createUserRole(
             displayName,
             description
         );
@@ -112,7 +112,7 @@ export class UserRoleManagementOperatorImpl
             }
         }
 
-        return this.userRoleDataAccessor.withTransaction(async (dm) => {
+        return this.userRoleDM.withTransaction(async (dm) => {
             const userRoleRecord = await dm.getUserRoleWithXLock(userRoleID);
             if (userRoleRecord === null) {
                 this.logger.error("no user_role with user_role_id found", {
@@ -137,7 +137,7 @@ export class UserRoleManagementOperatorImpl
     }
 
     public async deleteUserRole(id: number): Promise<void> {
-        await this.userRoleDataAccessor.deleteUserRole(id);
+        await this.userRoleDM.deleteUserRole(id);
     }
 
     public async getUserRoleList(
@@ -147,12 +147,8 @@ export class UserRoleManagementOperatorImpl
     ): Promise<{ totalUserRoleCount: number; userRoleList: UserRole[] }> {
         const dmSortOrder = this.getUserRoleListSortOrder(sortOrder);
         const dmResults = await Promise.all([
-            this.userRoleDataAccessor.getUserRoleCount(),
-            this.userRoleDataAccessor.getUserRoleList(
-                offset,
-                limit,
-                dmSortOrder
-            ),
+            this.userRoleDM.getUserRoleCount(),
+            this.userRoleDM.getUserRoleList(offset, limit, dmSortOrder),
         ]);
         return {
             totalUserRoleCount: dmResults[0],
@@ -164,7 +160,7 @@ export class UserRoleManagementOperatorImpl
         userID: number,
         userRoleID: number
     ): Promise<void> {
-        const userRecord = await this.userDataAccessor.getUserByUserID(userID);
+        const userRecord = await this.userDM.getUserByUserID(userID);
         if (userRecord === null) {
             this.logger.error("no user with user_id found", { userID });
             throw new ErrorWithStatus(
@@ -173,9 +169,7 @@ export class UserRoleManagementOperatorImpl
             );
         }
 
-        const userRoleRecord = await this.userRoleDataAccessor.getUserRole(
-            userRoleID
-        );
+        const userRoleRecord = await this.userRoleDM.getUserRole(userRoleID);
         if (userRoleRecord === null) {
             this.logger.error("no user role with user_role_id found", {
                 userRoleID,
@@ -186,7 +180,7 @@ export class UserRoleManagementOperatorImpl
             );
         }
 
-        return this.userHasUserRoleDataAccessor.withTransaction(async (dm) => {
+        return this.userHasUserRoleDM.withTransaction(async (dm) => {
             const userHasUserRole = await dm.getUserHasUserRoleWithXLock(
                 userID,
                 userRoleID
@@ -211,7 +205,7 @@ export class UserRoleManagementOperatorImpl
         userID: number,
         userRoleID: number
     ): Promise<void> {
-        const userRecord = await this.userDataAccessor.getUserByUserID(userID);
+        const userRecord = await this.userDM.getUserByUserID(userID);
         if (userRecord === null) {
             this.logger.error("no user with user_id found", { userID });
             throw new ErrorWithStatus(
@@ -220,9 +214,7 @@ export class UserRoleManagementOperatorImpl
             );
         }
 
-        const userRoleRecord = await this.userRoleDataAccessor.getUserRole(
-            userRoleID
-        );
+        const userRoleRecord = await this.userRoleDM.getUserRole(userRoleID);
         if (userRoleRecord === null) {
             this.logger.error("no user role with user_role_id found", {
                 userRoleID,
@@ -233,7 +225,7 @@ export class UserRoleManagementOperatorImpl
             );
         }
 
-        return await this.userHasUserRoleDataAccessor.deleteUserHasUserRole(
+        return await this.userHasUserRoleDM.deleteUserHasUserRole(
             userID,
             userRoleID
         );
@@ -242,7 +234,7 @@ export class UserRoleManagementOperatorImpl
     public async getUserRoleListFromUserList(
         userIDList: number[]
     ): Promise<UserRole[][]> {
-        return await this.userHasUserRoleDataAccessor.getUserRoleListOfUserList(
+        return await this.userHasUserRoleDM.getUserRoleListOfUserList(
             userIDList
         );
     }
