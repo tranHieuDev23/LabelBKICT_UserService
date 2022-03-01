@@ -76,6 +76,7 @@ export async function up(knex: Knex): Promise<void> {
                     .inTable(TabNameUserServiceUserRole)
                     .onDelete("CASCADE");
 
+                tab.unique(["user_id", "user_role_id"]);
                 tab.index(["user_id"], "user_service_user_has_user_role_idx");
             }
         );
@@ -112,6 +113,7 @@ export async function up(knex: Knex): Promise<void> {
                     .inTable(TabNameUserServiceUserPermission)
                     .onDelete("CASCADE");
 
+                tab.unique(["user_role_id", "user_permission_id"]);
                 tab.index(
                     ["user_role_id"],
                     "user_service_user_role_has_user_permission_idx"
