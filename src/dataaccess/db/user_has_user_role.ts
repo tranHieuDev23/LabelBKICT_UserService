@@ -93,7 +93,7 @@ export class UserHasUserRoleDataAccessorImpl
                 .from(TabNameUserServiceUserHasUserRole)
                 .join(
                     TabNameUserServiceUserRole,
-                    ColNameUserServiceUserHasUserRoleUserID,
+                    ColNameUserServiceUserHasUserRoleUserRoleID,
                     ColNameUserServiceUserRoleID
                 )
                 .whereIn(ColNameUserServiceUserHasUserRoleUserID, userIDList)
