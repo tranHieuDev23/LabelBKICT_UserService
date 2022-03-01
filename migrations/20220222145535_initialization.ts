@@ -53,6 +53,7 @@ export async function up(knex: Knex): Promise<void> {
         await knex.schema.createTable(TabNameUserServiceUserRole, (tab) => {
             tab.increments("id", { primaryKey: true });
             tab.string("display_name", 256).notNullable();
+            tab.string("description", 256).notNullable();
 
             tab.index(
                 ["display_name"],
@@ -88,7 +89,7 @@ export async function up(knex: Knex): Promise<void> {
             (tab) => {
                 tab.increments("id", { primaryKey: true });
                 tab.string("permission_name", 256).notNullable();
-                tab.string("display_name", 256).notNullable();
+                tab.string("description", 256).notNullable();
             }
         );
     }
