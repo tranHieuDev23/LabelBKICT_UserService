@@ -49,7 +49,7 @@ export class UserServiceGRPCServer {
     private loadUserServiceProtoGrpc(protoPath: string): ProtoGrpcType {
         const packageDefinition = loadSync(protoPath, {
             keepCase: false,
-            enums: String,
+            enums: Number,
             defaults: false,
             oneofs: true,
         });
