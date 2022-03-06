@@ -95,23 +95,14 @@ export class UserPermissionDataAccessorImpl
     }
 
     public async deleteUserPermission(id: number): Promise<void> {
+        let deletedCount: number;
         try {
-            const deletedCount = await this.knex
+            deletedCount = await this.knex
                 .delete()
                 .from(TabNameUserServiceUserPermission)
                 .where({
                     [ColNameUserServiceUserPermissionID]: id,
                 });
-            if (deletedCount === 0) {
-                this.logger.error(
-                    "no user permission with user_permission_id found",
-                    { userPermissionID: id }
-                );
-                throw new ErrorWithStatus(
-                    `no user permission with user_permission_id ${id} found`,
-                    status.NOT_FOUND
-                );
-            }
         } catch (error) {
             this.logger.error(
                 "failed to delete user permission",
@@ -119,6 +110,16 @@ export class UserPermissionDataAccessorImpl
                 { error }
             );
             throw ErrorWithStatus.wrapWithStatus(error, status.INTERNAL);
+        }
+        if (deletedCount === 0) {
+            this.logger.error(
+                "no user permission with user_permission_id found",
+                { userPermissionID: id }
+            );
+            throw new ErrorWithStatus(
+                `no user permission with user_permission_id ${id} found`,
+                status.NOT_FOUND
+            );
         }
     }
 

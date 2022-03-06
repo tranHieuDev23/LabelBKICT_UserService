@@ -49,15 +49,15 @@ export class BlacklistedTokenDataAccessorImpl
         requestTime: number
     ): Promise<number> {
         try {
-            const deletedRows = await this.knex
-                .delete("*")
+            const deletedCount = await this.knex
+                .delete()
                 .from(TabNameUserServiceBlacklistedToken)
                 .where(
                     ColNameUserServiceBlacklistedTokenExpireAt,
                     "<=",
                     requestTime
                 );
-            return deletedRows.length;
+            return deletedCount;
         } catch (error) {
             this.logger.error("failed to delete blacklisted tokens", {
                 error,

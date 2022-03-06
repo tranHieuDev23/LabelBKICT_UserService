@@ -71,8 +71,9 @@ export class UserRoleHasUserPermissionDataAccessorImpl
         userRoleID: number,
         userPermissionID: number
     ): Promise<void> {
+        let deletedCount: number;
         try {
-            const deletedCount = await this.knex
+            deletedCount = await this.knex
                 .delete()
                 .from(TabNameUserServiceUserRoleHasUserPermission)
                 .where({
@@ -81,24 +82,23 @@ export class UserRoleHasUserPermissionDataAccessorImpl
                     [ColNameUserServiceUserRoleHasUserPermissionUserPermissionID]:
                         userPermissionID,
                 });
-
-            if (deletedCount === 0) {
-                this.logger.debug(
-                    "no user role has user permission relation found",
-                    { userRoleID },
-                    { userPermissionID }
-                );
-                throw new ErrorWithStatus(
-                    `no user role has user permission relation found with user_role_id ${userRoleID}, user_permission_id ${userPermissionID}`,
-                    status.NOT_FOUND
-                );
-            }
         } catch (error) {
             this.logger.error(
                 "failed to create user role has user permission relation",
                 { error }
             );
             throw ErrorWithStatus.wrapWithStatus(error, status.INTERNAL);
+        }
+        if (deletedCount === 0) {
+            this.logger.debug(
+                "no user role has user permission relation found",
+                { userRoleID },
+                { userPermissionID }
+            );
+            throw new ErrorWithStatus(
+                `no user role has user permission relation found with user_role_id ${userRoleID}, user_permission_id ${userPermissionID}`,
+                status.NOT_FOUND
+            );
         }
     }
 
@@ -138,7 +138,7 @@ export class UserRoleHasUserPermissionDataAccessorImpl
                     ?.push(
                         new UserPermission(
                             +row[
-                                ColNameUserServiceUserRoleHasUserPermissionUserRoleID
+                                ColNameUserServiceUserRoleHasUserPermissionUserPermissionID
                             ],
                             row[ColNameUserServiceUserPermissionPermissionName],
                             row[ColNameUserServiceUserPermissionDescription]

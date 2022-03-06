@@ -57,31 +57,31 @@ export class UserHasUserRoleDataAccessorImpl
         userID: number,
         userRoleID: number
     ): Promise<void> {
+        let deletedCount: number;
         try {
-            const deletedCount = await this.knex
+            deletedCount = await this.knex
                 .delete()
                 .from(TabNameUserServiceUserHasUserRole)
                 .where({
                     [ColNameUserServiceUserHasUserRoleUserID]: userID,
                     [ColNameUserServiceUserHasUserRoleUserRoleID]: userRoleID,
                 });
-
-            if (deletedCount === 0) {
-                this.logger.debug(
-                    "no user has user role relation found",
-                    { userID },
-                    { userRoleID }
-                );
-                throw new ErrorWithStatus(
-                    `no user has user role relation found with user_id ${userID}, user_role_id ${userRoleID}`,
-                    status.NOT_FOUND
-                );
-            }
         } catch (error) {
             this.logger.error("failed to create user has user role relation", {
                 error,
             });
             throw ErrorWithStatus.wrapWithStatus(error, status.INTERNAL);
+        }
+        if (deletedCount === 0) {
+            this.logger.debug(
+                "no user has user role relation found",
+                { userID },
+                { userRoleID }
+            );
+            throw new ErrorWithStatus(
+                `no user has user role relation found with user_id ${userID}, user_role_id ${userRoleID}`,
+                status.NOT_FOUND
+            );
         }
     }
 

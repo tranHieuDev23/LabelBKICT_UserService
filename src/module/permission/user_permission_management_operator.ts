@@ -48,7 +48,6 @@ export class UserPermissionManagementOperatorImpl
         private readonly userPermissionDM: UserPermissionDataAccessor,
         private readonly userRoleDM: UserRoleDataAccessor,
         private readonly userRoleHasUserPermissionDM: UserRoleHasUserPermissionDataAccessor,
-        private readonly userDM: UserDataAccessor,
         private readonly userHasUserRoleDM: UserHasUserRoleDataAccessor,
         private readonly logger: Logger
     ) {}
@@ -358,7 +357,6 @@ injected(
     USER_PERMISSION_DATA_ACCESSOR_TOKEN,
     USER_ROLE_DATA_ACCESSOR_TOKEN,
     USER_ROLE_HAS_USER_PERMISSION_DATA_ACCESSOR_TOKEN,
-    USER_DATA_ACCESSOR_TOKEN,
     USER_HAS_USER_ROLE_DATA_ACCESSOR_TOKEN,
     LOGGER_TOKEN
 );

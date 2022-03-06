@@ -93,22 +93,14 @@ export class UserRoleDataAccessorImpl implements UserRoleDataAccessor {
     }
 
     public async deleteUserRole(id: number): Promise<void> {
+        let deletedCount: number;
         try {
-            const deletedCount = await this.knex
+            deletedCount = await this.knex
                 .delete()
                 .from(TabNameUserServiceUserRole)
                 .where({
                     [ColNameUserServiceUserRoleID]: id,
                 });
-            if (deletedCount === 0) {
-                this.logger.error("no user role with user_role_id found", {
-                    userRoleID: id,
-                });
-                throw new ErrorWithStatus(
-                    `no user role with user_role_id ${id} found`,
-                    status.NOT_FOUND
-                );
-            }
         } catch (error) {
             this.logger.error(
                 "failed to delete user role",
@@ -116,6 +108,15 @@ export class UserRoleDataAccessorImpl implements UserRoleDataAccessor {
                 { error }
             );
             throw ErrorWithStatus.wrapWithStatus(error, status.INTERNAL);
+        }
+        if (deletedCount === 0) {
+            this.logger.error("no user role with user_role_id found", {
+                userRoleID: id,
+            });
+            throw new ErrorWithStatus(
+                `no user role with user_role_id ${id} found`,
+                status.NOT_FOUND
+            );
         }
     }
 
