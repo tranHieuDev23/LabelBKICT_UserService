@@ -2,12 +2,10 @@ import { injected, token } from "brandi";
 import { Logger } from "winston";
 import validator from "validator";
 import {
-    UserDataAccessor,
     UserHasUserRoleDataAccessor,
     UserPermissionDataAccessor,
     UserRoleDataAccessor,
     UserRoleHasUserPermissionDataAccessor,
-    USER_DATA_ACCESSOR_TOKEN,
     USER_HAS_USER_ROLE_DATA_ACCESSOR_TOKEN,
     USER_PERMISSION_DATA_ACCESSOR_TOKEN,
     USER_ROLE_DATA_ACCESSOR_TOKEN,
