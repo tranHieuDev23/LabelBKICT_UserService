@@ -127,7 +127,8 @@ export class UserPermissionDataAccessorImpl
         try {
             const rows = await this.knex
                 .select()
-                .from(TabNameUserServiceUserPermission);
+                .from(TabNameUserServiceUserPermission)
+                .orderBy(ColNameUserServiceUserPermissionPermissionName);
             return rows.map((row) => this.getUserPermissionFromRow(row));
         } catch (error) {
             this.logger.error("failed to get user permission list", { error });

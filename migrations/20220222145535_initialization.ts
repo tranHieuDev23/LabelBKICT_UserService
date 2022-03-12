@@ -90,6 +90,11 @@ export async function up(knex: Knex): Promise<void> {
                 tab.increments("id", { primaryKey: true });
                 tab.string("permission_name", 256).notNullable().unique();
                 tab.string("description", 256).notNullable();
+
+                tab.index(
+                    ["permission_name"],
+                    "user_service_user_permission_permission_name_idx"
+                );
             }
         );
     }
