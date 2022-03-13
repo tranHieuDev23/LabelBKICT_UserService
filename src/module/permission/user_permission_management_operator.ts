@@ -233,11 +233,10 @@ export class UserPermissionManagementOperatorImpl
                     userPermissionID
                 );
             if (userRoleHasUserPermission !== null) {
-                this.logger.error(
-                    "user role already has user permission",
-                    { userRoleID },
-                    { userPermissionID }
-                );
+                this.logger.error("user role already has user permission", {
+                    userRoleID,
+                    userPermissionID,
+                });
                 throw new ErrorWithStatus(
                     `user role ${userRoleID} already has user permission ${userPermissionID}`,
                     status.FAILED_PRECONDITION
@@ -286,11 +285,10 @@ export class UserPermissionManagementOperatorImpl
                     userPermissionID
                 );
             if (userRoleHasUserPermission === null) {
-                this.logger.error(
-                    "user role does not have user permission",
-                    { userRoleID },
-                    { userPermissionID }
-                );
+                this.logger.error("user role does not have user permission", {
+                    userRoleID,
+                    userPermissionID,
+                });
                 throw new ErrorWithStatus(
                     `user role ${userRoleID} does not have user permission ${userPermissionID}`,
                     status.FAILED_PRECONDITION

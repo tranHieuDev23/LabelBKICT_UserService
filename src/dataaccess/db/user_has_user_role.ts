@@ -177,8 +177,7 @@ export class UserHasUserRoleDataAccessorImpl
             if (rows.length > 1) {
                 this.logger.error(
                     "more than one user has user role relation found",
-                    { userID },
-                    { userRoleID }
+                    { userID, userRoleID }
                 );
                 throw new ErrorWithStatus(
                     "more than one user has user role relation found",

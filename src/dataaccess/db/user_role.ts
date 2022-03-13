@@ -59,12 +59,11 @@ export class UserRoleDataAccessorImpl implements UserRoleDataAccessor {
                 .into(TabNameUserServiceUserRole);
             return +rows[0][ColNameUserServiceUserRoleID];
         } catch (error) {
-            this.logger.error(
-                "failed to create user role",
-                { displayName },
-                { description },
-                { error }
-            );
+            this.logger.error("failed to create user role", {
+                displayName,
+                description,
+                error,
+            });
             throw ErrorWithStatus.wrapWithStatus(error, status.INTERNAL);
         }
     }
@@ -83,11 +82,10 @@ export class UserRoleDataAccessorImpl implements UserRoleDataAccessor {
                     [ColNameUserServiceUserRoleID]: userRole.id,
                 });
         } catch (error) {
-            this.logger.error(
-                "failed to update user role",
-                { userRole },
-                { error }
-            );
+            this.logger.error("failed to update user role", {
+                userRole,
+                error,
+            });
             throw ErrorWithStatus.wrapWithStatus(error, status.INTERNAL);
         }
     }
@@ -102,11 +100,10 @@ export class UserRoleDataAccessorImpl implements UserRoleDataAccessor {
                     [ColNameUserServiceUserRoleID]: id,
                 });
         } catch (error) {
-            this.logger.error(
-                "failed to delete user role",
-                { userRoleID: id },
-                { error }
-            );
+            this.logger.error("failed to delete user role", {
+                userRoleID: id,
+                error,
+            });
             throw ErrorWithStatus.wrapWithStatus(error, status.INTERNAL);
         }
         if (deletedCount === 0) {
@@ -331,11 +328,10 @@ export class UserRoleDataAccessorImpl implements UserRoleDataAccessor {
                     [ColNameUserServiceUserRoleID]: id,
                 });
         } catch (error) {
-            this.logger.error(
-                "failed to get user role by user_role_id",
-                { userRoleID: id },
-                { error }
-            );
+            this.logger.error("failed to get user role by user_role_id", {
+                userRoleID: id,
+                error,
+            });
             throw ErrorWithStatus.wrapWithStatus(error, status.INTERNAL);
         }
 
@@ -370,11 +366,10 @@ export class UserRoleDataAccessorImpl implements UserRoleDataAccessor {
                 })
                 .forUpdate();
         } catch (error) {
-            this.logger.error(
-                "failed to get user role by user_role_id",
-                { userRoleID: id },
-                { error }
-            );
+            this.logger.error("failed to get user role by user_role_id", {
+                userRoleID: id,
+                error,
+            });
             throw ErrorWithStatus.wrapWithStatus(error, status.INTERNAL);
         }
 

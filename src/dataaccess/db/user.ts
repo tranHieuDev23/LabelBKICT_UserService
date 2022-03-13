@@ -62,12 +62,11 @@ export class UserDataAccessorImpl implements UserDataAccessor {
                 .into(TabNameUserServiceUser);
             return +rows[0][ColNameUserServiceUserID];
         } catch (error) {
-            this.logger.error(
-                "failed to create user",
-                { username },
-                { displayName },
-                { error }
-            );
+            this.logger.error("failed to create user", {
+                username,
+                displayName,
+                error,
+            });
             throw ErrorWithStatus.wrapWithStatus(error, status.INTERNAL);
         }
     }
@@ -84,7 +83,7 @@ export class UserDataAccessorImpl implements UserDataAccessor {
                     [ColNameUserServiceUserID]: user.id,
                 });
         } catch (error) {
-            this.logger.error("failed to update user", { user }, { error });
+            this.logger.error("failed to update user", { user, error });
             throw ErrorWithStatus.wrapWithStatus(error, status.INTERNAL);
         }
     }
@@ -99,11 +98,10 @@ export class UserDataAccessorImpl implements UserDataAccessor {
                     [ColNameUserServiceUserID]: userID,
                 });
         } catch (error) {
-            this.logger.error(
-                "failed to get user by user_id",
-                { userID },
-                { error }
-            );
+            this.logger.error("failed to get user by user_id", {
+                userID,
+                error,
+            });
             throw ErrorWithStatus.wrapWithStatus(error, status.INTERNAL);
         }
 
@@ -138,11 +136,10 @@ export class UserDataAccessorImpl implements UserDataAccessor {
                 })
                 .forUpdate();
         } catch (error) {
-            this.logger.error(
-                "failed to get user by user_id",
-                { userID },
-                { error }
-            );
+            this.logger.error("failed to get user by user_id", {
+                userID,
+                error,
+            });
             throw ErrorWithStatus.wrapWithStatus(error, status.INTERNAL);
         }
 
@@ -174,11 +171,10 @@ export class UserDataAccessorImpl implements UserDataAccessor {
                     [ColNameUserServiceUserUsername]: username,
                 });
         } catch (error) {
-            this.logger.error(
-                "failed to get user by username",
-                { username },
-                { error }
-            );
+            this.logger.error("failed to get user by username", {
+                username,
+                error,
+            });
             throw ErrorWithStatus.wrapWithStatus(error, status.INTERNAL);
         }
 
@@ -213,11 +209,10 @@ export class UserDataAccessorImpl implements UserDataAccessor {
                 })
                 .forUpdate();
         } catch (error) {
-            this.logger.error(
-                "failed to get user by username",
-                { username },
-                { error }
-            );
+            this.logger.error("failed to get user by username", {
+                username,
+                error,
+            });
             throw ErrorWithStatus.wrapWithStatus(error, status.INTERNAL);
         }
 

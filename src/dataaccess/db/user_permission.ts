@@ -59,12 +59,11 @@ export class UserPermissionDataAccessorImpl
                 .into(TabNameUserServiceUserPermission);
             return +rows[0][ColNameUserServiceUserPermissionID];
         } catch (error) {
-            this.logger.error(
-                "failed to create user permission",
-                { permissionName },
-                { description },
-                { error }
-            );
+            this.logger.error("failed to create user permission", {
+                permissionName,
+                description,
+                error,
+            });
             throw ErrorWithStatus.wrapWithStatus(error, status.INTERNAL);
         }
     }
@@ -85,11 +84,10 @@ export class UserPermissionDataAccessorImpl
                     [ColNameUserServiceUserPermissionID]: userPermission.id,
                 });
         } catch (error) {
-            this.logger.error(
-                "failed to update user permission",
-                { userPermission },
-                { error }
-            );
+            this.logger.error("failed to update user permission", {
+                userPermission,
+                error,
+            });
             throw ErrorWithStatus.wrapWithStatus(error, status.INTERNAL);
         }
     }
@@ -104,11 +102,10 @@ export class UserPermissionDataAccessorImpl
                     [ColNameUserServiceUserPermissionID]: id,
                 });
         } catch (error) {
-            this.logger.error(
-                "failed to delete user permission",
-                { userPermissionID: id },
-                { error }
-            );
+            this.logger.error("failed to delete user permission", {
+                userPermissionID: id,
+                error,
+            });
             throw ErrorWithStatus.wrapWithStatus(error, status.INTERNAL);
         }
         if (deletedCount === 0) {

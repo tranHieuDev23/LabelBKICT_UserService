@@ -191,8 +191,7 @@ export class UserRoleHasUserPermissionDataAccessorImpl
             if (rows.length > 1) {
                 this.logger.error(
                     "more than one user role has user permission relation found",
-                    { userRoleID },
-                    { userPermissionID }
+                    { userRoleID, userPermissionID }
                 );
                 throw new ErrorWithStatus(
                     "more than one user role has user permission relation found",

@@ -188,11 +188,10 @@ export class UserRoleManagementOperatorImpl
                 userRoleID
             );
             if (userHasUserRole !== null) {
-                this.logger.error(
-                    "user already has user role",
-                    { userID },
-                    { userRoleID }
-                );
+                this.logger.error("user already has user role", {
+                    userID,
+                    userRoleID,
+                });
                 throw new ErrorWithStatus(
                     `user ${userID} already has user role ${userRoleID}`,
                     status.FAILED_PRECONDITION
@@ -233,13 +232,12 @@ export class UserRoleManagementOperatorImpl
                 userRoleID
             );
             if (userHasUserRole === null) {
-                this.logger.error(
-                    "user does not have user role",
-                    { userID },
-                    { userRoleID }
-                );
+                this.logger.error("user does not have user role", {
+                    userID,
+                    userRoleID,
+                });
                 throw new ErrorWithStatus(
-                    `user ${userID} already has user role ${userRoleID}`,
+                    `user ${userID} does not have user role ${userRoleID}`,
                     status.FAILED_PRECONDITION
                 );
             }

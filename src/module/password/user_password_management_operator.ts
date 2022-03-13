@@ -102,9 +102,7 @@ export class UserPasswordManagementOperatorImpl
             if (oldHash === null) {
                 this.logger.error(
                     "user with user_id does not have a password",
-                    {
-                        userID: ofUserID,
-                    }
+                    { userID: ofUserID }
                 );
                 throw new ErrorWithStatus(
                     `user with id ${ofUserID} does not have a password`,
