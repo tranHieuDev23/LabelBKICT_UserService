@@ -195,7 +195,7 @@ export class UserRoleManagementOperatorImpl
                 );
                 throw new ErrorWithStatus(
                     `user ${userID} already has user role ${userRoleID}`,
-                    status.ALREADY_EXISTS
+                    status.FAILED_PRECONDITION
                 );
             }
 
@@ -227,10 +227,28 @@ export class UserRoleManagementOperatorImpl
             );
         }
 
-        return await this.userHasUserRoleDM.deleteUserHasUserRole(
-            userID,
-            userRoleID
-        );
+        return this.userHasUserRoleDM.withTransaction(async (dm) => {
+            const userHasUserRole = await dm.getUserHasUserRoleWithXLock(
+                userID,
+                userRoleID
+            );
+            if (userHasUserRole === null) {
+                this.logger.error(
+                    "user does not have user role",
+                    { userID },
+                    { userRoleID }
+                );
+                throw new ErrorWithStatus(
+                    `user ${userID} already has user role ${userRoleID}`,
+                    status.FAILED_PRECONDITION
+                );
+            }
+
+            return await this.userHasUserRoleDM.deleteUserHasUserRole(
+                userID,
+                userRoleID
+            );
+        });
     }
 
     public async getUserRoleListFromUserList(

@@ -240,7 +240,7 @@ export class UserPermissionManagementOperatorImpl
                 );
                 throw new ErrorWithStatus(
                     `user role ${userRoleID} already has user permission ${userPermissionID}`,
-                    status.ALREADY_EXISTS
+                    status.FAILED_PRECONDITION
                 );
             }
 
@@ -279,10 +279,29 @@ export class UserPermissionManagementOperatorImpl
             );
         }
 
-        await this.userRoleHasUserPermissionDM.deleteUserRoleHasUserPermission(
-            userRoleID,
-            userPermissionID
-        );
+        return this.userRoleHasUserPermissionDM.withTransaction(async (dm) => {
+            const userRoleHasUserPermission =
+                await dm.getUserRoleHasUserPermissionWithXLock(
+                    userRoleID,
+                    userPermissionID
+                );
+            if (userRoleHasUserPermission === null) {
+                this.logger.error(
+                    "user role does not have user permission",
+                    { userRoleID },
+                    { userPermissionID }
+                );
+                throw new ErrorWithStatus(
+                    `user role ${userRoleID} does not have user permission ${userPermissionID}`,
+                    status.FAILED_PRECONDITION
+                );
+            }
+
+            await this.userRoleHasUserPermissionDM.deleteUserRoleHasUserPermission(
+                userRoleID,
+                userPermissionID
+            );
+        });
     }
 
     public async getUserPermissionListOfUserRoleList(
