@@ -19,6 +19,7 @@ export interface UserManagementOperator {
         limit: number,
         sortOrder: _UserListSortOrder_Values
     ): Promise<{ totalUserCount: number; userList: User[] }>;
+    getUser(userID: number): Promise<User>;
 }
 
 export class UserManagementOperatorImpl implements UserManagementOperator {
@@ -149,6 +150,18 @@ export class UserManagementOperatorImpl implements UserManagementOperator {
             totalUserCount: dmResults[0],
             userList: dmResults[1],
         };
+    }
+
+    public async getUser(userID: number): Promise<User> {
+        const user = await this.userDM.getUserByUserID(userID);
+        if (user === null) {
+            this.logger.error("no user with user_id found", { userID });
+            throw new ErrorWithStatus(
+                `no user with user_id ${userID} found`,
+                status.NOT_FOUND
+            );
+        }
+        return user;
     }
 
     private sanitizeDisplayName(displayName: string): string {

@@ -111,6 +111,25 @@ export class UserServiceHandlersFactory {
                 }
             },
 
+            GetUser: async (call, callback) => {
+                const req = call.request;
+                if (req.id === undefined) {
+                    return callback({
+                        message: "id is required",
+                        code: status.INVALID_ARGUMENT,
+                    });
+                }
+
+                try {
+                    const user = await this.userManagementOperator.getUser(
+                        req.id
+                    );
+                    callback(null, { user });
+                } catch (e) {
+                    this.handleError(e, callback);
+                }
+            },
+
             CreateUserPassword: async (call, callback) => {
                 const req = call.request;
                 if (req.password === undefined) {
