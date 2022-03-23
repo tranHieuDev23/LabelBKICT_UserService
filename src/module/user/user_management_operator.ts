@@ -20,6 +20,11 @@ export interface UserManagementOperator {
         sortOrder: _UserListSortOrder_Values
     ): Promise<{ totalUserCount: number; userList: User[] }>;
     getUser(userID: number): Promise<User>;
+    searchUser(
+        query: string,
+        limit: number,
+        includedUserIDList: number[]
+    ): Promise<User[]>;
 }
 
 export class UserManagementOperatorImpl implements UserManagementOperator {
@@ -162,6 +167,17 @@ export class UserManagementOperatorImpl implements UserManagementOperator {
             );
         }
         return user;
+    }
+
+    public async searchUser(
+        query: string,
+        limit: number,
+        includedUserIDList: number[]
+    ): Promise<User[]> {
+        if (query === "") {
+            return [];
+        }
+        return await this.userDM.searchUser(query, limit, includedUserIDList);
     }
 
     private sanitizeDisplayName(displayName: string): string {

@@ -35,6 +35,11 @@ export interface UserDataAccessor {
         limit: number,
         sortOrder: UserListSortOrder
     ): Promise<User[]>;
+    searchUser(
+        query: string,
+        limit: number,
+        includedUserIDList: number[]
+    ): Promise<User[]>;
     withTransaction<T>(
         cb: (dataAccessor: UserDataAccessor) => Promise<T>
     ): Promise<T>;
@@ -44,6 +49,8 @@ const TabNameUserServiceUser = "user_service_user_tab";
 const ColNameUserServiceUserID = "id";
 const ColNameUserServiceUserUsername = "username";
 const ColNameUserServiceUserDisplayName = "display_name";
+const ColNameUserServiceUserFullTextSearchDocument =
+    "full_text_search_document";
 
 export class UserDataAccessorImpl implements UserDataAccessor {
     constructor(private readonly knex: Knex, private readonly logger: Logger) {}
@@ -502,6 +509,40 @@ export class UserDataAccessorImpl implements UserDataAccessor {
 
         try {
             return await queryBuilder;
+        } catch (error) {
+            this.logger.error("failed to get user list", {
+                error,
+            });
+            throw ErrorWithStatus.wrapWithStatus(error, status.INTERNAL);
+        }
+    }
+
+    public async searchUser(
+        query: string,
+        limit: number,
+        includedUserIDList: number[]
+    ): Promise<User[]> {
+        let qb = this.knex
+            .select()
+            .from(TabNameUserServiceUser)
+            .whereRaw(
+                `${ColNameUserServiceUserFullTextSearchDocument} @@ to_tsquery(?)`,
+                query
+            )
+            .orderByRaw(
+                `ts_rank(${ColNameUserServiceUserFullTextSearchDocument}, to_tsquery(?)) DESC`,
+                query
+            )
+            .limit(limit);
+        if (includedUserIDList.length > 0) {
+            qb = qb.andWhere((qb) =>
+                qb.whereIn(ColNameUserServiceUserID, includedUserIDList)
+            );
+        }
+
+        try {
+            const rows = await qb;
+            return rows.map((row) => this.getUserFromRow(row));
         } catch (error) {
             this.logger.error("failed to get user list", {
                 error,

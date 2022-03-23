@@ -130,6 +130,30 @@ export class UserServiceHandlersFactory {
                 }
             },
 
+            SearchUser: async (call, callback) => {
+                const req = call.request;
+                if (req.query === undefined) {
+                    return callback({
+                        message: "query is required",
+                        code: status.INVALID_ARGUMENT,
+                    });
+                }
+                const limit = req.limit || DEFAULT_USER_LIST_LIMIT;
+                const includedUserIDList = req.includedUserIdList || [];
+
+                try {
+                    const userList =
+                        await this.userManagementOperator.searchUser(
+                            req.query,
+                            limit,
+                            includedUserIDList
+                        );
+                    callback(null, { userList });
+                } catch (e) {
+                    this.handleError(e, callback);
+                }
+            },
+
             CreateUserPassword: async (call, callback) => {
                 const req = call.request;
                 if (req.password === undefined) {
