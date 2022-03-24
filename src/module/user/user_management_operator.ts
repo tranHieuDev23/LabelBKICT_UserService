@@ -130,8 +130,21 @@ export class UserManagementOperatorImpl implements UserManagementOperator {
             }
 
             if (user.username !== undefined) {
+                const userWithUsernameRecord =
+                    await this.userDM.getUserByUsernameWithXLock(user.username);
+                if (userWithUsernameRecord?.id !== userID) {
+                    this.logger.error("username has already been taken", {
+                        username: user.username,
+                    });
+                    throw new ErrorWithStatus(
+                        `username ${user.username} has already been taken`,
+                        status.ALREADY_EXISTS
+                    );
+                }
+
                 userRecord.username = user.username;
             }
+
             if (user.displayName !== undefined) {
                 userRecord.displayName = user.displayName;
             }

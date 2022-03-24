@@ -76,7 +76,11 @@ export class UserPermissionManagementOperatorImpl
         }
 
         return this.userPermissionDM.withTransaction(async (dm) => {
-            if (await this.isPermissionNameAlreadyTaken(dm, permissionName)) {
+            const userPermissionRecord =
+                await dm.getUserPermissionByPermissionNameWithXLock(
+                    permissionName
+                );
+            if (userPermissionRecord !== null) {
                 this.logger.error(
                     "user permission name has already been taken",
                     { permissionName }
@@ -161,12 +165,11 @@ export class UserPermissionManagementOperatorImpl
             }
 
             if (userPermission.permissionName !== undefined) {
-                const permissionNameAlreadyTaken =
-                    await this.isPermissionNameAlreadyTaken(
-                        dm,
+                const userWithUserNamePermissionRecord =
+                    await dm.getUserPermissionByPermissionNameWithXLock(
                         userPermission.permissionName
                     );
-                if (permissionNameAlreadyTaken) {
+                if (userWithUserNamePermissionRecord?.id !== userPermissionID) {
                     this.logger.error(
                         "user permission name has already been taken",
                         { permissionName: userPermission.permissionName }
@@ -351,11 +354,13 @@ export class UserPermissionManagementOperatorImpl
 
     private async isPermissionNameAlreadyTaken(
         dm: UserPermissionDataAccessor,
-        permissionName: string
+        userPermission: UserPermission
     ): Promise<boolean> {
         const userPermissionRecord =
-            await dm.getUserPermissionByPermissionNameWithXLock(permissionName);
-        return userPermissionRecord !== null;
+            await dm.getUserPermissionByPermissionNameWithXLock(
+                userPermission.permissionName || ""
+            );
+        return userPermissionRecord?.id !== userPermission?.id;
     }
 
     private sanitizeUserPermissionDescription(description: string): string {
