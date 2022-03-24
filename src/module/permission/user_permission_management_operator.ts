@@ -169,7 +169,10 @@ export class UserPermissionManagementOperatorImpl
                     await dm.getUserPermissionByPermissionNameWithXLock(
                         userPermission.permissionName
                     );
-                if (userWithUserNamePermissionRecord?.id !== userPermissionID) {
+                if (
+                    userWithUserNamePermissionRecord !== null &&
+                    userWithUserNamePermissionRecord.id !== userPermissionID
+                ) {
                     this.logger.error(
                         "user permission name has already been taken",
                         { permissionName: userPermission.permissionName }
