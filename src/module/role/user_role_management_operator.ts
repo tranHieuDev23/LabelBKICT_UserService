@@ -24,9 +24,9 @@ export interface UserRoleManagementOperator {
         limit: number,
         sortOrder: _UserRoleListSortOrder_Values
     ): Promise<{ totalUserRoleCount: number; userRoleList: UserRole[] }>;
-    addUserRoleToUser(userID: number, userRoleID: number): Promise<void>;
-    removeUserRoleFromUser(userID: number, userRoleID: number): Promise<void>;
-    getUserRoleListFromUserList(userIDList: number[]): Promise<UserRole[][]>;
+    addUserRoleToUser(userId: number, userRoleId: number): Promise<void>;
+    removeUserRoleFromUser(userId: number, userRoleId: number): Promise<void>;
+    getUserRoleListFromUserList(userIdList: number[]): Promise<UserRole[][]>;
 }
 
 export class UserRoleManagementOperatorImpl
@@ -63,12 +63,12 @@ export class UserRoleManagementOperatorImpl
             );
         }
 
-        const userRoleID = await this.userRoleDM.createUserRole(
+        const userRoleId = await this.userRoleDM.createUserRole(
             displayName,
             description
         );
         return {
-            id: userRoleID,
+            id: userRoleId,
             displayName: displayName,
             description: description,
         };
@@ -82,7 +82,7 @@ export class UserRoleManagementOperatorImpl
                 status.INVALID_ARGUMENT
             );
         }
-        const userRoleID = userRole.id;
+        const userRoleId = userRole.id;
 
         if (userRole.displayName !== undefined) {
             userRole.displayName = this.sanitizeUserRoleDisplayName(
@@ -115,13 +115,13 @@ export class UserRoleManagementOperatorImpl
         }
 
         return this.userRoleDM.withTransaction(async (dm) => {
-            const userRoleRecord = await dm.getUserRoleWithXLock(userRoleID);
+            const userRoleRecord = await dm.getUserRoleWithXLock(userRoleId);
             if (userRoleRecord === null) {
                 this.logger.error("no user_role with user_role_id found", {
-                    userRoleID,
+                    userRoleId,
                 });
                 throw new ErrorWithStatus(
-                    `no user role with user_role_id ${userRoleID}`,
+                    `no user role with user_role_id ${userRoleId}`,
                     status.NOT_FOUND
                 );
             }
@@ -159,101 +159,101 @@ export class UserRoleManagementOperatorImpl
     }
 
     public async addUserRoleToUser(
-        userID: number,
-        userRoleID: number
+        userId: number,
+        userRoleId: number
     ): Promise<void> {
-        const userRecord = await this.userDM.getUserByUserID(userID);
+        const userRecord = await this.userDM.getUserByUserId(userId);
         if (userRecord === null) {
-            this.logger.error("no user with user_id found", { userID });
+            this.logger.error("no user with user_id found", { userId });
             throw new ErrorWithStatus(
-                `no user with user_id ${userID} found`,
+                `no user with user_id ${userId} found`,
                 status.NOT_FOUND
             );
         }
 
-        const userRoleRecord = await this.userRoleDM.getUserRole(userRoleID);
+        const userRoleRecord = await this.userRoleDM.getUserRole(userRoleId);
         if (userRoleRecord === null) {
             this.logger.error("no user role with user_role_id found", {
-                userRoleID,
+                userRoleId,
             });
             throw new ErrorWithStatus(
-                `no user role with user_role_id ${userRoleID} found`,
+                `no user role with user_role_id ${userRoleId} found`,
                 status.NOT_FOUND
             );
         }
 
         return this.userHasUserRoleDM.withTransaction(async (dm) => {
             const userHasUserRole = await dm.getUserHasUserRoleWithXLock(
-                userID,
-                userRoleID
+                userId,
+                userRoleId
             );
             if (userHasUserRole !== null) {
                 this.logger.error("user already has user role", {
-                    userID,
-                    userRoleID,
+                    userId,
+                    userRoleId,
                 });
                 throw new ErrorWithStatus(
-                    `user ${userID} already has user role ${userRoleID}`,
+                    `user ${userId} already has user role ${userRoleId}`,
                     status.FAILED_PRECONDITION
                 );
             }
 
-            await dm.createUserHasUserRole(userID, userRoleID);
+            await dm.createUserHasUserRole(userId, userRoleId);
         });
     }
 
     public async removeUserRoleFromUser(
-        userID: number,
-        userRoleID: number
+        userId: number,
+        userRoleId: number
     ): Promise<void> {
-        const userRecord = await this.userDM.getUserByUserID(userID);
+        const userRecord = await this.userDM.getUserByUserId(userId);
         if (userRecord === null) {
-            this.logger.error("no user with user_id found", { userID });
+            this.logger.error("no user with user_id found", { userId });
             throw new ErrorWithStatus(
-                `no user with user_id ${userID} found`,
+                `no user with user_id ${userId} found`,
                 status.NOT_FOUND
             );
         }
 
-        const userRoleRecord = await this.userRoleDM.getUserRole(userRoleID);
+        const userRoleRecord = await this.userRoleDM.getUserRole(userRoleId);
         if (userRoleRecord === null) {
             this.logger.error("no user role with user_role_id found", {
-                userRoleID,
+                userRoleId,
             });
             throw new ErrorWithStatus(
-                `no user role with user_role_id ${userRoleID} found`,
+                `no user role with user_role_id ${userRoleId} found`,
                 status.NOT_FOUND
             );
         }
 
         return this.userHasUserRoleDM.withTransaction(async (dm) => {
             const userHasUserRole = await dm.getUserHasUserRoleWithXLock(
-                userID,
-                userRoleID
+                userId,
+                userRoleId
             );
             if (userHasUserRole === null) {
                 this.logger.error("user does not have user role", {
-                    userID,
-                    userRoleID,
+                    userId,
+                    userRoleId,
                 });
                 throw new ErrorWithStatus(
-                    `user ${userID} does not have user role ${userRoleID}`,
+                    `user ${userId} does not have user role ${userRoleId}`,
                     status.FAILED_PRECONDITION
                 );
             }
 
             return await this.userHasUserRoleDM.deleteUserHasUserRole(
-                userID,
-                userRoleID
+                userId,
+                userRoleId
             );
         });
     }
 
     public async getUserRoleListFromUserList(
-        userIDList: number[]
+        userIdList: number[]
     ): Promise<UserRole[][]> {
         return await this.userHasUserRoleDM.getUserRoleListOfUserList(
-            userIDList
+            userIdList
         );
     }
 
@@ -277,10 +277,10 @@ export class UserRoleManagementOperatorImpl
         sortOrder: _UserRoleListSortOrder_Values
     ): UserRoleListSortOrder {
         switch (sortOrder) {
-            case _UserRoleListSortOrder_Values.ID_ASCENDING:
-                return UserRoleListSortOrder.ID_ASCENDING;
-            case _UserRoleListSortOrder_Values.ID_DESCENDING:
-                return UserRoleListSortOrder.ID_DESCENDING;
+            case _UserRoleListSortOrder_Values.Id_ASCENDING:
+                return UserRoleListSortOrder.Id_ASCENDING;
+            case _UserRoleListSortOrder_Values.Id_DESCENDING:
+                return UserRoleListSortOrder.Id_DESCENDING;
             case _UserRoleListSortOrder_Values.DISPLAY_NAME_ASCENDING:
                 return UserRoleListSortOrder.DISPLAY_NAME_ASCENDING;
             case _UserRoleListSortOrder_Values.DISPLAY_NAME_DESCENDING:

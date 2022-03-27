@@ -6,11 +6,11 @@ import { ErrorWithStatus, LOGGER_TOKEN } from "../../utils";
 import { KNEX_INSTANCE_TOKEN } from "./knex";
 
 export interface BlacklistedTokenDataAccessor {
-    createBlacklistedToken(tokenID: number, expireAt: number): Promise<void>;
+    createBlacklistedToken(tokenId: number, expireAt: number): Promise<void>;
     deleteExpiredBlacklistedToken(requestTime: number): Promise<number>;
-    getBlacklistedTokenExpireAt(tokenID: number): Promise<number | null>;
+    getBlacklistedTokenExpireAt(tokenId: number): Promise<number | null>;
     getBlacklistedTokenExpireAtWithXLock(
-        tokenID: number
+        tokenId: number
     ): Promise<number | null>;
     withTransaction<T>(
         execFunc: (dataAccessor: BlacklistedTokenDataAccessor) => Promise<T>
@@ -18,7 +18,7 @@ export interface BlacklistedTokenDataAccessor {
 }
 
 const TabNameUserServiceBlacklistedToken = "user_service_blacklisted_token_tab";
-const ColNameUserServiceBlacklistedTokenID = "token_id";
+const ColNameUserServiceBlacklistedTokenId = "token_id";
 const ColNameUserServiceBlacklistedTokenExpireAt = "expire_at";
 
 export class BlacklistedTokenDataAccessorImpl
@@ -27,13 +27,13 @@ export class BlacklistedTokenDataAccessorImpl
     constructor(private readonly knex: Knex, private readonly logger: Logger) {}
 
     public async createBlacklistedToken(
-        tokenID: number,
+        tokenId: number,
         expireAt: number
     ): Promise<void> {
         try {
             await this.knex
                 .insert({
-                    [ColNameUserServiceBlacklistedTokenID]: tokenID,
+                    [ColNameUserServiceBlacklistedTokenId]: tokenId,
                     [ColNameUserServiceBlacklistedTokenExpireAt]: expireAt,
                 })
                 .into(TabNameUserServiceBlacklistedToken);
@@ -67,13 +67,13 @@ export class BlacklistedTokenDataAccessorImpl
     }
 
     public async getBlacklistedTokenExpireAt(
-        tokenID: number
+        tokenId: number
     ): Promise<number | null> {
         try {
             const rows = await this.knex
                 .select([ColNameUserServiceBlacklistedTokenExpireAt])
                 .from(TabNameUserServiceBlacklistedToken)
-                .where(ColNameUserServiceBlacklistedTokenID, "=", tokenID);
+                .where(ColNameUserServiceBlacklistedTokenId, "=", tokenId);
             if (rows.length !== 1) {
                 return null;
             }
@@ -87,13 +87,13 @@ export class BlacklistedTokenDataAccessorImpl
     }
 
     public async getBlacklistedTokenExpireAtWithXLock(
-        tokenID: number
+        tokenId: number
     ): Promise<number | null> {
         try {
             const rows = await this.knex
                 .select([ColNameUserServiceBlacklistedTokenExpireAt])
                 .from(TabNameUserServiceBlacklistedToken)
-                .where(ColNameUserServiceBlacklistedTokenID, "=", tokenID)
+                .where(ColNameUserServiceBlacklistedTokenId, "=", tokenId)
                 .forUpdate();
             if (rows.length !== 1) {
                 return null;

@@ -26,17 +26,17 @@ export interface UserPermissionManagementOperator {
     deleteUserPermission(id: number): Promise<void>;
     getUserPermissionList(): Promise<UserPermission[]>;
     addUserPermissionToUserRole(
-        userRoleID: number,
-        userPermissionID: number
+        userRoleId: number,
+        userPermissionId: number
     ): Promise<void>;
     removeUserPermissionFromUserRole(
-        userRoleID: number,
-        userPermissionID: number
+        userRoleId: number,
+        userPermissionId: number
     ): Promise<void>;
     getUserPermissionListOfUserRoleList(
-        userRoleIDList: number[]
+        userRoleIdList: number[]
     ): Promise<UserPermission[][]>;
-    getUserPermissionListOfUser(userID: number): Promise<UserPermission[]>;
+    getUserPermissionListOfUser(userId: number): Promise<UserPermission[]>;
 }
 
 export class UserPermissionManagementOperatorImpl
@@ -91,12 +91,12 @@ export class UserPermissionManagementOperatorImpl
                 );
             }
 
-            const permissionID = await dm.createUserPermission(
+            const permissionId = await dm.createUserPermission(
                 permissionName,
                 description
             );
             return {
-                id: permissionID,
+                id: permissionId,
                 permissionName: permissionName,
                 description: description,
             };
@@ -113,7 +113,7 @@ export class UserPermissionManagementOperatorImpl
                 status.INVALID_ARGUMENT
             );
         }
-        const userPermissionID = userPermission.id;
+        const userPermissionId = userPermission.id;
 
         if (userPermission.permissionName !== undefined) {
             if (
@@ -152,14 +152,14 @@ export class UserPermissionManagementOperatorImpl
 
         return this.userPermissionDM.withTransaction(async (dm) => {
             const userPermissionRecord =
-                await dm.getUserPermissionByIDWithXLock(userPermissionID);
+                await dm.getUserPermissionByIdWithXLock(userPermissionId);
             if (userPermissionRecord === null) {
                 this.logger.error(
                     "no user permission with user_permission_id exists",
-                    { userPermissionID }
+                    { userPermissionId }
                 );
                 throw new ErrorWithStatus(
-                    `no user permission with user_permission_id ${userPermissionID} exists`,
+                    `no user permission with user_permission_id ${userPermissionId} exists`,
                     status.ALREADY_EXISTS
                 );
             }
@@ -171,7 +171,7 @@ export class UserPermissionManagementOperatorImpl
                     );
                 if (
                     userWithUserNamePermissionRecord !== null &&
-                    userWithUserNamePermissionRecord.id !== userPermissionID
+                    userWithUserNamePermissionRecord.id !== userPermissionId
                 ) {
                     this.logger.error(
                         "user permission name has already been taken",
@@ -205,29 +205,29 @@ export class UserPermissionManagementOperatorImpl
     }
 
     public async addUserPermissionToUserRole(
-        userRoleID: number,
-        userPermissionID: number
+        userRoleId: number,
+        userPermissionId: number
     ): Promise<void> {
-        const userRoleRecord = await this.userRoleDM.getUserRole(userRoleID);
+        const userRoleRecord = await this.userRoleDM.getUserRole(userRoleId);
         if (userRoleRecord === null) {
             this.logger.error("no user role with user_role_id found", {
-                userRoleID,
+                userRoleId,
             });
             throw new ErrorWithStatus(
-                `no user role with user_role_id ${userRoleID} found`,
+                `no user role with user_role_id ${userRoleId} found`,
                 status.NOT_FOUND
             );
         }
 
         const userPermissionRecord =
-            await this.userPermissionDM.getUserPermissionByID(userPermissionID);
+            await this.userPermissionDM.getUserPermissionById(userPermissionId);
         if (userPermissionRecord === null) {
             this.logger.error(
                 "no user permission with user_permission_id found",
-                { userPermissionID }
+                { userPermissionId }
             );
             throw new ErrorWithStatus(
-                `no user permission with user_permission_id ${userPermissionID} found`,
+                `no user permission with user_permission_id ${userPermissionId} found`,
                 status.NOT_FOUND
             );
         }
@@ -235,51 +235,51 @@ export class UserPermissionManagementOperatorImpl
         return this.userRoleHasUserPermissionDM.withTransaction(async (dm) => {
             const userRoleHasUserPermission =
                 await dm.getUserRoleHasUserPermissionWithXLock(
-                    userRoleID,
-                    userPermissionID
+                    userRoleId,
+                    userPermissionId
                 );
             if (userRoleHasUserPermission !== null) {
                 this.logger.error("user role already has user permission", {
-                    userRoleID,
-                    userPermissionID,
+                    userRoleId,
+                    userPermissionId,
                 });
                 throw new ErrorWithStatus(
-                    `user role ${userRoleID} already has user permission ${userPermissionID}`,
+                    `user role ${userRoleId} already has user permission ${userPermissionId}`,
                     status.FAILED_PRECONDITION
                 );
             }
 
             await dm.createUserRoleHasUserPermission(
-                userRoleID,
-                userPermissionID
+                userRoleId,
+                userPermissionId
             );
         });
     }
 
     public async removeUserPermissionFromUserRole(
-        userRoleID: number,
-        userPermissionID: number
+        userRoleId: number,
+        userPermissionId: number
     ): Promise<void> {
-        const userRoleRecord = await this.userRoleDM.getUserRole(userRoleID);
+        const userRoleRecord = await this.userRoleDM.getUserRole(userRoleId);
         if (userRoleRecord === null) {
             this.logger.error("no user role with user_role_id found", {
-                userRoleID,
+                userRoleId,
             });
             throw new ErrorWithStatus(
-                `no user role with user_role_id ${userRoleID} found`,
+                `no user role with user_role_id ${userRoleId} found`,
                 status.NOT_FOUND
             );
         }
 
         const userPermissionRecord =
-            await this.userPermissionDM.getUserPermissionByID(userPermissionID);
+            await this.userPermissionDM.getUserPermissionById(userPermissionId);
         if (userPermissionRecord === null) {
             this.logger.error(
                 "no user permission with user_permission_id found",
-                { userPermissionID }
+                { userPermissionId }
             );
             throw new ErrorWithStatus(
-                `no user permission with user_permission_id ${userPermissionID} found`,
+                `no user permission with user_permission_id ${userPermissionId} found`,
                 status.NOT_FOUND
             );
         }
@@ -287,55 +287,55 @@ export class UserPermissionManagementOperatorImpl
         return this.userRoleHasUserPermissionDM.withTransaction(async (dm) => {
             const userRoleHasUserPermission =
                 await dm.getUserRoleHasUserPermissionWithXLock(
-                    userRoleID,
-                    userPermissionID
+                    userRoleId,
+                    userPermissionId
                 );
             if (userRoleHasUserPermission === null) {
                 this.logger.error("user role does not have user permission", {
-                    userRoleID,
-                    userPermissionID,
+                    userRoleId,
+                    userPermissionId,
                 });
                 throw new ErrorWithStatus(
-                    `user role ${userRoleID} does not have user permission ${userPermissionID}`,
+                    `user role ${userRoleId} does not have user permission ${userPermissionId}`,
                     status.FAILED_PRECONDITION
                 );
             }
 
             await this.userRoleHasUserPermissionDM.deleteUserRoleHasUserPermission(
-                userRoleID,
-                userPermissionID
+                userRoleId,
+                userPermissionId
             );
         });
     }
 
     public async getUserPermissionListOfUserRoleList(
-        userRoleIDList: number[]
+        userRoleIdList: number[]
     ): Promise<UserPermission[][]> {
         return await this.userRoleHasUserPermissionDM.getUserPermissionListOfUserRoleList(
-            userRoleIDList
+            userRoleIdList
         );
     }
 
     public async getUserPermissionListOfUser(
-        userID: number
+        userId: number
     ): Promise<UserPermission[]> {
-        const userRoleIDList =
-            await this.userHasUserRoleDM.getUserRoleIDListOfUser(userID);
+        const userRoleIdList =
+            await this.userHasUserRoleDM.getUserRoleIdListOfUser(userId);
         const userPermissionListOfUserRoleList =
             await this.userRoleHasUserPermissionDM.getUserPermissionListOfUserRoleList(
-                userRoleIDList
+                userRoleIdList
             );
 
-        const returnedUserPermissionIDSet = new Set<number>();
+        const returnedUserPermissionIdSet = new Set<number>();
         const results: UserPermission[] = [];
         for (const userPermissionList of userPermissionListOfUserRoleList) {
             for (const userPermission of userPermissionList) {
                 const id = userPermission.id;
-                if (returnedUserPermissionIDSet.has(id)) {
+                if (returnedUserPermissionIdSet.has(id)) {
                     continue;
                 }
 
-                returnedUserPermissionIDSet.add(id);
+                returnedUserPermissionIdSet.add(id);
                 results.push(userPermission);
             }
         }

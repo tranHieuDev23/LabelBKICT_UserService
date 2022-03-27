@@ -40,9 +40,9 @@ export class TokenManagementOperatorImpl implements TokenManagementOperator {
         const requestTime = this.timer.getCurrentTime();
 
         const decodedResult = await this.tokenGenerator.decode(token);
-        if (await this.isTokenBlacklisted(decodedResult.tokenID)) {
+        if (await this.isTokenBlacklisted(decodedResult.tokenId)) {
             this.logger.info("token is blacklisted", {
-                tokenID: decodedResult.tokenID,
+                tokenId: decodedResult.tokenId,
             });
             throw new ErrorWithStatus(
                 "token is blacklisted",
@@ -50,13 +50,13 @@ export class TokenManagementOperatorImpl implements TokenManagementOperator {
             );
         }
 
-        const user = await this.userDM.getUserByUserID(decodedResult.userID);
+        const user = await this.userDM.getUserByUserId(decodedResult.userId);
         if (user === null) {
             this.logger.info("no user with user_id found", {
-                userID: decodedResult.userID,
+                userId: decodedResult.userId,
             });
             throw new ErrorWithStatus(
-                `no user with user_id ${decodedResult.userID} found`,
+                `no user with user_id ${decodedResult.userId} found`,
                 status.UNAUTHENTICATED
             );
         }
@@ -73,11 +73,11 @@ export class TokenManagementOperatorImpl implements TokenManagementOperator {
         const decodedResult = await this.tokenGenerator.decode(token);
         return this.blacklistedTokenDM.withTransaction(async (dm) => {
             const expireAt = await dm.getBlacklistedTokenExpireAtWithXLock(
-                decodedResult.tokenID
+                decodedResult.tokenId
             );
             if (expireAt !== null) {
                 this.logger.info("token is blacklisted", {
-                    tokenID: decodedResult.tokenID,
+                    tokenId: decodedResult.tokenId,
                 });
                 throw new ErrorWithStatus(
                     "token is blacklisted",
@@ -86,15 +86,15 @@ export class TokenManagementOperatorImpl implements TokenManagementOperator {
             }
 
             await dm.createBlacklistedToken(
-                decodedResult.tokenID,
+                decodedResult.tokenId,
                 decodedResult.expireAt
             );
         });
     }
 
-    private async isTokenBlacklisted(tokenID: number): Promise<boolean> {
+    private async isTokenBlacklisted(tokenId: number): Promise<boolean> {
         const expireAtTime =
-            await this.blacklistedTokenDM.getBlacklistedTokenExpireAt(tokenID);
+            await this.blacklistedTokenDM.getBlacklistedTokenExpireAt(tokenId);
         return expireAtTime !== null;
     }
 

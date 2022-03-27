@@ -6,30 +6,30 @@ import { ErrorWithStatus, LOGGER_TOKEN } from "../../utils";
 import { KNEX_INSTANCE_TOKEN } from "./knex";
 
 export interface UserPasswordDataAccessor {
-    createUserPassword(ofUserID: number, hash: string): Promise<void>;
-    updateUserPassword(ofUserID: number, hash: string): Promise<void>;
-    getUserPasswordHash(ofUserID: number): Promise<string | null>;
-    getUserPasswordHashWithXLock(ofUserID: number): Promise<string | null>;
+    createUserPassword(ofUserId: number, hash: string): Promise<void>;
+    updateUserPassword(ofUserId: number, hash: string): Promise<void>;
+    getUserPasswordHash(ofUserId: number): Promise<string | null>;
+    getUserPasswordHashWithXLock(ofUserId: number): Promise<string | null>;
     withTransaction<T>(
         execFunc: (dataAccessor: UserPasswordDataAccessor) => Promise<T>
     ): Promise<T>;
 }
 
 const TabNameUserServiceUserPassword = "user_service_user_password_tab";
-const ColNameUserServiceUserPasswordOfUserID = "of_user_id";
+const ColNameUserServiceUserPasswordOfUserId = "of_user_id";
 const ColNameUserServiceUserPasswordHash = "hash";
 
 export class UserPasswordDataAccessorImpl implements UserPasswordDataAccessor {
     constructor(private readonly knex: Knex, private readonly logger: Logger) {}
 
     public async createUserPassword(
-        ofUserID: number,
+        ofUserId: number,
         hash: string
     ): Promise<void> {
         try {
             await this.knex
                 .insert({
-                    [ColNameUserServiceUserPasswordOfUserID]: ofUserID,
+                    [ColNameUserServiceUserPasswordOfUserId]: ofUserId,
                     [ColNameUserServiceUserPasswordHash]: hash,
                 })
                 .into(TabNameUserServiceUserPassword);
@@ -40,7 +40,7 @@ export class UserPasswordDataAccessorImpl implements UserPasswordDataAccessor {
     }
 
     public async updateUserPassword(
-        ofUserID: number,
+        ofUserId: number,
         hash: string
     ): Promise<void> {
         try {
@@ -50,7 +50,7 @@ export class UserPasswordDataAccessorImpl implements UserPasswordDataAccessor {
                     [ColNameUserServiceUserPasswordHash]: hash,
                 })
                 .where({
-                    [ColNameUserServiceUserPasswordOfUserID]: ofUserID,
+                    [ColNameUserServiceUserPasswordOfUserId]: ofUserId,
                 });
         } catch (error) {
             this.logger.error("failed to update user password", { error });
@@ -58,14 +58,14 @@ export class UserPasswordDataAccessorImpl implements UserPasswordDataAccessor {
         }
     }
 
-    public async getUserPasswordHash(ofUserID: number): Promise<string | null> {
+    public async getUserPasswordHash(ofUserId: number): Promise<string | null> {
         let rows;
         try {
             rows = await this.knex
                 .select([ColNameUserServiceUserPasswordHash])
                 .from(TabNameUserServiceUserPassword)
                 .where({
-                    [ColNameUserServiceUserPasswordOfUserID]: ofUserID,
+                    [ColNameUserServiceUserPasswordOfUserId]: ofUserId,
                 });
         } catch (error) {
             this.logger.error("failed to get user password hash", { error });
@@ -74,7 +74,7 @@ export class UserPasswordDataAccessorImpl implements UserPasswordDataAccessor {
 
         if (rows.length === 0) {
             this.logger.debug("no user password of user_id found", {
-                userID: ofUserID,
+                userId: ofUserId,
             });
             return null;
         }
@@ -83,7 +83,7 @@ export class UserPasswordDataAccessorImpl implements UserPasswordDataAccessor {
     }
 
     public async getUserPasswordHashWithXLock(
-        ofUserID: number
+        ofUserId: number
     ): Promise<string | null> {
         let rows;
         try {
@@ -91,7 +91,7 @@ export class UserPasswordDataAccessorImpl implements UserPasswordDataAccessor {
                 .select([ColNameUserServiceUserPasswordHash])
                 .from(TabNameUserServiceUserPassword)
                 .where({
-                    [ColNameUserServiceUserPasswordOfUserID]: ofUserID,
+                    [ColNameUserServiceUserPasswordOfUserId]: ofUserId,
                 })
                 .forUpdate();
         } catch (error) {
@@ -101,7 +101,7 @@ export class UserPasswordDataAccessorImpl implements UserPasswordDataAccessor {
 
         if (rows.length === 0) {
             this.logger.debug("no user password of user_id found", {
-                userID: ofUserID,
+                userId: ofUserId,
             });
             return null;
         }

@@ -8,20 +8,20 @@ import { UserPermission } from "./user_permission";
 
 export interface UserRoleHasUserPermissionDataAccessor {
     createUserRoleHasUserPermission(
-        userRoleID: number,
-        userPermissionID: number
+        userRoleId: number,
+        userPermissionId: number
     ): Promise<void>;
     deleteUserRoleHasUserPermission(
-        userRoleID: number,
-        userPermissionID: number
+        userRoleId: number,
+        userPermissionId: number
     ): Promise<void>;
     getUserPermissionListOfUserRoleList(
-        userRoleIDList: number[]
+        userRoleIdList: number[]
     ): Promise<UserPermission[][]>;
     getUserRoleHasUserPermissionWithXLock(
-        userRoleID: number,
-        userPermissionID: number
-    ): Promise<{ userRoleID: number; userPermissionID: number } | null>;
+        userRoleId: number,
+        userPermissionId: number
+    ): Promise<{ userRoleId: number; userPermissionId: number } | null>;
     withTransaction<T>(
         execFunc: (
             dataAccessor: UserRoleHasUserPermissionDataAccessor
@@ -31,12 +31,12 @@ export interface UserRoleHasUserPermissionDataAccessor {
 
 const TabNameUserServiceUserRoleHasUserPermission =
     "user_service_user_role_has_user_permission_tab";
-const ColNameUserServiceUserRoleHasUserPermissionUserRoleID = "user_role_id";
-const ColNameUserServiceUserRoleHasUserPermissionUserPermissionID =
+const ColNameUserServiceUserRoleHasUserPermissionUserRoleId = "user_role_id";
+const ColNameUserServiceUserRoleHasUserPermissionUserPermissionId =
     "user_permission_id";
 
 const TabNameUserServiceUserPermission = "user_service_user_permission_tab";
-const ColNameUserServiceUserPermissionID = "user_permission_id";
+const ColNameUserServiceUserPermissionId = "user_permission_id";
 const ColNameUserServiceUserPermissionPermissionName = "permission_name";
 const ColNameUserServiceUserPermissionDescription = "description";
 
@@ -46,16 +46,16 @@ export class UserRoleHasUserPermissionDataAccessorImpl
     constructor(private readonly knex: Knex, private readonly logger: Logger) {}
 
     public async createUserRoleHasUserPermission(
-        userRoleID: number,
-        userPermissionID: number
+        userRoleId: number,
+        userPermissionId: number
     ): Promise<void> {
         try {
             await this.knex
                 .insert({
-                    [ColNameUserServiceUserRoleHasUserPermissionUserRoleID]:
-                        userRoleID,
-                    [ColNameUserServiceUserRoleHasUserPermissionUserPermissionID]:
-                        userPermissionID,
+                    [ColNameUserServiceUserRoleHasUserPermissionUserRoleId]:
+                        userRoleId,
+                    [ColNameUserServiceUserRoleHasUserPermissionUserPermissionId]:
+                        userPermissionId,
                 })
                 .into(TabNameUserServiceUserRoleHasUserPermission);
         } catch (error) {
@@ -68,8 +68,8 @@ export class UserRoleHasUserPermissionDataAccessorImpl
     }
 
     public async deleteUserRoleHasUserPermission(
-        userRoleID: number,
-        userPermissionID: number
+        userRoleId: number,
+        userPermissionId: number
     ): Promise<void> {
         let deletedCount: number;
         try {
@@ -77,10 +77,10 @@ export class UserRoleHasUserPermissionDataAccessorImpl
                 .delete()
                 .from(TabNameUserServiceUserRoleHasUserPermission)
                 .where({
-                    [ColNameUserServiceUserRoleHasUserPermissionUserRoleID]:
-                        userRoleID,
-                    [ColNameUserServiceUserRoleHasUserPermissionUserPermissionID]:
-                        userPermissionID,
+                    [ColNameUserServiceUserRoleHasUserPermissionUserRoleId]:
+                        userRoleId,
+                    [ColNameUserServiceUserRoleHasUserPermissionUserPermissionId]:
+                        userPermissionId,
                 });
         } catch (error) {
             this.logger.error(
@@ -92,18 +92,18 @@ export class UserRoleHasUserPermissionDataAccessorImpl
         if (deletedCount === 0) {
             this.logger.debug(
                 "no user role has user permission relation found",
-                { userRoleID },
-                { userPermissionID }
+                { userRoleId },
+                { userPermissionId }
             );
             throw new ErrorWithStatus(
-                `no user role has user permission relation found with user_role_id ${userRoleID}, user_permission_id ${userPermissionID}`,
+                `no user role has user permission relation found with user_role_id ${userRoleId}, user_permission_id ${userPermissionId}`,
                 status.NOT_FOUND
             );
         }
     }
 
     public async getUserPermissionListOfUserRoleList(
-        userRoleIDList: number[]
+        userRoleIdList: number[]
     ): Promise<UserPermission[][]> {
         try {
             const rows = await this.knex
@@ -111,34 +111,34 @@ export class UserRoleHasUserPermissionDataAccessorImpl
                 .from(TabNameUserServiceUserRoleHasUserPermission)
                 .join(
                     TabNameUserServiceUserPermission,
-                    `${TabNameUserServiceUserRoleHasUserPermission}.${ColNameUserServiceUserRoleHasUserPermissionUserPermissionID}`,
-                    `${TabNameUserServiceUserPermission}.${ColNameUserServiceUserPermissionID}`
+                    `${TabNameUserServiceUserRoleHasUserPermission}.${ColNameUserServiceUserRoleHasUserPermissionUserPermissionId}`,
+                    `${TabNameUserServiceUserPermission}.${ColNameUserServiceUserPermissionId}`
                 )
                 .whereIn(
-                    ColNameUserServiceUserRoleHasUserPermissionUserRoleID,
-                    userRoleIDList
+                    ColNameUserServiceUserRoleHasUserPermissionUserRoleId,
+                    userRoleIdList
                 )
                 .orderBy(
-                    ColNameUserServiceUserRoleHasUserPermissionUserRoleID,
+                    ColNameUserServiceUserRoleHasUserPermissionUserRoleId,
                     "asc"
                 );
 
-            const userRoleIDToUserPermissionList = new Map<
+            const userRoleIdToUserPermissionList = new Map<
                 number,
                 UserPermission[]
             >();
             for (const row of rows) {
-                const userRoleID =
-                    row[ColNameUserServiceUserRoleHasUserPermissionUserRoleID];
-                if (!userRoleIDToUserPermissionList.has(userRoleID)) {
-                    userRoleIDToUserPermissionList.set(userRoleID, []);
+                const userRoleId =
+                    row[ColNameUserServiceUserRoleHasUserPermissionUserRoleId];
+                if (!userRoleIdToUserPermissionList.has(userRoleId)) {
+                    userRoleIdToUserPermissionList.set(userRoleId, []);
                 }
-                userRoleIDToUserPermissionList
-                    .get(userRoleID)
+                userRoleIdToUserPermissionList
+                    .get(userRoleId)
                     ?.push(
                         new UserPermission(
                             +row[
-                                ColNameUserServiceUserRoleHasUserPermissionUserPermissionID
+                                ColNameUserServiceUserRoleHasUserPermissionUserPermissionId
                             ],
                             row[ColNameUserServiceUserPermissionPermissionName],
                             row[ColNameUserServiceUserPermissionDescription]
@@ -147,9 +147,9 @@ export class UserRoleHasUserPermissionDataAccessorImpl
             }
 
             const results: UserPermission[][] = [];
-            for (const userRoleID of userRoleIDList) {
+            for (const userRoleId of userRoleIdList) {
                 results.push(
-                    userRoleIDToUserPermissionList.get(userRoleID) || []
+                    userRoleIdToUserPermissionList.get(userRoleId) || []
                 );
             }
 
@@ -164,26 +164,26 @@ export class UserRoleHasUserPermissionDataAccessorImpl
     }
 
     public async getUserRoleHasUserPermissionWithXLock(
-        userRoleID: number,
-        userPermissionID: number
-    ): Promise<{ userRoleID: number; userPermissionID: number } | null> {
+        userRoleId: number,
+        userPermissionId: number
+    ): Promise<{ userRoleId: number; userPermissionId: number } | null> {
         try {
             const rows = await this.knex
                 .select()
                 .from(TabNameUserServiceUserRoleHasUserPermission)
                 .where({
-                    [ColNameUserServiceUserRoleHasUserPermissionUserRoleID]:
-                        userRoleID,
-                    [ColNameUserServiceUserRoleHasUserPermissionUserPermissionID]:
-                        userPermissionID,
+                    [ColNameUserServiceUserRoleHasUserPermissionUserRoleId]:
+                        userRoleId,
+                    [ColNameUserServiceUserRoleHasUserPermissionUserPermissionId]:
+                        userPermissionId,
                 })
                 .forUpdate();
 
             if (rows.length == 0) {
                 this.logger.debug(
                     "no user role has user permission relation found",
-                    { userRoleID },
-                    { userPermissionID }
+                    { userRoleId },
+                    { userPermissionId }
                 );
                 return null;
             }
@@ -191,7 +191,7 @@ export class UserRoleHasUserPermissionDataAccessorImpl
             if (rows.length > 1) {
                 this.logger.error(
                     "more than one user role has user permission relation found",
-                    { userRoleID, userPermissionID }
+                    { userRoleId, userPermissionId }
                 );
                 throw new ErrorWithStatus(
                     "more than one user role has user permission relation found",
@@ -200,13 +200,13 @@ export class UserRoleHasUserPermissionDataAccessorImpl
             }
 
             return {
-                userRoleID:
+                userRoleId:
                     +rows[0][
-                        ColNameUserServiceUserRoleHasUserPermissionUserRoleID
+                        ColNameUserServiceUserRoleHasUserPermissionUserRoleId
                     ],
-                userPermissionID:
+                userPermissionId:
                     +rows[0][
-                        ColNameUserServiceUserRoleHasUserPermissionUserPermissionID
+                        ColNameUserServiceUserRoleHasUserPermissionUserPermissionId
                     ],
             };
         } catch (error) {

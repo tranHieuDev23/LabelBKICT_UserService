@@ -14,8 +14,8 @@ export class UserRole {
 }
 
 export enum UserRoleListSortOrder {
-    ID_ASCENDING = 0,
-    ID_DESCENDING = 1,
+    Id_ASCENDING = 0,
+    Id_DESCENDING = 1,
     DISPLAY_NAME_ASCENDING = 2,
     DISPLAY_NAME_DESCENDING = 3,
 }
@@ -38,7 +38,7 @@ export interface UserRoleDataAccessor {
 }
 
 const TabNameUserServiceUserRole = "user_service_user_role_tab";
-const ColNameUserServiceUserRoleID = "user_role_id";
+const ColNameUserServiceUserRoleId = "user_role_id";
 const ColNameUserServiceUserRoleDisplayName = "display_name";
 const ColNameUserServiceUserRoleDescription = "description";
 
@@ -55,9 +55,9 @@ export class UserRoleDataAccessorImpl implements UserRoleDataAccessor {
                     [ColNameUserServiceUserRoleDisplayName]: displayName,
                     [ColNameUserServiceUserRoleDescription]: description,
                 })
-                .returning(ColNameUserServiceUserRoleID)
+                .returning(ColNameUserServiceUserRoleId)
                 .into(TabNameUserServiceUserRole);
-            return +rows[0][ColNameUserServiceUserRoleID];
+            return +rows[0][ColNameUserServiceUserRoleId];
         } catch (error) {
             this.logger.error("failed to create user role", {
                 displayName,
@@ -79,7 +79,7 @@ export class UserRoleDataAccessorImpl implements UserRoleDataAccessor {
                         userRole.description,
                 })
                 .where({
-                    [ColNameUserServiceUserRoleID]: userRole.id,
+                    [ColNameUserServiceUserRoleId]: userRole.id,
                 });
         } catch (error) {
             this.logger.error("failed to update user role", {
@@ -97,18 +97,18 @@ export class UserRoleDataAccessorImpl implements UserRoleDataAccessor {
                 .delete()
                 .from(TabNameUserServiceUserRole)
                 .where({
-                    [ColNameUserServiceUserRoleID]: id,
+                    [ColNameUserServiceUserRoleId]: id,
                 });
         } catch (error) {
             this.logger.error("failed to delete user role", {
-                userRoleID: id,
+                userRoleId: id,
                 error,
             });
             throw ErrorWithStatus.wrapWithStatus(error, status.INTERNAL);
         }
         if (deletedCount === 0) {
             this.logger.error("no user role with user_role_id found", {
-                userRoleID: id,
+                userRoleId: id,
             });
             throw new ErrorWithStatus(
                 `no user role with user_role_id ${id} found`,
@@ -156,43 +156,43 @@ export class UserRoleDataAccessorImpl implements UserRoleDataAccessor {
     ): Promise<Record<string, any> | null> {
         let queryBuilder: Knex.QueryBuilder;
         switch (sortOrder) {
-            case UserRoleListSortOrder.ID_ASCENDING:
+            case UserRoleListSortOrder.Id_ASCENDING:
                 queryBuilder = this.knex
-                    .select([ColNameUserServiceUserRoleID])
+                    .select([ColNameUserServiceUserRoleId])
                     .from(TabNameUserServiceUserRole)
-                    .orderBy(ColNameUserServiceUserRoleID, "asc")
+                    .orderBy(ColNameUserServiceUserRoleId, "asc")
                     .offset(offset);
                 break;
 
-            case UserRoleListSortOrder.ID_DESCENDING:
+            case UserRoleListSortOrder.Id_DESCENDING:
                 queryBuilder = this.knex
-                    .select([ColNameUserServiceUserRoleID])
+                    .select([ColNameUserServiceUserRoleId])
                     .from(TabNameUserServiceUserRole)
-                    .orderBy(ColNameUserServiceUserRoleID, "desc")
+                    .orderBy(ColNameUserServiceUserRoleId, "desc")
                     .offset(offset);
                 break;
 
             case UserRoleListSortOrder.DISPLAY_NAME_ASCENDING:
                 queryBuilder = this.knex
                     .select([
-                        ColNameUserServiceUserRoleID,
+                        ColNameUserServiceUserRoleId,
                         ColNameUserServiceUserRoleDisplayName,
                     ])
                     .from(TabNameUserServiceUserRole)
                     .orderBy(ColNameUserServiceUserRoleDisplayName, "asc")
-                    .orderBy(ColNameUserServiceUserRoleID, "asc")
+                    .orderBy(ColNameUserServiceUserRoleId, "asc")
                     .offset(offset);
                 break;
 
             case UserRoleListSortOrder.DISPLAY_NAME_DESCENDING:
                 queryBuilder = this.knex
                     .select([
-                        ColNameUserServiceUserRoleID,
+                        ColNameUserServiceUserRoleId,
                         ColNameUserServiceUserRoleDisplayName,
                     ])
                     .from(TabNameUserServiceUserRole)
                     .orderBy(ColNameUserServiceUserRoleDisplayName, "desc")
-                    .orderBy(ColNameUserServiceUserRoleID, "desc")
+                    .orderBy(ColNameUserServiceUserRoleId, "desc")
                     .offset(offset);
                 break;
 
@@ -226,28 +226,28 @@ export class UserRoleDataAccessorImpl implements UserRoleDataAccessor {
     ): Promise<Record<string, any>[]> {
         let queryBuilder: Knex.QueryBuilder;
         switch (sortOrder) {
-            case UserRoleListSortOrder.ID_ASCENDING:
+            case UserRoleListSortOrder.Id_ASCENDING:
                 queryBuilder = this.knex
                     .select()
                     .from(TabNameUserServiceUserRole)
                     .where(
-                        ColNameUserServiceUserRoleID,
+                        ColNameUserServiceUserRoleId,
                         ">=",
-                        keyset[ColNameUserServiceUserRoleID]
+                        keyset[ColNameUserServiceUserRoleId]
                     )
-                    .orderBy(ColNameUserServiceUserRoleID, "asc");
+                    .orderBy(ColNameUserServiceUserRoleId, "asc");
                 break;
 
-            case UserRoleListSortOrder.ID_DESCENDING:
+            case UserRoleListSortOrder.Id_DESCENDING:
                 queryBuilder = this.knex
                     .select()
                     .from(TabNameUserServiceUserRole)
                     .where(
-                        ColNameUserServiceUserRoleID,
+                        ColNameUserServiceUserRoleId,
                         "<=",
-                        keyset[ColNameUserServiceUserRoleID]
+                        keyset[ColNameUserServiceUserRoleId]
                     )
-                    .orderBy(ColNameUserServiceUserRoleID, "desc");
+                    .orderBy(ColNameUserServiceUserRoleId, "desc");
                 break;
 
             case UserRoleListSortOrder.DISPLAY_NAME_ASCENDING:
@@ -267,13 +267,13 @@ export class UserRoleDataAccessorImpl implements UserRoleDataAccessor {
                                 keyset[ColNameUserServiceUserRoleDisplayName]
                             )
                             .andWhere(
-                                ColNameUserServiceUserRoleID,
+                                ColNameUserServiceUserRoleId,
                                 ">=",
-                                keyset[ColNameUserServiceUserRoleID]
+                                keyset[ColNameUserServiceUserRoleId]
                             )
                     )
                     .orderBy(ColNameUserServiceUserRoleDisplayName, "asc")
-                    .orderBy(ColNameUserServiceUserRoleID, "asc");
+                    .orderBy(ColNameUserServiceUserRoleId, "asc");
                 break;
 
             case UserRoleListSortOrder.DISPLAY_NAME_DESCENDING:
@@ -293,13 +293,13 @@ export class UserRoleDataAccessorImpl implements UserRoleDataAccessor {
                                 keyset[ColNameUserServiceUserRoleDisplayName]
                             )
                             .andWhere(
-                                ColNameUserServiceUserRoleID,
+                                ColNameUserServiceUserRoleId,
                                 "<=",
-                                keyset[ColNameUserServiceUserRoleID]
+                                keyset[ColNameUserServiceUserRoleId]
                             )
                     )
                     .orderBy(ColNameUserServiceUserRoleDisplayName, "desc")
-                    .orderBy(ColNameUserServiceUserRoleID, "desc");
+                    .orderBy(ColNameUserServiceUserRoleId, "desc");
                 break;
 
             default:
@@ -325,11 +325,11 @@ export class UserRoleDataAccessorImpl implements UserRoleDataAccessor {
                 .select()
                 .from(TabNameUserServiceUserRole)
                 .where({
-                    [ColNameUserServiceUserRoleID]: id,
+                    [ColNameUserServiceUserRoleId]: id,
                 });
         } catch (error) {
             this.logger.error("failed to get user role by user_role_id", {
-                userRoleID: id,
+                userRoleId: id,
                 error,
             });
             throw ErrorWithStatus.wrapWithStatus(error, status.INTERNAL);
@@ -337,14 +337,14 @@ export class UserRoleDataAccessorImpl implements UserRoleDataAccessor {
 
         if (rows.length == 0) {
             this.logger.debug("no user role with user_role_id found", {
-                userRoleID: id,
+                userRoleId: id,
             });
             return null;
         }
 
         if (rows.length > 1) {
             this.logger.error("more than one user with user_id found", {
-                userRoleID: id,
+                userRoleId: id,
             });
             throw new ErrorWithStatus(
                 "more than one user role was found",
@@ -362,12 +362,12 @@ export class UserRoleDataAccessorImpl implements UserRoleDataAccessor {
                 .select()
                 .from(TabNameUserServiceUserRole)
                 .where({
-                    [ColNameUserServiceUserRoleID]: id,
+                    [ColNameUserServiceUserRoleId]: id,
                 })
                 .forUpdate();
         } catch (error) {
             this.logger.error("failed to get user role by user_role_id", {
-                userRoleID: id,
+                userRoleId: id,
                 error,
             });
             throw ErrorWithStatus.wrapWithStatus(error, status.INTERNAL);
@@ -375,14 +375,14 @@ export class UserRoleDataAccessorImpl implements UserRoleDataAccessor {
 
         if (rows.length == 0) {
             this.logger.debug("no user role with user_role_id found", {
-                userRoleID: id,
+                userRoleId: id,
             });
             return null;
         }
 
         if (rows.length > 1) {
             this.logger.error("more than one user with user_id found", {
-                userRoleID: id,
+                userRoleId: id,
             });
             throw new ErrorWithStatus(
                 "more than one user role was found",
@@ -407,7 +407,7 @@ export class UserRoleDataAccessorImpl implements UserRoleDataAccessor {
 
     private getUserRoleFromRow(row: Record<string, any>): UserRole {
         return new UserRole(
-            +row[ColNameUserServiceUserRoleID],
+            +row[ColNameUserServiceUserRoleId],
             row[ColNameUserServiceUserRoleDisplayName],
             row[ColNameUserServiceUserRoleDescription]
         );

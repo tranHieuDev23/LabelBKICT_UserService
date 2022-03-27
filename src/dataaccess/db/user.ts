@@ -14,8 +14,8 @@ export class User {
 }
 
 export enum UserListSortOrder {
-    ID_ASCENDING = 0,
-    ID_DESCENDING = 1,
+    Id_ASCENDING = 0,
+    Id_DESCENDING = 1,
     USERNAME_ASCENDING = 2,
     USERNAME_DESCENDING = 3,
     DISPLAY_NAME_ASCENDING = 4,
@@ -25,8 +25,8 @@ export enum UserListSortOrder {
 export interface UserDataAccessor {
     createUser(username: string, displayName: string): Promise<number>;
     updateUser(user: User): Promise<void>;
-    getUserByUserID(userID: number): Promise<User | null>;
-    getUserByUserIDWithXLock(userID: number): Promise<User | null>;
+    getUserByUserId(userId: number): Promise<User | null>;
+    getUserByUserIdWithXLock(userId: number): Promise<User | null>;
     getUserByUsername(username: string): Promise<User | null>;
     getUserByUsernameWithXLock(username: string): Promise<User | null>;
     getUserCount(): Promise<number>;
@@ -38,7 +38,7 @@ export interface UserDataAccessor {
     searchUser(
         query: string,
         limit: number,
-        includedUserIDList: number[]
+        includedUserIdList: number[]
     ): Promise<User[]>;
     withTransaction<T>(
         cb: (dataAccessor: UserDataAccessor) => Promise<T>
@@ -46,7 +46,7 @@ export interface UserDataAccessor {
 }
 
 const TabNameUserServiceUser = "user_service_user_tab";
-const ColNameUserServiceUserID = "user_id";
+const ColNameUserServiceUserId = "user_id";
 const ColNameUserServiceUserUsername = "username";
 const ColNameUserServiceUserDisplayName = "display_name";
 const ColNameUserServiceUserFullTextSearchDocument =
@@ -65,9 +65,9 @@ export class UserDataAccessorImpl implements UserDataAccessor {
                     [ColNameUserServiceUserUsername]: username,
                     [ColNameUserServiceUserDisplayName]: displayName,
                 })
-                .returning(ColNameUserServiceUserID)
+                .returning(ColNameUserServiceUserId)
                 .into(TabNameUserServiceUser);
-            return +rows[0][ColNameUserServiceUserID];
+            return +rows[0][ColNameUserServiceUserId];
         } catch (error) {
             this.logger.error("failed to create user", {
                 username,
@@ -87,7 +87,7 @@ export class UserDataAccessorImpl implements UserDataAccessor {
                     [ColNameUserServiceUserDisplayName]: user.displayName,
                 })
                 .where({
-                    [ColNameUserServiceUserID]: user.id,
+                    [ColNameUserServiceUserId]: user.id,
                 });
         } catch (error) {
             this.logger.error("failed to update user", { user, error });
@@ -95,31 +95,31 @@ export class UserDataAccessorImpl implements UserDataAccessor {
         }
     }
 
-    public async getUserByUserID(userID: number): Promise<User | null> {
+    public async getUserByUserId(userId: number): Promise<User | null> {
         let rows: Record<string, any>[];
         try {
             rows = await this.knex
                 .select()
                 .from(TabNameUserServiceUser)
                 .where({
-                    [ColNameUserServiceUserID]: userID,
+                    [ColNameUserServiceUserId]: userId,
                 });
         } catch (error) {
             this.logger.error("failed to get user by user_id", {
-                userID,
+                userId,
                 error,
             });
             throw ErrorWithStatus.wrapWithStatus(error, status.INTERNAL);
         }
 
         if (rows.length == 0) {
-            this.logger.debug("no user with user_id found", { userID });
+            this.logger.debug("no user with user_id found", { userId });
             return null;
         }
 
         if (rows.length > 1) {
             this.logger.error("more than one user with user_id found", {
-                userID,
+                userId,
             });
             throw new ErrorWithStatus(
                 "more than one user was found",
@@ -130,8 +130,8 @@ export class UserDataAccessorImpl implements UserDataAccessor {
         return this.getUserFromRow(rows[0]);
     }
 
-    public async getUserByUserIDWithXLock(
-        userID: number
+    public async getUserByUserIdWithXLock(
+        userId: number
     ): Promise<User | null> {
         let rows: Record<string, any>[];
         try {
@@ -139,25 +139,25 @@ export class UserDataAccessorImpl implements UserDataAccessor {
                 .select()
                 .from(TabNameUserServiceUser)
                 .where({
-                    [ColNameUserServiceUserID]: userID,
+                    [ColNameUserServiceUserId]: userId,
                 })
                 .forUpdate();
         } catch (error) {
             this.logger.error("failed to get user by user_id", {
-                userID,
+                userId,
                 error,
             });
             throw ErrorWithStatus.wrapWithStatus(error, status.INTERNAL);
         }
 
         if (rows.length == 0) {
-            this.logger.debug("no user with user_id found", { userID });
+            this.logger.debug("no user with user_id found", { userId });
             return null;
         }
 
         if (rows.length > 1) {
             this.logger.error("more than one user with user_id found", {
-                userID,
+                userId,
             });
             throw new ErrorWithStatus(
                 "more than one user was found",
@@ -280,67 +280,67 @@ export class UserDataAccessorImpl implements UserDataAccessor {
     ): Promise<Record<string, any> | null> {
         let queryBuilder: Knex.QueryBuilder;
         switch (sortOrder) {
-            case UserListSortOrder.ID_ASCENDING:
+            case UserListSortOrder.Id_ASCENDING:
                 queryBuilder = this.knex
-                    .select([ColNameUserServiceUserID])
+                    .select([ColNameUserServiceUserId])
                     .from(TabNameUserServiceUser)
-                    .orderBy(ColNameUserServiceUserID, "asc")
+                    .orderBy(ColNameUserServiceUserId, "asc")
                     .offset(offset);
                 break;
 
-            case UserListSortOrder.ID_DESCENDING:
+            case UserListSortOrder.Id_DESCENDING:
                 queryBuilder = this.knex
-                    .select([ColNameUserServiceUserID])
+                    .select([ColNameUserServiceUserId])
                     .from(TabNameUserServiceUser)
-                    .orderBy(ColNameUserServiceUserID, "desc")
+                    .orderBy(ColNameUserServiceUserId, "desc")
                     .offset(offset);
                 break;
 
             case UserListSortOrder.USERNAME_ASCENDING:
                 queryBuilder = this.knex
                     .select([
-                        ColNameUserServiceUserID,
+                        ColNameUserServiceUserId,
                         ColNameUserServiceUserUsername,
                     ])
                     .from(TabNameUserServiceUser)
                     .orderBy(ColNameUserServiceUserUsername, "asc")
-                    .orderBy(ColNameUserServiceUserID, "asc")
+                    .orderBy(ColNameUserServiceUserId, "asc")
                     .offset(offset);
                 break;
 
             case UserListSortOrder.USERNAME_DESCENDING:
                 queryBuilder = this.knex
                     .select([
-                        ColNameUserServiceUserID,
+                        ColNameUserServiceUserId,
                         ColNameUserServiceUserUsername,
                     ])
                     .from(TabNameUserServiceUser)
                     .orderBy(ColNameUserServiceUserUsername, "desc")
-                    .orderBy(ColNameUserServiceUserID, "desc")
+                    .orderBy(ColNameUserServiceUserId, "desc")
                     .offset(offset);
                 break;
 
             case UserListSortOrder.DISPLAY_NAME_ASCENDING:
                 queryBuilder = this.knex
                     .select([
-                        ColNameUserServiceUserID,
+                        ColNameUserServiceUserId,
                         ColNameUserServiceUserDisplayName,
                     ])
                     .from(TabNameUserServiceUser)
                     .orderBy(ColNameUserServiceUserDisplayName, "asc")
-                    .orderBy(ColNameUserServiceUserID, "asc")
+                    .orderBy(ColNameUserServiceUserId, "asc")
                     .offset(offset);
                 break;
 
             case UserListSortOrder.DISPLAY_NAME_DESCENDING:
                 queryBuilder = this.knex
                     .select([
-                        ColNameUserServiceUserID,
+                        ColNameUserServiceUserId,
                         ColNameUserServiceUserDisplayName,
                     ])
                     .from(TabNameUserServiceUser)
                     .orderBy(ColNameUserServiceUserDisplayName, "desc")
-                    .orderBy(ColNameUserServiceUserID, "desc")
+                    .orderBy(ColNameUserServiceUserId, "desc")
                     .offset(offset);
                 break;
 
@@ -373,28 +373,28 @@ export class UserDataAccessorImpl implements UserDataAccessor {
     ): Promise<Record<string, any>[]> {
         let queryBuilder: Knex.QueryBuilder;
         switch (sortOrder) {
-            case UserListSortOrder.ID_ASCENDING:
+            case UserListSortOrder.Id_ASCENDING:
                 queryBuilder = this.knex
                     .select()
                     .from(TabNameUserServiceUser)
                     .where(
-                        ColNameUserServiceUserID,
+                        ColNameUserServiceUserId,
                         ">=",
-                        keyset[ColNameUserServiceUserID]
+                        keyset[ColNameUserServiceUserId]
                     )
-                    .orderBy(ColNameUserServiceUserID, "asc");
+                    .orderBy(ColNameUserServiceUserId, "asc");
                 break;
 
-            case UserListSortOrder.ID_DESCENDING:
+            case UserListSortOrder.Id_DESCENDING:
                 queryBuilder = this.knex
                     .select()
                     .from(TabNameUserServiceUser)
                     .where(
-                        ColNameUserServiceUserID,
+                        ColNameUserServiceUserId,
                         "<=",
-                        keyset[ColNameUserServiceUserID]
+                        keyset[ColNameUserServiceUserId]
                     )
-                    .orderBy(ColNameUserServiceUserID, "desc");
+                    .orderBy(ColNameUserServiceUserId, "desc");
                 break;
 
             case UserListSortOrder.USERNAME_ASCENDING:
@@ -414,13 +414,13 @@ export class UserDataAccessorImpl implements UserDataAccessor {
                                 keyset[ColNameUserServiceUserUsername]
                             )
                             .andWhere(
-                                ColNameUserServiceUserID,
+                                ColNameUserServiceUserId,
                                 ">=",
-                                keyset[ColNameUserServiceUserID]
+                                keyset[ColNameUserServiceUserId]
                             )
                     )
                     .orderBy(ColNameUserServiceUserUsername, "asc")
-                    .orderBy(ColNameUserServiceUserID, "asc");
+                    .orderBy(ColNameUserServiceUserId, "asc");
                 break;
 
             case UserListSortOrder.USERNAME_DESCENDING:
@@ -440,13 +440,13 @@ export class UserDataAccessorImpl implements UserDataAccessor {
                                 keyset[ColNameUserServiceUserUsername]
                             )
                             .andWhere(
-                                ColNameUserServiceUserID,
+                                ColNameUserServiceUserId,
                                 "<=",
-                                keyset[ColNameUserServiceUserID]
+                                keyset[ColNameUserServiceUserId]
                             )
                     )
                     .orderBy(ColNameUserServiceUserUsername, "desc")
-                    .orderBy(ColNameUserServiceUserID, "desc");
+                    .orderBy(ColNameUserServiceUserId, "desc");
                 break;
 
             case UserListSortOrder.DISPLAY_NAME_ASCENDING:
@@ -466,13 +466,13 @@ export class UserDataAccessorImpl implements UserDataAccessor {
                                 keyset[ColNameUserServiceUserDisplayName]
                             )
                             .andWhere(
-                                ColNameUserServiceUserID,
+                                ColNameUserServiceUserId,
                                 ">=",
-                                keyset[ColNameUserServiceUserID]
+                                keyset[ColNameUserServiceUserId]
                             )
                     )
                     .orderBy(ColNameUserServiceUserDisplayName, "asc")
-                    .orderBy(ColNameUserServiceUserID, "asc");
+                    .orderBy(ColNameUserServiceUserId, "asc");
                 break;
 
             case UserListSortOrder.DISPLAY_NAME_DESCENDING:
@@ -492,13 +492,13 @@ export class UserDataAccessorImpl implements UserDataAccessor {
                                 keyset[ColNameUserServiceUserDisplayName]
                             )
                             .andWhere(
-                                ColNameUserServiceUserID,
+                                ColNameUserServiceUserId,
                                 "<=",
-                                keyset[ColNameUserServiceUserID]
+                                keyset[ColNameUserServiceUserId]
                             )
                     )
                     .orderBy(ColNameUserServiceUserDisplayName, "desc")
-                    .orderBy(ColNameUserServiceUserID, "desc");
+                    .orderBy(ColNameUserServiceUserId, "desc");
                 break;
 
             default:
@@ -520,7 +520,7 @@ export class UserDataAccessorImpl implements UserDataAccessor {
     public async searchUser(
         query: string,
         limit: number,
-        includedUserIDList: number[]
+        includedUserIdList: number[]
     ): Promise<User[]> {
         let qb = this.knex
             .select()
@@ -534,9 +534,9 @@ export class UserDataAccessorImpl implements UserDataAccessor {
                 query
             )
             .limit(limit);
-        if (includedUserIDList.length > 0) {
+        if (includedUserIdList.length > 0) {
             qb = qb.andWhere((qb) =>
-                qb.whereIn(ColNameUserServiceUserID, includedUserIDList)
+                qb.whereIn(ColNameUserServiceUserId, includedUserIdList)
             );
         }
 
@@ -562,7 +562,7 @@ export class UserDataAccessorImpl implements UserDataAccessor {
 
     private getUserFromRow(row: Record<string, any>): User {
         return new User(
-            +row[ColNameUserServiceUserID],
+            +row[ColNameUserServiceUserId],
             row[ColNameUserServiceUserUsername],
             row[ColNameUserServiceUserDisplayName]
         );

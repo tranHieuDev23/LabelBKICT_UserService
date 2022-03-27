@@ -21,8 +21,8 @@ export interface UserPermissionDataAccessor {
     updateUserPermission(userPermission: UserPermission): Promise<void>;
     deleteUserPermission(id: number): Promise<void>;
     getUserPermissionList(): Promise<UserPermission[]>;
-    getUserPermissionByID(id: number): Promise<UserPermission | null>;
-    getUserPermissionByIDWithXLock(id: number): Promise<UserPermission | null>;
+    getUserPermissionById(id: number): Promise<UserPermission | null>;
+    getUserPermissionByIdWithXLock(id: number): Promise<UserPermission | null>;
     getUserPermissionByPermissionName(
         permissionName: string
     ): Promise<UserPermission | null>;
@@ -35,7 +35,7 @@ export interface UserPermissionDataAccessor {
 }
 
 const TabNameUserServiceUserPermission = "user_service_user_permission_tab";
-const ColNameUserServiceUserPermissionID = "user_permission_id";
+const ColNameUserServiceUserPermissionId = "user_permission_id";
 const ColNameUserServiceUserPermissionPermissionName = "permission_name";
 const ColNameUserServiceUserPermissionDescription = "description";
 
@@ -55,9 +55,9 @@ export class UserPermissionDataAccessorImpl
                         permissionName,
                     [ColNameUserServiceUserPermissionDescription]: description,
                 })
-                .returning(ColNameUserServiceUserPermissionID)
+                .returning(ColNameUserServiceUserPermissionId)
                 .into(TabNameUserServiceUserPermission);
-            return +rows[0][ColNameUserServiceUserPermissionID];
+            return +rows[0][ColNameUserServiceUserPermissionId];
         } catch (error) {
             this.logger.error("failed to create user permission", {
                 permissionName,
@@ -81,7 +81,7 @@ export class UserPermissionDataAccessorImpl
                         userPermission.description,
                 })
                 .where({
-                    [ColNameUserServiceUserPermissionID]: userPermission.id,
+                    [ColNameUserServiceUserPermissionId]: userPermission.id,
                 });
         } catch (error) {
             this.logger.error("failed to update user permission", {
@@ -99,11 +99,11 @@ export class UserPermissionDataAccessorImpl
                 .delete()
                 .from(TabNameUserServiceUserPermission)
                 .where({
-                    [ColNameUserServiceUserPermissionID]: id,
+                    [ColNameUserServiceUserPermissionId]: id,
                 });
         } catch (error) {
             this.logger.error("failed to delete user permission", {
-                userPermissionID: id,
+                userPermissionId: id,
                 error,
             });
             throw ErrorWithStatus.wrapWithStatus(error, status.INTERNAL);
@@ -111,7 +111,7 @@ export class UserPermissionDataAccessorImpl
         if (deletedCount === 0) {
             this.logger.error(
                 "no user permission with user_permission_id found",
-                { userPermissionID: id }
+                { userPermissionId: id }
             );
             throw new ErrorWithStatus(
                 `no user permission with user_permission_id ${id} found`,
@@ -133,7 +133,7 @@ export class UserPermissionDataAccessorImpl
         }
     }
 
-    public async getUserPermissionByID(
+    public async getUserPermissionById(
         id: number
     ): Promise<UserPermission | null> {
         try {
@@ -141,13 +141,13 @@ export class UserPermissionDataAccessorImpl
                 .select()
                 .from(TabNameUserServiceUserPermission)
                 .where({
-                    [ColNameUserServiceUserPermissionID]: id,
+                    [ColNameUserServiceUserPermissionId]: id,
                 });
 
             if (rows.length == 0) {
                 this.logger.debug(
                     "no user role with user_permission_id found",
-                    { userPermissionID: id }
+                    { userPermissionId: id }
                 );
                 return null;
             }
@@ -155,7 +155,7 @@ export class UserPermissionDataAccessorImpl
             if (rows.length > 1) {
                 this.logger.error(
                     "more than one user with user_permission_id found",
-                    { userPermissionID: id }
+                    { userPermissionId: id }
                 );
                 throw new ErrorWithStatus(
                     "more than one user role was found",
@@ -170,7 +170,7 @@ export class UserPermissionDataAccessorImpl
         }
     }
 
-    public async getUserPermissionByIDWithXLock(
+    public async getUserPermissionByIdWithXLock(
         id: number
     ): Promise<UserPermission | null> {
         try {
@@ -178,14 +178,14 @@ export class UserPermissionDataAccessorImpl
                 .select()
                 .from(TabNameUserServiceUserPermission)
                 .where({
-                    [ColNameUserServiceUserPermissionID]: id,
+                    [ColNameUserServiceUserPermissionId]: id,
                 })
                 .forUpdate();
 
             if (rows.length == 0) {
                 this.logger.debug(
                     "no user role with user_permission_id found",
-                    { userPermissionID: id }
+                    { userPermissionId: id }
                 );
                 return null;
             }
@@ -193,7 +193,7 @@ export class UserPermissionDataAccessorImpl
             if (rows.length > 1) {
                 this.logger.error(
                     "more than one user with user_permission_id found",
-                    { userPermissionID: id }
+                    { userPermissionId: id }
                 );
                 throw new ErrorWithStatus(
                     "more than one user role was found",
@@ -297,7 +297,7 @@ export class UserPermissionDataAccessorImpl
 
     private getUserPermissionFromRow(row: Record<string, any>): UserPermission {
         return new UserPermission(
-            +row[ColNameUserServiceUserPermissionID],
+            +row[ColNameUserServiceUserPermissionId],
             row[ColNameUserServiceUserPermissionPermissionName],
             row[ColNameUserServiceUserPermissionDescription]
         );

@@ -7,25 +7,25 @@ import { KNEX_INSTANCE_TOKEN } from "./knex";
 import { UserRole } from "./user_role";
 
 export interface UserHasUserRoleDataAccessor {
-    createUserHasUserRole(userID: number, userRoleID: number): Promise<void>;
-    deleteUserHasUserRole(userID: number, userRoleID: number): Promise<void>;
-    getUserRoleListOfUserList(userIDList: number[]): Promise<UserRole[][]>;
-    getUserRoleIDListOfUser(userID: number): Promise<number[]>;
+    createUserHasUserRole(userId: number, userRoleId: number): Promise<void>;
+    deleteUserHasUserRole(userId: number, userRoleId: number): Promise<void>;
+    getUserRoleListOfUserList(userIdList: number[]): Promise<UserRole[][]>;
+    getUserRoleIdListOfUser(userId: number): Promise<number[]>;
     getUserHasUserRoleWithXLock(
-        userID: number,
-        userRoleID: number
-    ): Promise<{ userID: number; userRoleID: number } | null>;
+        userId: number,
+        userRoleId: number
+    ): Promise<{ userId: number; userRoleId: number } | null>;
     withTransaction<T>(
         execFunc: (dataAccessor: UserHasUserRoleDataAccessor) => Promise<T>
     ): Promise<T>;
 }
 
 const TabNameUserServiceUserHasUserRole = "user_service_user_has_user_role_tab";
-const ColNameUserServiceUserHasUserRoleUserID = "user_id";
-const ColNameUserServiceUserHasUserRoleUserRoleID = "user_role_id";
+const ColNameUserServiceUserHasUserRoleUserId = "user_id";
+const ColNameUserServiceUserHasUserRoleUserRoleId = "user_role_id";
 
 const TabNameUserServiceUserRole = "user_service_user_role_tab";
-const ColNameUserServiceUserRoleID = "user_role_id";
+const ColNameUserServiceUserRoleId = "user_role_id";
 const ColNameUserServiceUserRoleDisplayName = "display_name";
 const ColNameUserServiceUserRoleDescription = "description";
 
@@ -35,14 +35,14 @@ export class UserHasUserRoleDataAccessorImpl
     constructor(private readonly knex: Knex, private readonly logger: Logger) {}
 
     public async createUserHasUserRole(
-        userID: number,
-        userRoleID: number
+        userId: number,
+        userRoleId: number
     ): Promise<void> {
         try {
             await this.knex
                 .insert({
-                    [ColNameUserServiceUserHasUserRoleUserID]: userID,
-                    [ColNameUserServiceUserHasUserRoleUserRoleID]: userRoleID,
+                    [ColNameUserServiceUserHasUserRoleUserId]: userId,
+                    [ColNameUserServiceUserHasUserRoleUserRoleId]: userRoleId,
                 })
                 .into(TabNameUserServiceUserHasUserRole);
         } catch (error) {
@@ -54,8 +54,8 @@ export class UserHasUserRoleDataAccessorImpl
     }
 
     public async deleteUserHasUserRole(
-        userID: number,
-        userRoleID: number
+        userId: number,
+        userRoleId: number
     ): Promise<void> {
         let deletedCount: number;
         try {
@@ -63,8 +63,8 @@ export class UserHasUserRoleDataAccessorImpl
                 .delete()
                 .from(TabNameUserServiceUserHasUserRole)
                 .where({
-                    [ColNameUserServiceUserHasUserRoleUserID]: userID,
-                    [ColNameUserServiceUserHasUserRoleUserRoleID]: userRoleID,
+                    [ColNameUserServiceUserHasUserRoleUserId]: userId,
+                    [ColNameUserServiceUserHasUserRoleUserRoleId]: userRoleId,
                 });
         } catch (error) {
             this.logger.error("failed to create user has user role relation", {
@@ -75,18 +75,18 @@ export class UserHasUserRoleDataAccessorImpl
         if (deletedCount === 0) {
             this.logger.debug(
                 "no user has user role relation found",
-                { userID },
-                { userRoleID }
+                { userId },
+                { userRoleId }
             );
             throw new ErrorWithStatus(
-                `no user has user role relation found with user_id ${userID}, user_role_id ${userRoleID}`,
+                `no user has user role relation found with user_id ${userId}, user_role_id ${userRoleId}`,
                 status.NOT_FOUND
             );
         }
     }
 
     public async getUserRoleListOfUserList(
-        userIDList: number[]
+        userIdList: number[]
     ): Promise<UserRole[][]> {
         try {
             const rows = await this.knex
@@ -94,23 +94,23 @@ export class UserHasUserRoleDataAccessorImpl
                 .from(TabNameUserServiceUserHasUserRole)
                 .join(
                     TabNameUserServiceUserRole,
-                    `${TabNameUserServiceUserHasUserRole}.${ColNameUserServiceUserHasUserRoleUserRoleID}`,
-                    `${TabNameUserServiceUserRole}.${ColNameUserServiceUserRoleID}`
+                    `${TabNameUserServiceUserHasUserRole}.${ColNameUserServiceUserHasUserRoleUserRoleId}`,
+                    `${TabNameUserServiceUserRole}.${ColNameUserServiceUserRoleId}`
                 )
-                .whereIn(ColNameUserServiceUserHasUserRoleUserID, userIDList)
-                .orderBy(ColNameUserServiceUserHasUserRoleUserID, "asc");
+                .whereIn(ColNameUserServiceUserHasUserRoleUserId, userIdList)
+                .orderBy(ColNameUserServiceUserHasUserRoleUserId, "asc");
 
-            const userIDToUserRoleList = new Map<number, UserRole[]>();
+            const userIdToUserRoleList = new Map<number, UserRole[]>();
             for (const row of rows) {
-                const userID = row[ColNameUserServiceUserHasUserRoleUserID];
-                if (!userIDToUserRoleList.has(userID)) {
-                    userIDToUserRoleList.set(userID, []);
+                const userId = row[ColNameUserServiceUserHasUserRoleUserId];
+                if (!userIdToUserRoleList.has(userId)) {
+                    userIdToUserRoleList.set(userId, []);
                 }
-                userIDToUserRoleList
-                    .get(userID)
+                userIdToUserRoleList
+                    .get(userId)
                     ?.push(
                         new UserRole(
-                            +row[ColNameUserServiceUserHasUserRoleUserRoleID],
+                            +row[ColNameUserServiceUserHasUserRoleUserRoleId],
                             row[ColNameUserServiceUserRoleDisplayName],
                             row[ColNameUserServiceUserRoleDescription]
                         )
@@ -118,8 +118,8 @@ export class UserHasUserRoleDataAccessorImpl
             }
 
             const results: UserRole[][] = [];
-            for (const userID of userIDList) {
-                results.push(userIDToUserRoleList.get(userID) || []);
+            for (const userId of userIdList) {
+                results.push(userIdToUserRoleList.get(userId) || []);
             }
 
             return results;
@@ -131,17 +131,17 @@ export class UserHasUserRoleDataAccessorImpl
         }
     }
 
-    public async getUserRoleIDListOfUser(userID: number): Promise<number[]> {
+    public async getUserRoleIdListOfUser(userId: number): Promise<number[]> {
         try {
             const rows = await this.knex
                 .select()
                 .from(TabNameUserServiceUserHasUserRole)
                 .where({
-                    [ColNameUserServiceUserHasUserRoleUserID]: userID,
+                    [ColNameUserServiceUserHasUserRoleUserId]: userId,
                 });
 
             return rows.map(
-                (row) => +row[ColNameUserServiceUserHasUserRoleUserRoleID]
+                (row) => +row[ColNameUserServiceUserHasUserRoleUserRoleId]
             );
         } catch (error) {
             this.logger.error("failed to get user role id list of user id", {
@@ -152,24 +152,24 @@ export class UserHasUserRoleDataAccessorImpl
     }
 
     public async getUserHasUserRoleWithXLock(
-        userID: number,
-        userRoleID: number
-    ): Promise<{ userID: number; userRoleID: number } | null> {
+        userId: number,
+        userRoleId: number
+    ): Promise<{ userId: number; userRoleId: number } | null> {
         try {
             const rows = await this.knex
                 .select()
                 .from(TabNameUserServiceUserHasUserRole)
                 .where({
-                    [ColNameUserServiceUserHasUserRoleUserID]: userID,
-                    [ColNameUserServiceUserHasUserRoleUserRoleID]: userRoleID,
+                    [ColNameUserServiceUserHasUserRoleUserId]: userId,
+                    [ColNameUserServiceUserHasUserRoleUserRoleId]: userRoleId,
                 })
                 .forUpdate();
 
             if (rows.length == 0) {
                 this.logger.debug(
                     "no user has user role relation found",
-                    { userID },
-                    { userRoleID }
+                    { userId },
+                    { userRoleId }
                 );
                 return null;
             }
@@ -177,7 +177,7 @@ export class UserHasUserRoleDataAccessorImpl
             if (rows.length > 1) {
                 this.logger.error(
                     "more than one user has user role relation found",
-                    { userID, userRoleID }
+                    { userId, userRoleId }
                 );
                 throw new ErrorWithStatus(
                     "more than one user has user role relation found",
@@ -186,9 +186,9 @@ export class UserHasUserRoleDataAccessorImpl
             }
 
             return {
-                userID: +rows[0][ColNameUserServiceUserHasUserRoleUserID],
-                userRoleID:
-                    +rows[0][ColNameUserServiceUserHasUserRoleUserRoleID],
+                userId: +rows[0][ColNameUserServiceUserHasUserRoleUserId],
+                userRoleId:
+                    +rows[0][ColNameUserServiceUserHasUserRoleUserRoleId],
             };
         } catch (error) {
             this.logger.error("failed to get user has user role relation", {

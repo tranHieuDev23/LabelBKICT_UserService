@@ -19,11 +19,11 @@ export interface UserManagementOperator {
         limit: number,
         sortOrder: _UserListSortOrder_Values
     ): Promise<{ totalUserCount: number; userList: User[] }>;
-    getUser(userID: number): Promise<User>;
+    getUser(userId: number): Promise<User>;
     searchUser(
         query: string,
         limit: number,
-        includedUserIDList: number[]
+        includedUserIdList: number[]
     ): Promise<User[]>;
 }
 
@@ -68,12 +68,12 @@ export class UserManagementOperatorImpl implements UserManagementOperator {
                 );
             }
 
-            const createdUserID = await dataAccessor.createUser(
+            const createdUserId = await dataAccessor.createUser(
                 username,
                 displayName
             );
             return {
-                id: createdUserID,
+                id: createdUserId,
                 username: username,
                 displayName: displayName,
             };
@@ -88,7 +88,7 @@ export class UserManagementOperatorImpl implements UserManagementOperator {
                 status.INVALID_ARGUMENT
             );
         }
-        const userID = user.id;
+        const userId = user.id;
 
         if (user.username !== undefined) {
             if (!this.isValidUsername(user.username)) {
@@ -116,12 +116,12 @@ export class UserManagementOperatorImpl implements UserManagementOperator {
         }
 
         return this.userDM.withTransaction<User>(async (dataAccessor) => {
-            const userRecord = await dataAccessor.getUserByUserIDWithXLock(
-                userID
+            const userRecord = await dataAccessor.getUserByUserIdWithXLock(
+                userId
             );
             if (userRecord === null) {
                 this.logger.error("no user with user_id found", {
-                    userID: user.id,
+                    userId: user.id,
                 });
                 throw new ErrorWithStatus(
                     `no user with id ${user.id} found`,
@@ -134,7 +134,7 @@ export class UserManagementOperatorImpl implements UserManagementOperator {
                     await this.userDM.getUserByUsernameWithXLock(user.username);
                 if (
                     userWithUsernameRecord !== null &&
-                    userWithUsernameRecord.id !== userID
+                    userWithUsernameRecord.id !== userId
                 ) {
                     this.logger.error("username has already been taken", {
                         username: user.username,
@@ -173,12 +173,12 @@ export class UserManagementOperatorImpl implements UserManagementOperator {
         };
     }
 
-    public async getUser(userID: number): Promise<User> {
-        const user = await this.userDM.getUserByUserID(userID);
+    public async getUser(userId: number): Promise<User> {
+        const user = await this.userDM.getUserByUserId(userId);
         if (user === null) {
-            this.logger.error("no user with user_id found", { userID });
+            this.logger.error("no user with user_id found", { userId });
             throw new ErrorWithStatus(
-                `no user with user_id ${userID} found`,
+                `no user with user_id ${userId} found`,
                 status.NOT_FOUND
             );
         }
@@ -188,12 +188,12 @@ export class UserManagementOperatorImpl implements UserManagementOperator {
     public async searchUser(
         query: string,
         limit: number,
-        includedUserIDList: number[]
+        includedUserIdList: number[]
     ): Promise<User[]> {
         if (query === "") {
             return [];
         }
-        return await this.userDM.searchUser(query, limit, includedUserIDList);
+        return await this.userDM.searchUser(query, limit, includedUserIdList);
     }
 
     private sanitizeDisplayName(displayName: string): string {
@@ -215,10 +215,10 @@ export class UserManagementOperatorImpl implements UserManagementOperator {
         sortOrder: _UserListSortOrder_Values
     ): UserListSortOrder {
         switch (sortOrder) {
-            case _UserListSortOrder_Values.ID_ASCENDING:
-                return UserListSortOrder.ID_ASCENDING;
-            case _UserListSortOrder_Values.ID_DESCENDING:
-                return UserListSortOrder.ID_DESCENDING;
+            case _UserListSortOrder_Values.Id_ASCENDING:
+                return UserListSortOrder.Id_ASCENDING;
+            case _UserListSortOrder_Values.Id_DESCENDING:
+                return UserListSortOrder.Id_DESCENDING;
             case _UserListSortOrder_Values.USERNAME_ASCENDING:
                 return UserListSortOrder.USERNAME_ASCENDING;
             case _UserListSortOrder_Values.USERNAME_DESCENDING:

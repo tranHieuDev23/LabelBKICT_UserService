@@ -139,14 +139,14 @@ export class UserServiceHandlersFactory {
                     });
                 }
                 const limit = req.limit || DEFAULT_USER_LIST_LIMIT;
-                const includedUserIDList = req.includedUserIdList || [];
+                const includedUserIdList = req.includedUserIdList || [];
 
                 try {
                     const userList =
                         await this.userManagementOperator.searchUser(
                             req.query,
                             limit,
-                            includedUserIDList
+                            includedUserIdList
                         );
                     callback(null, { userList });
                 } catch (e) {

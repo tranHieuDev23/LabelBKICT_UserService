@@ -14,8 +14,8 @@ import { Hasher, HASHER_TOKEN } from "./hasher";
 import { TokenGenerator, TOKEN_GENERATOR_TOKEN } from "../token/generator";
 
 export interface UserPasswordManagementOperator {
-    createUserPassword(userID: number, password: string): Promise<void>;
-    updateUserPassword(userID: number, password: string): Promise<void>;
+    createUserPassword(userId: number, password: string): Promise<void>;
+    updateUserPassword(userId: number, password: string): Promise<void>;
     loginWithPassword(
         username: string,
         password: string
@@ -34,7 +34,7 @@ export class UserPasswordManagementOperatorImpl
     ) {}
 
     public async createUserPassword(
-        ofUserID: number,
+        ofUserId: number,
         password: string
     ): Promise<void> {
         if (!this.isValidPassword(password)) {
@@ -45,36 +45,36 @@ export class UserPasswordManagementOperatorImpl
             );
         }
 
-        const user = await this.userDM.getUserByUserID(ofUserID);
+        const user = await this.userDM.getUserByUserId(ofUserId);
         if (user === null) {
             this.logger.error("no user with user_id found", {
-                userID: ofUserID,
+                userId: ofUserId,
             });
             throw new ErrorWithStatus(
-                `no user with with id ${ofUserID} found`,
+                `no user with with id ${ofUserId} found`,
                 status.NOT_FOUND
             );
         }
 
         const hash = await this.hasher.hash(password);
         return this.userPasswordDM.withTransaction(async (dm) => {
-            const oldHash = await dm.getUserPasswordHashWithXLock(ofUserID);
+            const oldHash = await dm.getUserPasswordHashWithXLock(ofUserId);
             if (oldHash !== null) {
                 this.logger.error("user with user_id already has a password", {
-                    userID: ofUserID,
+                    userId: ofUserId,
                 });
                 throw new ErrorWithStatus(
-                    `user with id ${ofUserID} already has a password`,
+                    `user with id ${ofUserId} already has a password`,
                     status.ALREADY_EXISTS
                 );
             }
 
-            await dm.createUserPassword(ofUserID, hash);
+            await dm.createUserPassword(ofUserId, hash);
         });
     }
 
     public async updateUserPassword(
-        ofUserID: number,
+        ofUserId: number,
         password: string
     ): Promise<void> {
         if (!this.isValidPassword(password)) {
@@ -85,32 +85,32 @@ export class UserPasswordManagementOperatorImpl
             );
         }
 
-        const user = await this.userDM.getUserByUserID(ofUserID);
+        const user = await this.userDM.getUserByUserId(ofUserId);
         if (user === null) {
             this.logger.error("no user with user_id found", {
-                userID: ofUserID,
+                userId: ofUserId,
             });
             throw new ErrorWithStatus(
-                `no user with with id ${ofUserID} found`,
+                `no user with with id ${ofUserId} found`,
                 status.NOT_FOUND
             );
         }
 
         const hash = await this.hasher.hash(password);
         return this.userPasswordDM.withTransaction(async (dm) => {
-            const oldHash = await dm.getUserPasswordHashWithXLock(ofUserID);
+            const oldHash = await dm.getUserPasswordHashWithXLock(ofUserId);
             if (oldHash === null) {
                 this.logger.error(
                     "user with user_id does not have a password",
-                    { userID: ofUserID }
+                    { userId: ofUserId }
                 );
                 throw new ErrorWithStatus(
-                    `user with id ${ofUserID} does not have a password`,
+                    `user with id ${ofUserId} does not have a password`,
                     status.NOT_FOUND
                 );
             }
 
-            await dm.updateUserPassword(ofUserID, hash);
+            await dm.updateUserPassword(ofUserId, hash);
         });
     }
 
@@ -130,7 +130,7 @@ export class UserPasswordManagementOperatorImpl
         const hash = await this.userPasswordDM.getUserPasswordHash(user.id);
         if (hash === null) {
             this.logger.error("user doesn't have password", {
-                userID: user.id,
+                userId: user.id,
             });
             throw new ErrorWithStatus(
                 "user doesn't have password",
