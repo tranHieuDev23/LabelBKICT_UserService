@@ -18,7 +18,7 @@ export interface BlacklistedTokenDataAccessor {
 }
 
 const TabNameUserServiceBlacklistedToken = "user_service_blacklisted_token_tab";
-const ColNameUserServiceBlacklistedTokenID = "id";
+const ColNameUserServiceBlacklistedTokenID = "token_id";
 const ColNameUserServiceBlacklistedTokenExpireAt = "expire_at";
 
 export class BlacklistedTokenDataAccessorImpl

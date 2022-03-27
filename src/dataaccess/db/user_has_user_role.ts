@@ -25,7 +25,7 @@ const ColNameUserServiceUserHasUserRoleUserID = "user_id";
 const ColNameUserServiceUserHasUserRoleUserRoleID = "user_role_id";
 
 const TabNameUserServiceUserRole = "user_service_user_role_tab";
-const ColNameUserServiceUserRoleID = "id";
+const ColNameUserServiceUserRoleID = "user_role_id";
 const ColNameUserServiceUserRoleDisplayName = "display_name";
 const ColNameUserServiceUserRoleDescription = "description";
 

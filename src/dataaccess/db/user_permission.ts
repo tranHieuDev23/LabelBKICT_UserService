@@ -35,7 +35,7 @@ export interface UserPermissionDataAccessor {
 }
 
 const TabNameUserServiceUserPermission = "user_service_user_permission_tab";
-const ColNameUserServiceUserPermissionID = "id";
+const ColNameUserServiceUserPermissionID = "user_permission_id";
 const ColNameUserServiceUserPermissionPermissionName = "permission_name";
 const ColNameUserServiceUserPermissionDescription = "description";
 

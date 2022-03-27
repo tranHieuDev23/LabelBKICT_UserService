@@ -12,7 +12,7 @@ const TabNameUserServiceUserRoleHasUserPermission =
 export async function up(knex: Knex): Promise<void> {
     if (!(await knex.schema.hasTable(TabNameUserServiceUser))) {
         await knex.schema.createTable(TabNameUserServiceUser, (tab) => {
-            tab.increments("id", { primaryKey: true });
+            tab.increments("user_id", { primaryKey: true });
             tab.string("username", 64).notNullable().unique();
             tab.string("display_name", 256).notNullable();
 
@@ -28,7 +28,7 @@ export async function up(knex: Knex): Promise<void> {
 
             tab.primary(["of_user_id"]);
             tab.foreign("of_user_id")
-                .references("id")
+                .references("user_id")
                 .inTable(TabNameUserServiceUser);
         });
     }
@@ -37,10 +37,10 @@ export async function up(knex: Knex): Promise<void> {
         await knex.schema.createTable(
             TabNameUserServiceBlacklistedToken,
             (tab) => {
-                tab.bigInteger("id").notNullable();
+                tab.bigInteger("token_id").notNullable();
                 tab.bigInteger("expire_at").notNullable();
 
-                tab.primary(["id"]);
+                tab.primary(["token_id"]);
                 tab.index(
                     ["expire_at"],
                     "user_service_blacklisted_token_expire_idx"
@@ -51,7 +51,7 @@ export async function up(knex: Knex): Promise<void> {
 
     if (!(await knex.schema.hasTable(TabNameUserServiceUserRole))) {
         await knex.schema.createTable(TabNameUserServiceUserRole, (tab) => {
-            tab.increments("id", { primaryKey: true });
+            tab.increments("user_role_id", { primaryKey: true });
             tab.string("display_name", 256).notNullable();
             tab.string("description", 256).notNullable();
 
@@ -70,10 +70,10 @@ export async function up(knex: Knex): Promise<void> {
                 tab.integer("user_role_id").notNullable();
 
                 tab.foreign("user_id")
-                    .references("id")
+                    .references("user_id")
                     .inTable(TabNameUserServiceUser);
                 tab.foreign("user_role_id")
-                    .references("id")
+                    .references("user_role_id")
                     .inTable(TabNameUserServiceUserRole)
                     .onDelete("CASCADE");
 
@@ -87,7 +87,7 @@ export async function up(knex: Knex): Promise<void> {
         await knex.schema.createTable(
             TabNameUserServiceUserPermission,
             (tab) => {
-                tab.increments("id", { primaryKey: true });
+                tab.increments("user_permission_id", { primaryKey: true });
                 tab.string("permission_name", 256).notNullable().unique();
                 tab.string("description", 256).notNullable();
 
@@ -111,11 +111,11 @@ export async function up(knex: Knex): Promise<void> {
                 tab.integer("user_permission_id").notNullable();
 
                 tab.foreign("user_role_id")
-                    .references("id")
+                    .references("user_role_id")
                     .inTable(TabNameUserServiceUserRole)
                     .onDelete("CASCADE");
                 tab.foreign("user_permission_id")
-                    .references("id")
+                    .references("user_permission_id")
                     .inTable(TabNameUserServiceUserPermission)
                     .onDelete("CASCADE");
 

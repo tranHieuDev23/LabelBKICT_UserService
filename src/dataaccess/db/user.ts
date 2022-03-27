@@ -46,7 +46,7 @@ export interface UserDataAccessor {
 }
 
 const TabNameUserServiceUser = "user_service_user_tab";
-const ColNameUserServiceUserID = "id";
+const ColNameUserServiceUserID = "user_id";
 const ColNameUserServiceUserUsername = "username";
 const ColNameUserServiceUserDisplayName = "display_name";
 const ColNameUserServiceUserFullTextSearchDocument =
