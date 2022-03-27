@@ -94,8 +94,8 @@ export class UserHasUserRoleDataAccessorImpl
                 .from(TabNameUserServiceUserHasUserRole)
                 .join(
                     TabNameUserServiceUserRole,
-                    ColNameUserServiceUserHasUserRoleUserRoleID,
-                    ColNameUserServiceUserRoleID
+                    `${TabNameUserServiceUserHasUserRole}.${ColNameUserServiceUserHasUserRoleUserRoleID}`,
+                    `${TabNameUserServiceUserRole}.${ColNameUserServiceUserRoleID}`
                 )
                 .whereIn(ColNameUserServiceUserHasUserRoleUserID, userIDList)
                 .orderBy(ColNameUserServiceUserHasUserRoleUserID, "asc");
@@ -191,7 +191,7 @@ export class UserHasUserRoleDataAccessorImpl
                     +rows[0][ColNameUserServiceUserHasUserRoleUserRoleID],
             };
         } catch (error) {
-            this.logger.error("failed to get user role list of user id list", {
+            this.logger.error("failed to get user has user role relation", {
                 error,
             });
             throw ErrorWithStatus.wrapWithStatus(error, status.INTERNAL);

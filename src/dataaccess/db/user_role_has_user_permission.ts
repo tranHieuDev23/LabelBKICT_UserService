@@ -111,8 +111,8 @@ export class UserRoleHasUserPermissionDataAccessorImpl
                 .from(TabNameUserServiceUserRoleHasUserPermission)
                 .join(
                     TabNameUserServiceUserPermission,
-                    ColNameUserServiceUserRoleHasUserPermissionUserPermissionID,
-                    ColNameUserServiceUserPermissionID
+                    `${TabNameUserServiceUserRoleHasUserPermission}.${ColNameUserServiceUserRoleHasUserPermissionUserPermissionID}`,
+                    `${TabNameUserServiceUserPermission}.${ColNameUserServiceUserPermissionID}`
                 )
                 .whereIn(
                     ColNameUserServiceUserRoleHasUserPermissionUserRoleID,
@@ -210,9 +210,10 @@ export class UserRoleHasUserPermissionDataAccessorImpl
                     ],
             };
         } catch (error) {
-            this.logger.error("failed to get user role list of user id list", {
-                error,
-            });
+            this.logger.error(
+                "failed to get user role has user permission relation",
+                { error }
+            );
             throw ErrorWithStatus.wrapWithStatus(error, status.INTERNAL);
         }
     }
