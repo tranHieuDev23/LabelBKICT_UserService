@@ -54,10 +54,8 @@ export class UserManagementOperatorImpl implements UserManagementOperator {
             );
         }
 
-        return this.userDM.withTransaction<User>(async (dataAccessor) => {
-            const userRecord = await dataAccessor.getUserByUsernameWithXLock(
-                username
-            );
+        return this.userDM.withTransaction<User>(async (dm) => {
+            const userRecord = await dm.getUserByUsernameWithXLock(username);
             if (userRecord !== null) {
                 this.logger.error("username has already been taken", {
                     username,
@@ -68,10 +66,7 @@ export class UserManagementOperatorImpl implements UserManagementOperator {
                 );
             }
 
-            const createdUserId = await dataAccessor.createUser(
-                username,
-                displayName
-            );
+            const createdUserId = await dm.createUser(username, displayName);
             return {
                 id: createdUserId,
                 username: username,
@@ -115,10 +110,8 @@ export class UserManagementOperatorImpl implements UserManagementOperator {
             }
         }
 
-        return this.userDM.withTransaction<User>(async (dataAccessor) => {
-            const userRecord = await dataAccessor.getUserByUserIdWithXLock(
-                userId
-            );
+        return this.userDM.withTransaction<User>(async (dm) => {
+            const userRecord = await dm.getUserByUserIdWithXLock(userId);
             if (userRecord === null) {
                 this.logger.error("no user with user_id found", {
                     userId: user.id,
@@ -131,7 +124,7 @@ export class UserManagementOperatorImpl implements UserManagementOperator {
 
             if (user.username !== undefined) {
                 const userWithUsernameRecord =
-                    await this.userDM.getUserByUsernameWithXLock(user.username);
+                    await dm.getUserByUsernameWithXLock(user.username);
                 if (
                     userWithUsernameRecord !== null &&
                     userWithUsernameRecord.id !== userId
@@ -152,7 +145,7 @@ export class UserManagementOperatorImpl implements UserManagementOperator {
                 userRecord.displayName = user.displayName;
             }
 
-            await dataAccessor.updateUser(userRecord);
+            await dm.updateUser(userRecord);
             return userRecord;
         });
     }

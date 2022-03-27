@@ -301,7 +301,7 @@ export class UserPermissionManagementOperatorImpl
                 );
             }
 
-            await this.userRoleHasUserPermissionDM.deleteUserRoleHasUserPermission(
+            await dm.deleteUserRoleHasUserPermission(
                 userRoleId,
                 userPermissionId
             );
