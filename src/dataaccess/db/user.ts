@@ -14,8 +14,8 @@ export class User {
 }
 
 export enum UserListSortOrder {
-    Id_ASCENDING = 0,
-    Id_DESCENDING = 1,
+    ID_ASCENDING = 0,
+    ID_DESCENDING = 1,
     USERNAME_ASCENDING = 2,
     USERNAME_DESCENDING = 3,
     DISPLAY_NAME_ASCENDING = 4,
@@ -280,7 +280,7 @@ export class UserDataAccessorImpl implements UserDataAccessor {
     ): Promise<Record<string, any> | null> {
         let queryBuilder: Knex.QueryBuilder;
         switch (sortOrder) {
-            case UserListSortOrder.Id_ASCENDING:
+            case UserListSortOrder.ID_ASCENDING:
                 queryBuilder = this.knex
                     .select([ColNameUserServiceUserId])
                     .from(TabNameUserServiceUser)
@@ -288,7 +288,7 @@ export class UserDataAccessorImpl implements UserDataAccessor {
                     .offset(offset);
                 break;
 
-            case UserListSortOrder.Id_DESCENDING:
+            case UserListSortOrder.ID_DESCENDING:
                 queryBuilder = this.knex
                     .select([ColNameUserServiceUserId])
                     .from(TabNameUserServiceUser)
@@ -373,7 +373,7 @@ export class UserDataAccessorImpl implements UserDataAccessor {
     ): Promise<Record<string, any>[]> {
         let queryBuilder: Knex.QueryBuilder;
         switch (sortOrder) {
-            case UserListSortOrder.Id_ASCENDING:
+            case UserListSortOrder.ID_ASCENDING:
                 queryBuilder = this.knex
                     .select()
                     .from(TabNameUserServiceUser)
@@ -385,7 +385,7 @@ export class UserDataAccessorImpl implements UserDataAccessor {
                     .orderBy(ColNameUserServiceUserId, "asc");
                 break;
 
-            case UserListSortOrder.Id_DESCENDING:
+            case UserListSortOrder.ID_DESCENDING:
                 queryBuilder = this.knex
                     .select()
                     .from(TabNameUserServiceUser)

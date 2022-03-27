@@ -215,10 +215,10 @@ export class UserManagementOperatorImpl implements UserManagementOperator {
         sortOrder: _UserListSortOrder_Values
     ): UserListSortOrder {
         switch (sortOrder) {
-            case _UserListSortOrder_Values.Id_ASCENDING:
-                return UserListSortOrder.Id_ASCENDING;
-            case _UserListSortOrder_Values.Id_DESCENDING:
-                return UserListSortOrder.Id_DESCENDING;
+            case _UserListSortOrder_Values.ID_ASCENDING:
+                return UserListSortOrder.ID_ASCENDING;
+            case _UserListSortOrder_Values.ID_DESCENDING:
+                return UserListSortOrder.ID_DESCENDING;
             case _UserListSortOrder_Values.USERNAME_ASCENDING:
                 return UserListSortOrder.USERNAME_ASCENDING;
             case _UserListSortOrder_Values.USERNAME_DESCENDING:

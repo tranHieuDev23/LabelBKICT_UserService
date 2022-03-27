@@ -277,10 +277,10 @@ export class UserRoleManagementOperatorImpl
         sortOrder: _UserRoleListSortOrder_Values
     ): UserRoleListSortOrder {
         switch (sortOrder) {
-            case _UserRoleListSortOrder_Values.Id_ASCENDING:
-                return UserRoleListSortOrder.Id_ASCENDING;
-            case _UserRoleListSortOrder_Values.Id_DESCENDING:
-                return UserRoleListSortOrder.Id_DESCENDING;
+            case _UserRoleListSortOrder_Values.ID_ASCENDING:
+                return UserRoleListSortOrder.ID_ASCENDING;
+            case _UserRoleListSortOrder_Values.ID_DESCENDING:
+                return UserRoleListSortOrder.ID_DESCENDING;
             case _UserRoleListSortOrder_Values.DISPLAY_NAME_ASCENDING:
                 return UserRoleListSortOrder.DISPLAY_NAME_ASCENDING;
             case _UserRoleListSortOrder_Values.DISPLAY_NAME_DESCENDING:
