@@ -5,7 +5,7 @@ export class DatabaseConfig {
     public port = 5432;
     public user = "postgres";
     public password = "admin";
-    public database = "label_bkict_db";
+    public database = "label_bkict_user_service_db";
 
     public static fromEnv(): DatabaseConfig {
         const config = new DatabaseConfig();
