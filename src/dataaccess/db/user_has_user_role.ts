@@ -32,7 +32,10 @@ const ColNameUserServiceUserRoleDescription = "description";
 export class UserHasUserRoleDataAccessorImpl
     implements UserHasUserRoleDataAccessor
 {
-    constructor(private readonly knex: Knex, private readonly logger: Logger) {}
+    constructor(
+        private readonly knex: Knex<any, any[]>,
+        private readonly logger: Logger
+    ) {}
 
     public async createUserHasUserRole(
         userId: number,

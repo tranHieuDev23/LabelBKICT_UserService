@@ -20,7 +20,10 @@ const ColNameUserServiceUserPasswordOfUserId = "of_user_id";
 const ColNameUserServiceUserPasswordHash = "hash";
 
 export class UserPasswordDataAccessorImpl implements UserPasswordDataAccessor {
-    constructor(private readonly knex: Knex, private readonly logger: Logger) {}
+    constructor(
+        private readonly knex: Knex<any, any[]>,
+        private readonly logger: Logger
+    ) {}
 
     public async createUserPassword(
         ofUserId: number,

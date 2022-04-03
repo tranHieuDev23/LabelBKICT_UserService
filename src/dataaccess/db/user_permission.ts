@@ -42,7 +42,10 @@ const ColNameUserServiceUserPermissionDescription = "description";
 export class UserPermissionDataAccessorImpl
     implements UserPermissionDataAccessor
 {
-    constructor(private readonly knex: Knex, private readonly logger: Logger) {}
+    constructor(
+        private readonly knex: Knex<any, any[]>,
+        private readonly logger: Logger
+    ) {}
 
     public async createUserPermission(
         permissionName: string,

@@ -24,7 +24,10 @@ const ColNameUserServiceBlacklistedTokenExpireAt = "expire_at";
 export class BlacklistedTokenDataAccessorImpl
     implements BlacklistedTokenDataAccessor
 {
-    constructor(private readonly knex: Knex, private readonly logger: Logger) {}
+    constructor(
+        private readonly knex: Knex<any, any[]>,
+        private readonly logger: Logger
+    ) {}
 
     public async createBlacklistedToken(
         tokenId: number,

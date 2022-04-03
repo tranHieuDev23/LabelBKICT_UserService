@@ -43,7 +43,10 @@ const ColNameUserServiceUserRoleDisplayName = "display_name";
 const ColNameUserServiceUserRoleDescription = "description";
 
 export class UserRoleDataAccessorImpl implements UserRoleDataAccessor {
-    constructor(private readonly knex: Knex, private readonly logger: Logger) {}
+    constructor(
+        private readonly knex: Knex<any, any[]>,
+        private readonly logger: Logger
+    ) {}
 
     public async createUserRole(
         displayName: string,

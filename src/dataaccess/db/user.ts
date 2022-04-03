@@ -53,7 +53,10 @@ const ColNameUserServiceUserFullTextSearchDocument =
     "full_text_search_document";
 
 export class UserDataAccessorImpl implements UserDataAccessor {
-    constructor(private readonly knex: Knex, private readonly logger: Logger) {}
+    constructor(
+        private readonly knex: Knex<any, any[]>,
+        private readonly logger: Logger
+    ) {}
 
     public async createUser(
         username: string,
