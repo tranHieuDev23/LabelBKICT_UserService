@@ -11,4 +11,4 @@ RUN npm run build
 # Start the server with 16 instances
 ENV NODE_ENV=production
 EXPOSE 20000
-ENTRYPOINT ["pm2-runtime", "-i", "16", "dist/main.js"] 
+ENTRYPOINT ["pm2-runtime", "start", "ecosystem.config.js"] 
