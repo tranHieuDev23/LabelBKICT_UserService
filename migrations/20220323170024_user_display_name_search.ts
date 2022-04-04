@@ -20,6 +20,11 @@ export async function up(knex: Knex): Promise<void> {
             FOR EACH ROW
             EXECUTE PROCEDURE user_tab_write_trigger_function();
 
+        CREATE TRIGGER user_tab_update_trigger
+            BEFORE UPDATE ON public.${TabNameUserServiceUser}
+            FOR EACH ROW
+            EXECUTE PROCEDURE user_tab_write_trigger_function();
+
         CREATE INDEX user_service_user_full_text_search_idx ON public.${TabNameUserServiceUser} USING gin(full_text_search_document);
     `);
 }
