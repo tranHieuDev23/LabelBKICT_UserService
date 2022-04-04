@@ -11,7 +11,7 @@ export async function up(knex: Knex): Promise<void> {
         CREATE FUNCTION user_tab_write_trigger_function()
         RETURNS trigger AS $$
         BEGIN
-            NEW.document := to_tsvector(NEW."username" || ' ' || NEW."display_name");
+            NEW."full_text_search_document" := to_tsvector(NEW."username" || ' ' || NEW."display_name");
             RETURN NEW;
         END $$ LANGUAGE 'plpgsql';
 
