@@ -529,11 +529,11 @@ export class UserDataAccessorImpl implements UserDataAccessor {
             .select()
             .from(TabNameUserServiceUser)
             .whereRaw(
-                `${ColNameUserServiceUserFullTextSearchDocument} @@ to_tsquery(?)`,
+                `${ColNameUserServiceUserFullTextSearchDocument} @@ plainto_tsquery (?)`,
                 query
             )
             .orderByRaw(
-                `ts_rank(${ColNameUserServiceUserFullTextSearchDocument}, to_tsquery(?)) DESC`,
+                `ts_rank(${ColNameUserServiceUserFullTextSearchDocument}, plainto_tsquery (?)) DESC`,
                 query
             )
             .limit(limit);
