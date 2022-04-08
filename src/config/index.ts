@@ -1,4 +1,5 @@
 import { Container } from "brandi";
+import { APPLICATION_CONFIG_TOKEN } from "./application";
 import { UserServiceConfig, USER_SERVICE_CONFIG_TOKEN } from "./config";
 import { DATABASE_CONFIG_TOKEN } from "./database";
 import { DISTRIBUTED_CONFIG_TOKEN } from "./distributed";
@@ -11,6 +12,7 @@ export * from "./distributed";
 export * from "./database";
 export * from "./grpc_service";
 export * from "./token";
+export * from "./application";
 export * from "./config";
 
 export function bindToContainer(container: Container): void {
@@ -43,5 +45,11 @@ export function bindToContainer(container: Container): void {
     container
         .bind(TOKEN_CONFIG_TOKEN)
         .toInstance(() => container.get(USER_SERVICE_CONFIG_TOKEN).tokenConfig)
+        .inSingletonScope();
+    container
+        .bind(APPLICATION_CONFIG_TOKEN)
+        .toInstance(
+            () => container.get(USER_SERVICE_CONFIG_TOKEN).applicationConfig
+        )
         .inSingletonScope();
 }

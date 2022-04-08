@@ -1,4 +1,5 @@
 import { token } from "brandi";
+import { ApplicationConfig } from "./application";
 import { DatabaseConfig } from "./database";
 import { DistributedConfig } from "./distributed";
 import { GRPCServerConfig } from "./grpc_service";
@@ -11,6 +12,7 @@ export class UserServiceConfig {
     public databaseConfig = new DatabaseConfig();
     public grpcServerConfig = new GRPCServerConfig();
     public tokenConfig = new TokenConfig();
+    public applicationConfig = new ApplicationConfig();
 
     public static fromEnv(): UserServiceConfig {
         const config = new UserServiceConfig();
@@ -19,6 +21,7 @@ export class UserServiceConfig {
         config.databaseConfig = DatabaseConfig.fromEnv();
         config.grpcServerConfig = GRPCServerConfig.fromEnv();
         config.tokenConfig = TokenConfig.fromEnv();
+        config.applicationConfig = ApplicationConfig.fromEnv();
         return config;
     }
 }

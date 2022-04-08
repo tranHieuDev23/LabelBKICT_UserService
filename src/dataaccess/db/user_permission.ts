@@ -20,6 +20,7 @@ export interface UserPermissionDataAccessor {
     ): Promise<number>;
     updateUserPermission(userPermission: UserPermission): Promise<void>;
     deleteUserPermission(id: number): Promise<void>;
+    getUserPermissionCount(): Promise<number>;
     getUserPermissionList(): Promise<UserPermission[]>;
     getUserPermissionById(id: number): Promise<UserPermission | null>;
     getUserPermissionByIdWithXLock(id: number): Promise<UserPermission | null>;
@@ -120,6 +121,18 @@ export class UserPermissionDataAccessorImpl
                 `no user permission with user_permission_id ${id} found`,
                 status.NOT_FOUND
             );
+        }
+    }
+
+    public async getUserPermissionCount(): Promise<number> {
+        try {
+            const rows = await this.knex
+                .count()
+                .from(TabNameUserServiceUserPermission);
+            return +(rows[0] as any)["count"];
+        } catch (error) {
+            this.logger.error("failed to get user permission count", { error });
+            throw ErrorWithStatus.wrapWithStatus(error, status.INTERNAL);
         }
     }
 
