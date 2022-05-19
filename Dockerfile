@@ -19,4 +19,4 @@ RUN cron
 # Start the server with 16 instances
 ENV NODE_ENV=production
 EXPOSE 20000
-ENTRYPOINT ["sh", "./scripts/start_service.sh"]
+ENTRYPOINT ["sh", "./scripts/start_service.sh"] 
