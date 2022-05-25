@@ -19,6 +19,7 @@ export interface TokenManagementOperator {
     ): Promise<{ user: User | null; newToken: string | null }>;
     blacklistToken(token: string): Promise<void>;
     deleteExpiredBlacklistedToken(requestTime: number): Promise<number>;
+    deleteExpiredBlacklistedToken(requestTime: number): Promise<number>;
 }
 
 export class TokenManagementOperatorImpl implements TokenManagementOperator {

@@ -2,14 +2,14 @@ import { Container } from "brandi";
 import {
     DeleteExpiredBlacklistedTokenJobImpl,
     DELETE_EXPIRED_BLACKLISTED_TOKEN_JOB_TOKEN,
-} from "./deleteExpiredBlacklistedToken";
+} from "./delete_expired_blacklisted_token";
 import {
     InitializationJobImpl,
     INITIALIZATION_JOB_TOKEN,
 } from "./initialization";
 
 export * from "./initialization";
-export * from "./deleteExpiredBlacklistedToken";
+export * from "./delete_expired_blacklisted_token";
 
 export function bindToContainer(container: Container): void {
     container
