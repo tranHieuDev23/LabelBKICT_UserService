@@ -16,8 +16,8 @@ export class DeleteExpiredBlacklistedTokenJobImpl implements DeleteExpiredBlackl
         private readonly logger: Logger
     ) {}
     public async execute(): Promise<void> {
-        const deleteToken = await this.tokenManagementOperator.deleteExpiredBlacklistedToken(Date.now());
-        this.logger.info("delete expired blacklisted token finish");
+        await this.tokenManagementOperator.deleteExpiredBlacklistedToken(Date.now());
+        this.logger.info("Deleted expired blacklisted token successfully");
     }
 }
 

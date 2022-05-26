@@ -94,13 +94,13 @@ export class TokenManagementOperatorImpl implements TokenManagementOperator {
     }
 
     public async deleteExpiredBlacklistedToken(requestTime: number): Promise<number> {
-        const deletedToken = await this.blacklistedTokenDM.deleteExpiredBlacklistedToken(requestTime);
-        if (deletedToken == null || deletedToken == 0) {
+        const deletedTokenCount = await this.blacklistedTokenDM.deleteExpiredBlacklistedToken(requestTime);
+        if (deletedTokenCount == null || deletedTokenCount == 0) {
             this.logger.info("No token is expired", {
-               deleteToken: deletedToken,
+               deleteToken: deletedTokenCount,
             });
         } 
-        return deletedToken;
+        return deletedTokenCount;
     }
 
     private async isTokenBlacklisted(tokenId: number): Promise<boolean> {

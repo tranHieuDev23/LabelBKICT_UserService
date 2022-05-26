@@ -8,7 +8,7 @@ if (args["start_grpc_server"]) {
     startGRPCServer(".env");
 } else if (args["initialize"]) {
     initialize(".env");
-} else if (args["delete_expired_blacklisted_token_job"]) {
+} else if (args["delete_expired_blacklisted_token"]) {
     deleteExpiredBlacklistedToken(".env");
 } else {
     console.log("no component was selected, exiting...");
