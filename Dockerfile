@@ -9,12 +9,14 @@ RUN npm install -g pm2
 # Build package
 COPY . .
 RUN npm run build
+# Install cron
+RUN apt update
+RUN apt install -y cron
+# Start the cronjob
+RUN chmod 0644 deploy/cron.d
+RUN crontab deploy/cron.d
+RUN cron
 # Start the server with 16 instances
 ENV NODE_ENV=production
 EXPOSE 20000
-# Start the cronjob auto delete expired blacklisted token 
-COPY deploy/cron.d /etc/cron.d
-RUN chmod 0644 /etc/cron.d && 
-    crontab /etc/cron.d
-RUN cron
 ENTRYPOINT ["sh", "./scripts/start_service.sh"]
