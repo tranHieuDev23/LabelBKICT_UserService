@@ -12,7 +12,7 @@
     "lint": "npx eslint ./src --ext .js,.jsx,.ts,.tsx",
     "serve": "node dist/main.js",
     "serve-initialize": "node dist/main.js --initialize",
-    "serve-grpc": "node dist/main.js --start_grpc_server",
+    "serve-grpc": "ts-node src/main.ts --start_grpc_server",
     "start-initialize": "node dist/main.js --prod --initialize",
     "start-grpc": "node dist/main.js --prod --start_grpc_server",
     "watch-node": "nodemon --ignore \"logs/**\" --delay 1s --inspect dist/main.js",

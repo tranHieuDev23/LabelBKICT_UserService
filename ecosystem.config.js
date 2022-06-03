@@ -6,6 +6,6 @@ module.exports = {
             args: " --start_grpc_server",
             instances: 16,
             instance_var: "NODE_ID",
-        },
+        }
     ],
 };
