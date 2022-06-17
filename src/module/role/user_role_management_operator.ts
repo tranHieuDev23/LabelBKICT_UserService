@@ -242,10 +242,7 @@ export class UserRoleManagementOperatorImpl
                 );
             }
 
-            return await this.userHasUserRoleDM.deleteUserHasUserRole(
-                userId,
-                userRoleId
-            );
+            return await dm.deleteUserHasUserRole(userId, userRoleId);
         });
     }
 
