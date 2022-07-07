@@ -20,15 +20,22 @@ import {
     UserManagementOperator,
     USER_MANAGEMENT_OPERATOR_TOKEN,
 } from "../module/user";
+import { 
+    UserTagManagementOperator,
+    USER_TAG_MANAGEMENT_OPERATOR_TOKEN 
+} from "../module/tag";
 import { UserServiceHandlers } from "../proto/gen/UserService";
 import { ErrorWithStatus } from "../utils";
 import { _UserListSortOrder_Values } from "../proto/gen/UserListSortOrder";
 import { _UserRoleListSortOrder_Values } from "../proto/gen/UserRoleListSortOrder";
 import { UserRoleList } from "../proto/gen/UserRoleList";
 import { UserPermissionList } from "../proto/gen/UserPermissionList";
+import { UserTagList } from "../proto/gen/UserTagList";
+import { _UserTagListSortOrder_Values } from "../proto/gen/UserTagListSortOrder";
 
 const DEFAULT_USER_LIST_LIMIT = 10;
 const DEFAULT_USER_ROLE_LIST_LIMIT = 10;
+const DEFAULT_USER_TAG_LIST_LIMIT = 10;
 
 export class UserServiceHandlersFactory {
     constructor(
@@ -36,8 +43,9 @@ export class UserServiceHandlersFactory {
         private readonly userPasswordManagementOperator: UserPasswordManagementOperator,
         private readonly tokenManagementOperator: TokenManagementOperator,
         private readonly userRoleManagementOperator: UserRoleManagementOperator,
-        private readonly userPermissionManagementOperator: UserPermissionManagementOperator
-    ) {}
+        private readonly userPermissionManagementOperator: UserPermissionManagementOperator,
+        private readonly userTagManagementOperator: UserTagManagementOperator
+        ) {}
 
     public getUserServiceHandlers(): UserServiceHandlers {
         const handler: UserServiceHandlers = {
@@ -97,13 +105,13 @@ export class UserServiceHandlersFactory {
                 if (req.sortOrder === undefined) {
                     req.sortOrder = _UserListSortOrder_Values.ID_ASCENDING;
                 }
-
                 try {
                     const { totalUserCount, userList } =
                         await this.userManagementOperator.getUserList(
                             req.offset,
                             req.limit,
-                            req.sortOrder
+                            req.sortOrder,
+                            req.filterOptions
                         );
                     return callback(null, { totalUserCount, userList });
                 } catch (e) {
@@ -634,6 +642,175 @@ export class UserServiceHandlersFactory {
                     return this.handleError(e, callback);
                 }
             },
+
+            CreateUserTag: async (call, callback) => {
+                const req = call.request;
+                if (req.displayName === undefined) {
+                    return callback({
+                        message: "display_name is required",
+                        code: status.INVALID_ARGUMENT,
+                    });
+                }
+                if (req.description === undefined) {
+                    req.description = "";
+                }
+
+                try {
+                    const createdUserTag =
+                        await this.userTagManagementOperator.createUserTag(
+                            req.displayName,
+                            req.description
+                        );
+                    return callback(null, { userTag: createdUserTag });
+                } catch (e) {
+                    this.handleError(e, callback);
+                }
+            },
+
+            UpdateUserTag: async (call, callback) => {
+                const req = call.request;
+                if (req.userTag === undefined) {
+                    return callback({
+                        message: "user_tag is required",
+                        code: status.INVALID_ARGUMENT,
+                    });
+                }
+
+                try {
+                    const updatedUserTag =
+                        await this.userTagManagementOperator.updateUserTag(
+                            req.userTag
+                        );
+                    return callback(null, { userTag: updatedUserTag });
+                } catch (e) {
+                    this.handleError(e, callback);
+                }
+            },
+
+            DeleteUserTag: async (call, callback) => {
+                const req = call.request;
+                if (req.id === undefined) {
+                    return callback({
+                        message: "id is required",
+                        code: status.INVALID_ARGUMENT,
+                    });
+                }
+
+                try {
+                    await this.userTagManagementOperator.deleteUserTag(
+                        req.id
+                    );
+                    return callback(null, {});
+                } catch (e) {
+                    this.handleError(e, callback);
+                }
+            },
+
+            GetUserTagList: async (call, callback) => {
+                const req = call.request;
+                if (req.offset === undefined) {
+                    req.offset = 0;
+                }
+                if (req.limit === undefined) {
+                    req.limit = DEFAULT_USER_TAG_LIST_LIMIT;
+                }
+                if (req.sortOrder === undefined) {
+                    req.sortOrder = _UserTagListSortOrder_Values.ID_ASCENDING;
+                }
+
+                try {
+                    const { totalUserTagCount, userTagList } =
+                        await this.userTagManagementOperator.getUserTagList(
+                            req.offset,
+                            req.limit,
+                            req.sortOrder
+                        );
+                    return callback(null, { totalUserTagCount, userTagList });
+                } catch (e) {
+                    this.handleError(e, callback);
+                }
+            },
+
+            AddUserTagToUser: async (call, callback) => {
+                const req = call.request;
+                if (req.userId === undefined) {
+                    return callback({
+                        message: "user_id is required",
+                        code: status.INVALID_ARGUMENT,
+                    });
+                }
+                if (req.userTagId === undefined) {
+                    return callback({
+                        message: "user_tag_id is required",
+                        code: status.INVALID_ARGUMENT,
+                    });
+                }
+
+                try {
+                    await this.userTagManagementOperator.addUserTagToUser(
+                        req.userId,
+                        req.userTagId
+                    );
+                    return callback(null, {});
+                } catch (e) {
+                    this.handleError(e, callback);
+                }
+            },
+
+            RemoveUserTagFromUser: async (call, callback) => {
+                const req = call.request;
+                if (req.userId === undefined) {
+                    return callback({
+                        message: "user_id is required",
+                        code: status.INVALID_ARGUMENT,
+                    });
+                }
+                if (req.userTagId === undefined) {
+                    return callback({
+                        message: "user_tag_id is required",
+                        code: status.INVALID_ARGUMENT,
+                    });
+                }
+
+                try {
+                    console.log(req.userId,
+                        req.userTagId);
+                    await this.userTagManagementOperator.removeUserTagFromUser(
+                        req.userId,
+                        req.userTagId
+                    );
+                    return callback(null, {});
+                } catch (e) {
+                    this.handleError(e, callback);
+                }
+            },
+
+            GetUserTagListOfUserList: async (call, callback) => {
+                const req = call.request;
+                if (req.userIdList === undefined) {
+                    req.userIdList = [];
+                }
+
+                try {
+                    const userTagListOfUserList =
+                        await this.userTagManagementOperator.getUserTagListFromUserList(
+                            req.userIdList
+                        );
+                    const userTagListProtoList = userTagListOfUserList.map(
+                        (userTagList) => {
+                            const userTagListProto: UserTagList = {
+                                userTagList: userTagList,
+                            };
+                            return userTagListProto;
+                        }
+                    );
+                    return callback(null, {
+                        userTagListOfUserList: userTagListProtoList,
+                    });
+                } catch (e) {
+                    this.handleError(e, callback);
+                }
+            },
         };
         return handler;
     }
@@ -663,7 +840,8 @@ injected(
     USER_PASSWORD_MANAGEMENT_OPERATOR_TOKEN,
     TOKEN_MANAGEMENT_OPERATOR_TOKEN,
     USER_ROLE_MANAGEMENT_OPERATOR_TOKEN,
-    USER_PERMISSION_MANAGEMENT_OPERATOR_TOKEN
+    USER_PERMISSION_MANAGEMENT_OPERATOR_TOKEN,
+    USER_TAG_MANAGEMENT_OPERATOR_TOKEN
 );
 
 export const USER_SERVICE_HANDLERS_FACTORY_TOKEN =

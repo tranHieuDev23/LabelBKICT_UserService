@@ -9,6 +9,7 @@ import * as role from "../module/role";
 import * as token from "../module/token";
 import * as user from "../module/user";
 import * as jobs from "../jobs";
+import * as tag from "../module/tag";
 
 export function initialize(dotenvPath: string) {
     dotenv.config({
@@ -25,6 +26,7 @@ export function initialize(dotenvPath: string) {
     token.bindToContainer(container);
     user.bindToContainer(container);
     jobs.bindToContainer(container);
+    tag.bindToContainer(container);
 
     const initializationJob = container.get(jobs.INITIALIZATION_JOB_TOKEN);
     initializationJob.execute().then(() => {

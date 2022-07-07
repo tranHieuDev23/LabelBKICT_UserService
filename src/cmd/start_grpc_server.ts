@@ -8,6 +8,7 @@ import * as permission from "../module/permission";
 import * as role from "../module/role";
 import * as token from "../module/token";
 import * as user from "../module/user";
+import * as tag from "../module/tag";
 import * as service from "../service";
 
 export function startGRPCServer(dotenvPath: string) {
@@ -25,6 +26,7 @@ export function startGRPCServer(dotenvPath: string) {
     token.bindToContainer(container);
     user.bindToContainer(container);
     service.bindToContainer(container);
+    tag.bindToContainer(container);
 
     const server = container.get(service.USER_SERVICE_GRPC_SERVER_TOKEN);
     server.loadProtoAndStart("./src/proto/service/user_service.proto");

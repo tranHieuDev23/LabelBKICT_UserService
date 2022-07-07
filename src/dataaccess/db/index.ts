@@ -9,6 +9,10 @@ import {
     UserHasUserRoleDataAccessorImpl,
     USER_HAS_USER_ROLE_DATA_ACCESSOR_TOKEN,
 } from "./user_has_user_role";
+import { 
+    UserHasUserTagDataAccessorImpl, 
+    USER_HAS_USER_TAG_DATA_ACCESSOR_TOKEN 
+} from "./user_has_user_tag";
 import {
     UserPasswordDataAccessorImpl,
     USER_PASSWORD_DATA_ACCESSOR_TOKEN,
@@ -25,6 +29,10 @@ import {
     UserRoleHasUserPermissionDataAccessorImpl,
     USER_ROLE_HAS_USER_PERMISSION_DATA_ACCESSOR_TOKEN,
 } from "./user_role_has_user_permission";
+import { 
+    UserTagDataAccessorImpl, 
+    USER_TAG_DATA_ACCESSOR_TOKEN 
+} from "./user_tag";
 
 export * from "./user";
 export * from "./user_password";
@@ -33,6 +41,8 @@ export * from "./user_permission";
 export * from "./user_has_user_role";
 export * from "./user_role_has_user_permission";
 export * from "./blacklisted_token";
+export * from "./user_tag";
+export * from "./user_has_user_tag";
 
 export function bindToContainer(container: Container): void {
     container
@@ -66,5 +76,13 @@ export function bindToContainer(container: Container): void {
     container
         .bind(BLACKLISTED_TOKEN_DATA_ACCESSOR_TOKEN)
         .toInstance(BlacklistedTokenDataAccessorImpl)
+        .inSingletonScope();
+    container
+        .bind(USER_TAG_DATA_ACCESSOR_TOKEN)
+        .toInstance(UserTagDataAccessorImpl)
+        .inSingletonScope();
+    container
+        .bind(USER_HAS_USER_TAG_DATA_ACCESSOR_TOKEN)
+        .toInstance(UserHasUserTagDataAccessorImpl)
         .inSingletonScope();
 }

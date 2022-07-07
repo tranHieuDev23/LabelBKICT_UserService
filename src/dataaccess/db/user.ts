@@ -22,6 +22,12 @@ export enum UserListSortOrder {
     DISPLAY_NAME_DESCENDING = 5,
 }
 
+export class UserListFilterOptions {
+    public usernameQuery = "";
+    public userTagIdList: (number | null)[] = [];
+    public userRoleIdList: (number | null)[] = [];
+}
+
 export interface UserDataAccessor {
     createUser(username: string, displayName: string): Promise<number>;
     updateUser(user: User): Promise<void>;
@@ -33,7 +39,8 @@ export interface UserDataAccessor {
     getUserList(
         offset: number,
         limit: number,
-        sortOrder: UserListSortOrder
+        sortOrder: UserListSortOrder,
+        filterOptions: UserListFilterOptions
     ): Promise<User[]>;
     searchUser(
         query: string,
@@ -46,6 +53,12 @@ export interface UserDataAccessor {
 }
 
 const TabNameUserServiceUser = "user_service_user_tab";
+const TabNameUserServiceUserHasUserRole = "user_service_user_has_user_role_tab";
+const ColNameUserServiceUserHasUserRoleId = "user_id";
+const ColNameUserServiceUserHasUserRoleUserRoleId = "user_role_id";
+const TabNameUserServiceUserHasUserTag = "user_service_user_has_user_tag_tab";
+const ColNameUserServiceUserHasUserTagId = "user_id";
+const ColNameUserServiceUserHasUserTagUserTagId = "user_tag_id";
 const ColNameUserServiceUserId = "user_id";
 const ColNameUserServiceUserUsername = "username";
 const ColNameUserServiceUserDisplayName = "display_name";
@@ -259,262 +272,46 @@ export class UserDataAccessorImpl implements UserDataAccessor {
     public async getUserList(
         offset: number,
         limit: number,
-        sortOrder: UserListSortOrder
+        sortOrder: UserListSortOrder,
+        filterOptions: UserListFilterOptions
     ): Promise<User[]> {
-        const keyset = await this.getUserListPaginationKeyset(
-            offset,
-            sortOrder
-        );
-        if (keyset === null) {
-            return [];
-        }
-
-        const rows = await this.getUserListFromPaginationKeyset(
-            keyset,
-            limit,
-            sortOrder
-        );
-        return rows.map((row) => this.getUserFromRow(row));
-    }
-
-    private async getUserListPaginationKeyset(
-        offset: number,
-        sortOrder: UserListSortOrder
-    ): Promise<Record<string, any> | null> {
-        let queryBuilder: Knex.QueryBuilder;
-        switch (sortOrder) {
-            case UserListSortOrder.ID_ASCENDING:
-                queryBuilder = this.knex
-                    .select([ColNameUserServiceUserId])
-                    .from(TabNameUserServiceUser)
-                    .orderBy(ColNameUserServiceUserId, "asc")
-                    .offset(offset);
-                break;
-
-            case UserListSortOrder.ID_DESCENDING:
-                queryBuilder = this.knex
-                    .select([ColNameUserServiceUserId])
-                    .from(TabNameUserServiceUser)
-                    .orderBy(ColNameUserServiceUserId, "desc")
-                    .offset(offset);
-                break;
-
-            case UserListSortOrder.USERNAME_ASCENDING:
-                queryBuilder = this.knex
-                    .select([
-                        ColNameUserServiceUserId,
-                        ColNameUserServiceUserUsername,
-                    ])
-                    .from(TabNameUserServiceUser)
-                    .orderBy(ColNameUserServiceUserUsername, "asc")
-                    .orderBy(ColNameUserServiceUserId, "asc")
-                    .offset(offset);
-                break;
-
-            case UserListSortOrder.USERNAME_DESCENDING:
-                queryBuilder = this.knex
-                    .select([
-                        ColNameUserServiceUserId,
-                        ColNameUserServiceUserUsername,
-                    ])
-                    .from(TabNameUserServiceUser)
-                    .orderBy(ColNameUserServiceUserUsername, "desc")
-                    .orderBy(ColNameUserServiceUserId, "desc")
-                    .offset(offset);
-                break;
-
-            case UserListSortOrder.DISPLAY_NAME_ASCENDING:
-                queryBuilder = this.knex
-                    .select([
-                        ColNameUserServiceUserId,
-                        ColNameUserServiceUserDisplayName,
-                    ])
-                    .from(TabNameUserServiceUser)
-                    .orderBy(ColNameUserServiceUserDisplayName, "asc")
-                    .orderBy(ColNameUserServiceUserId, "asc")
-                    .offset(offset);
-                break;
-
-            case UserListSortOrder.DISPLAY_NAME_DESCENDING:
-                queryBuilder = this.knex
-                    .select([
-                        ColNameUserServiceUserId,
-                        ColNameUserServiceUserDisplayName,
-                    ])
-                    .from(TabNameUserServiceUser)
-                    .orderBy(ColNameUserServiceUserDisplayName, "desc")
-                    .orderBy(ColNameUserServiceUserId, "desc")
-                    .offset(offset);
-                break;
-
-            default:
-                throw new Error("Unsupported sort order value.");
-        }
-
-        queryBuilder = queryBuilder.limit(1);
-
-        let rows: Record<string, any>[];
         try {
-            rows = await queryBuilder;
+            let queryBuilder = this.knex
+                .select(`${TabNameUserServiceUser}.${ColNameUserServiceUserId}`,
+                    ColNameUserServiceUserUsername,
+                    ColNameUserServiceUserDisplayName,
+                    ColNameUserServiceUserFullTextSearchDocument,
+                    ColNameUserServiceUserHasUserRoleUserRoleId,
+                    ColNameUserServiceUserHasUserTagUserTagId)
+                .from(TabNameUserServiceUser)
+                .leftOuterJoin(
+                    TabNameUserServiceUserHasUserRole,
+                    `${TabNameUserServiceUser}.${ColNameUserServiceUserId}`,
+                    `${TabNameUserServiceUserHasUserRole}.${ColNameUserServiceUserHasUserRoleId}`
+                )
+                .leftOuterJoin(
+                    TabNameUserServiceUserHasUserTag,
+                    `${TabNameUserServiceUser}.${ColNameUserServiceUserId}`,
+                    `${TabNameUserServiceUserHasUserTag}.${ColNameUserServiceUserHasUserTagId}`
+                )
+                .offset(offset)
+                .limit(limit);
+            queryBuilder = this.applyUserListOrderByClause(
+                queryBuilder,
+                sortOrder
+            );
+            queryBuilder = queryBuilder.where((qb) => 
+                this.getUserListFilterOptionsWhereClause(qb, filterOptions)
+            );
+            const rows = await queryBuilder;
+            return rows.map((row) => this.getUserFromRow(row));
         } catch (error) {
-            this.logger.error("failed to get user list pagination keyset", {
-                error,
-            });
-            throw ErrorWithStatus.wrapWithStatus(error, status.INTERNAL);
-        }
-
-        if (rows.length == 0) {
-            return null;
-        }
-        return rows[0];
-    }
-
-    private async getUserListFromPaginationKeyset(
-        keyset: Record<string, any>,
-        limit: number,
-        sortOrder: UserListSortOrder
-    ): Promise<Record<string, any>[]> {
-        let queryBuilder: Knex.QueryBuilder;
-        switch (sortOrder) {
-            case UserListSortOrder.ID_ASCENDING:
-                queryBuilder = this.knex
-                    .select()
-                    .from(TabNameUserServiceUser)
-                    .where(
-                        ColNameUserServiceUserId,
-                        ">=",
-                        keyset[ColNameUserServiceUserId]
-                    )
-                    .orderBy(ColNameUserServiceUserId, "asc");
-                break;
-
-            case UserListSortOrder.ID_DESCENDING:
-                queryBuilder = this.knex
-                    .select()
-                    .from(TabNameUserServiceUser)
-                    .where(
-                        ColNameUserServiceUserId,
-                        "<=",
-                        keyset[ColNameUserServiceUserId]
-                    )
-                    .orderBy(ColNameUserServiceUserId, "desc");
-                break;
-
-            case UserListSortOrder.USERNAME_ASCENDING:
-                queryBuilder = this.knex
-                    .select()
-                    .from(TabNameUserServiceUser)
-                    .where(
-                        ColNameUserServiceUserUsername,
-                        ">",
-                        keyset[ColNameUserServiceUserUsername]
-                    )
-                    .orWhere((qb) =>
-                        qb
-                            .where(
-                                ColNameUserServiceUserUsername,
-                                "=",
-                                keyset[ColNameUserServiceUserUsername]
-                            )
-                            .andWhere(
-                                ColNameUserServiceUserId,
-                                ">=",
-                                keyset[ColNameUserServiceUserId]
-                            )
-                    )
-                    .orderBy(ColNameUserServiceUserUsername, "asc")
-                    .orderBy(ColNameUserServiceUserId, "asc");
-                break;
-
-            case UserListSortOrder.USERNAME_DESCENDING:
-                queryBuilder = this.knex
-                    .select()
-                    .from(TabNameUserServiceUser)
-                    .where(
-                        ColNameUserServiceUserUsername,
-                        "<",
-                        keyset[ColNameUserServiceUserUsername]
-                    )
-                    .orWhere((qb) =>
-                        qb
-                            .where(
-                                ColNameUserServiceUserUsername,
-                                "=",
-                                keyset[ColNameUserServiceUserUsername]
-                            )
-                            .andWhere(
-                                ColNameUserServiceUserId,
-                                "<=",
-                                keyset[ColNameUserServiceUserId]
-                            )
-                    )
-                    .orderBy(ColNameUserServiceUserUsername, "desc")
-                    .orderBy(ColNameUserServiceUserId, "desc");
-                break;
-
-            case UserListSortOrder.DISPLAY_NAME_ASCENDING:
-                queryBuilder = this.knex
-                    .select()
-                    .from(TabNameUserServiceUser)
-                    .where(
-                        ColNameUserServiceUserDisplayName,
-                        ">",
-                        keyset[ColNameUserServiceUserDisplayName]
-                    )
-                    .orWhere((qb) =>
-                        qb
-                            .where(
-                                ColNameUserServiceUserDisplayName,
-                                "=",
-                                keyset[ColNameUserServiceUserDisplayName]
-                            )
-                            .andWhere(
-                                ColNameUserServiceUserId,
-                                ">=",
-                                keyset[ColNameUserServiceUserId]
-                            )
-                    )
-                    .orderBy(ColNameUserServiceUserDisplayName, "asc")
-                    .orderBy(ColNameUserServiceUserId, "asc");
-                break;
-
-            case UserListSortOrder.DISPLAY_NAME_DESCENDING:
-                queryBuilder = this.knex
-                    .select()
-                    .from(TabNameUserServiceUser)
-                    .where(
-                        ColNameUserServiceUserDisplayName,
-                        "<",
-                        keyset[ColNameUserServiceUserDisplayName]
-                    )
-                    .orWhere((qb) =>
-                        qb
-                            .where(
-                                ColNameUserServiceUserDisplayName,
-                                "=",
-                                keyset[ColNameUserServiceUserDisplayName]
-                            )
-                            .andWhere(
-                                ColNameUserServiceUserId,
-                                "<=",
-                                keyset[ColNameUserServiceUserId]
-                            )
-                    )
-                    .orderBy(ColNameUserServiceUserDisplayName, "desc")
-                    .orderBy(ColNameUserServiceUserId, "desc");
-                break;
-
-            default:
-                throw new Error("Unsupported sort order value.");
-        }
-
-        queryBuilder = queryBuilder.limit(limit);
-
-        try {
-            return await queryBuilder;
-        } catch (error) {
-            this.logger.error("failed to get user list", {
-                error,
+            this.logger.error("fail to get user list", {
+                offset,
+                limit,
+                sortOrder,
+                filterOptions,
+                error
             });
             throw ErrorWithStatus.wrapWithStatus(error, status.INTERNAL);
         }
@@ -569,6 +366,82 @@ export class UserDataAccessorImpl implements UserDataAccessor {
             row[ColNameUserServiceUserUsername],
             row[ColNameUserServiceUserDisplayName]
         );
+    }
+
+    private applyUserListOrderByClause(
+        qb: Knex.QueryBuilder,
+        sortOption: UserListSortOrder
+    ): Knex.QueryBuilder {
+        switch (sortOption) {
+            case UserListSortOrder.ID_ASCENDING:
+                return qb.orderBy(ColNameUserServiceUserId, "asc");
+            case UserListSortOrder.ID_DESCENDING:
+                return qb.orderBy(ColNameUserServiceUserId, "desc");
+            case UserListSortOrder.USERNAME_ASCENDING:
+                return qb
+                    .orderBy(ColNameUserServiceUserUsername, "asc")
+                    .orderBy(ColNameUserServiceUserId, "asc");
+            case UserListSortOrder.USERNAME_DESCENDING:
+                return qb
+                    .orderBy(ColNameUserServiceUserUsername, "desc")
+                    .orderBy(ColNameUserServiceUserId, "desc");
+            case UserListSortOrder.DISPLAY_NAME_ASCENDING:
+                return qb
+                    .orderBy(ColNameUserServiceUserDisplayName, "asc")
+                    .orderBy(ColNameUserServiceUserId, "asc");
+            case UserListSortOrder.DISPLAY_NAME_DESCENDING:
+                return qb
+                    .orderBy(ColNameUserServiceUserDisplayName, "desc")
+                    .orderBy(ColNameUserServiceUserId, "desc");
+            default:
+                throw new ErrorWithStatus(
+                    "invalid user list sort order",
+                    status.INVALID_ARGUMENT
+                );
+        }
+    }
+
+    private getUserListFilterOptionsWhereClause(
+        qb: Knex.QueryBuilder,
+        filterOptions: UserListFilterOptions
+    ): Knex.QueryBuilder {
+        if (filterOptions.usernameQuery !== "") {
+            qb.whereRaw(
+                `${ColNameUserServiceUserFullTextSearchDocument} @@ plainto_tsquery (?)`,
+                filterOptions.usernameQuery
+            )
+        }
+        if (filterOptions.userTagIdList.length > 0) {
+            const hasNullUserTag =
+                filterOptions.userTagIdList.findIndex(
+                    (userTagId) => userTagId === null
+                ) !== -1;
+            qb.whereIn(
+                `${ColNameUserServiceUserHasUserTagUserTagId}`,
+                filterOptions.userTagIdList
+            );
+            if (hasNullUserTag) {
+                qb.orWhereNull(
+                    `${ColNameUserServiceUserHasUserTagUserTagId}`,
+                );
+            }
+        }
+        if (filterOptions.userRoleIdList.length > 0) {
+            const hasNullUserRole =
+                filterOptions.userRoleIdList.findIndex(
+                    (userRoleId) => userRoleId === null
+                ) !== -1;
+            qb.whereIn(
+                `${ColNameUserServiceUserHasUserRoleUserRoleId}`,
+                filterOptions.userRoleIdList
+            );
+            if (hasNullUserRole) {
+                qb.orWhereNull(
+                    `${ColNameUserServiceUserHasUserRoleUserRoleId}`,
+                );
+            }
+        }
+        return qb;
     }
 }
 
