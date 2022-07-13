@@ -773,8 +773,6 @@ export class UserServiceHandlersFactory {
                 }
 
                 try {
-                    console.log(req.userId,
-                        req.userTagId);
                     await this.userTagManagementOperator.removeUserTagFromUser(
                         req.userId,
                         req.userTagId
