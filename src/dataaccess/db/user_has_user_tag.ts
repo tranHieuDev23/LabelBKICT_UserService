@@ -9,6 +9,7 @@ import { UserTag } from "./user_tag";
 export interface UserHasUserTagDataAccessor {
     createUserHasUserTag(userId: number, userTagId: number): Promise<void>;
     deleteUserHasUserTag(userId: number, userTagId: number): Promise<void>;
+    getUserTagListOfUser(userIdList: number): Promise<UserTag[]>;
     getUserTagListOfUserList(userIdList: number[]): Promise<UserTag[][]>;
     getUserTagIdListOfUser(userId: number): Promise<number[]>;
     getUserHasUserTagWithXLock(
@@ -85,6 +86,39 @@ export class UserHasUserTagDataAccessorImpl
                 `no user has user tag relation found with user_id ${userId}, user_tag_id ${userTagId}`,
                 status.NOT_FOUND
             );
+        }
+    }
+
+    public async getUserTagListOfUser(
+        userId: number
+    ): Promise<UserTag[]> {
+        try {
+            const rows = await this.knex
+                .select()
+                .from(TabNameUserServiceUserHasUserTag)
+                .join(
+                    TabNameUserServiceUserTag,
+                    `${TabNameUserServiceUserHasUserTag}.${ColNameUserServiceUserHasUserTagUserTagId}`,
+                    `${TabNameUserServiceUserTag}.${ColNameUserServiceUserTagId}`
+                )
+                .where(ColNameUserServiceUserHasUserTagUserId, userId)
+                .orderBy(ColNameUserServiceUserHasUserTagUserId, "asc");
+            
+            const results: UserTag[] = [];
+            for (const row of rows) {
+                results.push(new UserTag(
+                    +row[ColNameUserServiceUserHasUserTagUserTagId],
+                    row[ColNameUserServiceUserTagDisplayName],
+                    row[ColNameUserServiceUserTagDescription]
+                ))
+            }
+
+            return results;
+        } catch (error) {
+            this.logger.error("failed to get user tag list of user", {
+                error,
+            });
+            throw ErrorWithStatus.wrapWithStatus(error, status.INTERNAL);
         }
     }
 
