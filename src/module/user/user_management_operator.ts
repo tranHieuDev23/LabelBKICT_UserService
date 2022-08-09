@@ -165,7 +165,12 @@ export class UserManagementOperatorImpl implements UserManagementOperator {
         const dmSortOrder = this.getUserListSortOrder(sortOrder);
         const dmResults = await Promise.all([
             this.userDM.getUserCount(),
-            this.userDM.getUserList(offset, limit, dmSortOrder, dmFilterOptions),
+            this.userDM.getUserList(
+                offset,
+                limit,
+                dmSortOrder,
+                dmFilterOptions
+            ),
         ]);
         return {
             totalUserCount: dmResults[0],
@@ -243,22 +248,13 @@ export class UserManagementOperatorImpl implements UserManagementOperator {
         if (filterOptions === undefined) {
             return dmFilterOptions;
         }
-        dmFilterOptions.usernameQuery =
-            filterOptions.usernameQuery || "";
-
-        dmFilterOptions.userTagIdList = filterOptions.userTagIdList || [];
-        dmFilterOptions.userTagIdList = (
-            filterOptions.userTagIdList || []
-        ).map((userTagId) => {
-            return userTagId === 0 ? null : userTagId;
-        });
-
-        dmFilterOptions.userRoleIdList = filterOptions.userRoleIdList || [];
+        dmFilterOptions.usernameQuery = filterOptions.usernameQuery || "";
+        dmFilterOptions.userTagIdList = (filterOptions.userTagIdList || []).map(
+            (userTagId) => (userTagId === 0 ? null : userTagId)
+        );
         dmFilterOptions.userRoleIdList = (
             filterOptions.userRoleIdList || []
-        ).map((userRoleId) => {
-            return userRoleId === 0 ? null : userRoleId;
-        });
+        ).map((userRoleId) => (userRoleId === 0 ? null : userRoleId));
         return dmFilterOptions;
     }
 }

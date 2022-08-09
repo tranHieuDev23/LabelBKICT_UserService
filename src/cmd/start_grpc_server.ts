@@ -25,8 +25,8 @@ export function startGRPCServer(dotenvPath: string) {
     role.bindToContainer(container);
     token.bindToContainer(container);
     user.bindToContainer(container);
-    service.bindToContainer(container);
     tag.bindToContainer(container);
+    service.bindToContainer(container);
 
     const server = container.get(service.USER_SERVICE_GRPC_SERVER_TOKEN);
     server.loadProtoAndStart("./src/proto/service/user_service.proto");

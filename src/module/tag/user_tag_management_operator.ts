@@ -11,7 +11,10 @@ import {
 } from "../../dataaccess/db";
 import { UserTag } from "../../proto/gen/UserTag";
 import { ErrorWithStatus, LOGGER_TOKEN } from "../../utils";
-import { UserTagDataAccessor, UserTagListSortOrder } from "../../dataaccess/db/user_tag";
+import {
+    UserTagDataAccessor,
+    UserTagListSortOrder,
+} from "../../dataaccess/db/user_tag";
 import { _UserTagListSortOrder_Values } from "../../proto/gen/UserTagListSortOrder";
 
 export interface UserTagManagementOperator {
@@ -240,8 +243,7 @@ export class UserTagManagementOperatorImpl
                     status.FAILED_PRECONDITION
                 );
             }
-            console.log("o day",userId,
-                userTagId)
+            console.log("o day", userId, userTagId);
             return await this.userHasUserTagDM.deleteUserHasUserTag(
                 userId,
                 userTagId
@@ -252,9 +254,7 @@ export class UserTagManagementOperatorImpl
     public async getUserTagListFromUserList(
         userIdList: number[]
     ): Promise<UserTag[][]> {
-        return await this.userHasUserTagDM.getUserTagListOfUserList(
-            userIdList
-        );
+        return await this.userHasUserTagDM.getUserTagListOfUserList(userIdList);
     }
 
     private sanitizeUserTagDisplayName(displayName: string): string {

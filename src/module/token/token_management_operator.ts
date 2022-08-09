@@ -19,7 +19,6 @@ export interface TokenManagementOperator {
     ): Promise<{ user: User | null; newToken: string | null }>;
     blacklistToken(token: string): Promise<void>;
     deleteExpiredBlacklistedToken(requestTime: number): Promise<number>;
-    deleteExpiredBlacklistedToken(requestTime: number): Promise<number>;
 }
 
 export class TokenManagementOperatorImpl implements TokenManagementOperator {
@@ -101,7 +100,7 @@ export class TokenManagementOperatorImpl implements TokenManagementOperator {
             await this.blacklistedTokenDM.deleteExpiredBlacklistedToken(
                 requestTime
             );
-        if (deletedTokenCount == null || deletedTokenCount == 0) {
+        if (deletedTokenCount == 0) {
             this.logger.info("no token is expired", {
                 deleteToken: deletedTokenCount,
             });

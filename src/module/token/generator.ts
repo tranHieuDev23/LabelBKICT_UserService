@@ -3,7 +3,7 @@ import { injected, token } from "brandi";
 import jwt, { SignOptions, VerifyOptions } from "jsonwebtoken";
 import { Logger } from "winston";
 import { TokenConfig, TOKEN_CONFIG_TOKEN } from "../../config";
-import { ErrorWithStatus, LOGGER_TOKEN, Id_GENERATOR_TOKEN } from "../../utils";
+import { ErrorWithStatus, LOGGER_TOKEN, ID_GENERATOR_TOKEN } from "../../utils";
 import { IdGenerator } from "../../utils/id";
 
 export class DecodeTokenResult {
@@ -98,6 +98,6 @@ export class JWTGenerator implements TokenGenerator {
     }
 }
 
-injected(JWTGenerator, Id_GENERATOR_TOKEN, TOKEN_CONFIG_TOKEN, LOGGER_TOKEN);
+injected(JWTGenerator, ID_GENERATOR_TOKEN, TOKEN_CONFIG_TOKEN, LOGGER_TOKEN);
 
 export const TOKEN_GENERATOR_TOKEN = token<TokenGenerator>("TokenGenerator");

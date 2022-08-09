@@ -130,16 +130,21 @@ export class UserPasswordManagementOperatorImpl
                 `no user with username ${username} found`,
                 status.NOT_FOUND
             );
-        } else {
-            const userTagList = await this.userHasUserTagDM.getUserTagListOfUser(user.id);
-            for (const userTag of userTagList) {
-                if (userTag.displayName === USER_TAG_DISPLAY_NAME_OF_DISABLED_STATUS_USER) {
-                    this.logger.error("no user with username found", { username });
-                    throw new ErrorWithStatus(
-                        `no user with username ${username} found`,
-                        status.NOT_FOUND
-                    ); 
-                }
+        }
+
+        const userTagList = await this.userHasUserTagDM.getUserTagListOfUser(
+            user.id
+        );
+        for (const userTag of userTagList) {
+            if (
+                userTag.displayName ===
+                USER_TAG_DISPLAY_NAME_OF_DISABLED_STATUS_USER
+            ) {
+                this.logger.error("user is disabled", { username });
+                throw new ErrorWithStatus(
+                    `user ${username} is disabled`,
+                    status.NOT_FOUND
+                );
             }
         }
 

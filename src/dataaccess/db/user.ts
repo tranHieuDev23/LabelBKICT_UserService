@@ -277,12 +277,14 @@ export class UserDataAccessorImpl implements UserDataAccessor {
     ): Promise<User[]> {
         try {
             let queryBuilder = this.knex
-                .select(`${TabNameUserServiceUser}.${ColNameUserServiceUserId}`,
+                .select(
+                    `${TabNameUserServiceUser}.${ColNameUserServiceUserId}`,
                     ColNameUserServiceUserUsername,
                     ColNameUserServiceUserDisplayName,
                     ColNameUserServiceUserFullTextSearchDocument,
                     ColNameUserServiceUserHasUserRoleUserRoleId,
-                    ColNameUserServiceUserHasUserTagUserTagId)
+                    ColNameUserServiceUserHasUserTagUserTagId
+                )
                 .from(TabNameUserServiceUser)
                 .leftOuterJoin(
                     TabNameUserServiceUserHasUserRole,
@@ -300,7 +302,7 @@ export class UserDataAccessorImpl implements UserDataAccessor {
                 queryBuilder,
                 sortOrder
             );
-            queryBuilder = queryBuilder.where((qb) => 
+            queryBuilder = queryBuilder.where((qb) =>
                 this.getUserListFilterOptionsWhereClause(qb, filterOptions)
             );
             const rows = await queryBuilder;
@@ -311,7 +313,7 @@ export class UserDataAccessorImpl implements UserDataAccessor {
                 limit,
                 sortOrder,
                 filterOptions,
-                error
+                error,
             });
             throw ErrorWithStatus.wrapWithStatus(error, status.INTERNAL);
         }
@@ -409,7 +411,7 @@ export class UserDataAccessorImpl implements UserDataAccessor {
             qb.whereRaw(
                 `${ColNameUserServiceUserFullTextSearchDocument} @@ plainto_tsquery (?)`,
                 filterOptions.usernameQuery
-            )
+            );
         }
         if (filterOptions.userTagIdList.length > 0) {
             const hasNullUserTag =
@@ -421,9 +423,7 @@ export class UserDataAccessorImpl implements UserDataAccessor {
                 filterOptions.userTagIdList
             );
             if (hasNullUserTag) {
-                qb.orWhereNull(
-                    `${ColNameUserServiceUserHasUserTagUserTagId}`,
-                );
+                qb.orWhereNull(`${ColNameUserServiceUserHasUserTagUserTagId}`);
             }
         }
         if (filterOptions.userRoleIdList.length > 0) {
@@ -437,7 +437,7 @@ export class UserDataAccessorImpl implements UserDataAccessor {
             );
             if (hasNullUserRole) {
                 qb.orWhereNull(
-                    `${ColNameUserServiceUserHasUserRoleUserRoleId}`,
+                    `${ColNameUserServiceUserHasUserRoleUserRoleId}`
                 );
             }
         }
