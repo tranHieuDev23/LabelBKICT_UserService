@@ -1,11 +1,11 @@
 import { token } from "brandi";
 
 export class ApplicationConfig {
-    public firstUserDisplayName: string = "";
-    public firstUserUsername: string = "";
-    public firstUserPassword: string = "";
-    public firstUserRoleDisplayName: string = "Admin";
-    public firstUserRoleDescription: string = "";
+    public firstUserDisplayName = "";
+    public firstUserUsername = "";
+    public firstUserPassword = "";
+    public firstUserRoleDisplayName = "Admin";
+    public firstUserRoleDescription = "";
     public firstUserPermissionPermissionNameList: string[] = [];
 
     public static fromEnv(): ApplicationConfig {

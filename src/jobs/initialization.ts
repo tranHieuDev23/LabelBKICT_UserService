@@ -25,8 +25,6 @@ import {
     UserManagementOperator,
     USER_MANAGEMENT_OPERATOR_TOKEN,
 } from "../module/user";
-import { _UserListSortOrder_Values } from "../proto/gen/UserListSortOrder";
-import { _UserRoleListSortOrder_Values } from "../proto/gen/UserRoleListSortOrder";
 import { LOGGER_TOKEN } from "../utils";
 
 export interface InitializationJob {
