@@ -243,11 +243,7 @@ export class UserTagManagementOperatorImpl
                     status.FAILED_PRECONDITION
                 );
             }
-            console.log("o day", userId, userTagId);
-            return await this.userHasUserTagDM.deleteUserHasUserTag(
-                userId,
-                userTagId
-            );
+            return await dm.deleteUserHasUserTag(userId, userTagId);
         });
     }
 

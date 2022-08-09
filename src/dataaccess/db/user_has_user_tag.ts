@@ -9,7 +9,7 @@ import { UserTag } from "./user_tag";
 export interface UserHasUserTagDataAccessor {
     createUserHasUserTag(userId: number, userTagId: number): Promise<void>;
     deleteUserHasUserTag(userId: number, userTagId: number): Promise<void>;
-    getUserTagListOfUser(userIdList: number): Promise<UserTag[]>;
+    getUserTagListOfUser(userId: number): Promise<UserTag[]>;
     getUserTagListOfUserList(userIdList: number[]): Promise<UserTag[][]>;
     getUserTagIdListOfUser(userId: number): Promise<number[]>;
     getUserHasUserTagWithXLock(
@@ -89,9 +89,7 @@ export class UserHasUserTagDataAccessorImpl
         }
     }
 
-    public async getUserTagListOfUser(
-        userId: number
-    ): Promise<UserTag[]> {
+    public async getUserTagListOfUser(userId: number): Promise<UserTag[]> {
         try {
             const rows = await this.knex
                 .select()
@@ -103,14 +101,10 @@ export class UserHasUserTagDataAccessorImpl
                 )
                 .where(ColNameUserServiceUserHasUserTagUserId, userId)
                 .orderBy(ColNameUserServiceUserHasUserTagUserId, "asc");
-            
+
             const results: UserTag[] = [];
             for (const row of rows) {
-                results.push(new UserTag(
-                    +row[ColNameUserServiceUserHasUserTagUserTagId],
-                    row[ColNameUserServiceUserTagDisplayName],
-                    row[ColNameUserServiceUserTagDescription]
-                ))
+                results.push(this.getUserTagFromRow(row));
             }
 
             return results;
@@ -145,13 +139,7 @@ export class UserHasUserTagDataAccessorImpl
                 }
                 userIdToUserTagList
                     .get(userId)
-                    ?.push(
-                        new UserTag(
-                            +row[ColNameUserServiceUserHasUserTagUserTagId],
-                            row[ColNameUserServiceUserTagDisplayName],
-                            row[ColNameUserServiceUserTagDescription]
-                        )
-                    );
+                    ?.push(this.getUserTagFromRow(row));
             }
 
             const results: UserTag[][] = [];
@@ -224,8 +212,7 @@ export class UserHasUserTagDataAccessorImpl
 
             return {
                 userId: +rows[0][ColNameUserServiceUserHasUserTagUserId],
-                userTagId:
-                    +rows[0][ColNameUserServiceUserHasUserTagUserTagId],
+                userTagId: +rows[0][ColNameUserServiceUserHasUserTagUserTagId],
             };
         } catch (error) {
             this.logger.error("failed to get user has user tag relation", {
@@ -245,6 +232,14 @@ export class UserHasUserTagDataAccessorImpl
             );
             return cb(txDataAccessor);
         });
+    }
+
+    private getUserTagFromRow(row: Record<string, any>): UserTag {
+        return new UserTag(
+            +row[ColNameUserServiceUserTagId],
+            row[ColNameUserServiceUserTagDisplayName],
+            row[ColNameUserServiceUserTagDescription]
+        );
     }
 }
 

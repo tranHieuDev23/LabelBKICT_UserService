@@ -143,7 +143,7 @@ export class UserPasswordManagementOperatorImpl
                 this.logger.error("user is disabled", { username });
                 throw new ErrorWithStatus(
                     `user ${username} is disabled`,
-                    status.NOT_FOUND
+                    status.UNAUTHENTICATED
                 );
             }
         }

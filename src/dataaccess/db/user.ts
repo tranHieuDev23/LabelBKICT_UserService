@@ -53,17 +53,19 @@ export interface UserDataAccessor {
 }
 
 const TabNameUserServiceUser = "user_service_user_tab";
-const TabNameUserServiceUserHasUserRole = "user_service_user_has_user_role_tab";
-const ColNameUserServiceUserHasUserRoleId = "user_id";
-const ColNameUserServiceUserHasUserRoleUserRoleId = "user_role_id";
-const TabNameUserServiceUserHasUserTag = "user_service_user_has_user_tag_tab";
-const ColNameUserServiceUserHasUserTagId = "user_id";
-const ColNameUserServiceUserHasUserTagUserTagId = "user_tag_id";
 const ColNameUserServiceUserId = "user_id";
 const ColNameUserServiceUserUsername = "username";
 const ColNameUserServiceUserDisplayName = "display_name";
 const ColNameUserServiceUserFullTextSearchDocument =
     "full_text_search_document";
+
+const TabNameUserServiceUserHasUserRole = "user_service_user_has_user_role_tab";
+const ColNameUserServiceUserHasUserRoleUserId = "user_id";
+const ColNameUserServiceUserHasUserRoleUserRoleId = "user_role_id";
+
+const TabNameUserServiceUserHasUserTag = "user_service_user_has_user_tag_tab";
+const ColNameUserServiceUserHasUserTagUserId = "user_id";
+const ColNameUserServiceUserHasUserTagUserTagId = "user_tag_id";
 
 export class UserDataAccessorImpl implements UserDataAccessor {
     constructor(
@@ -279,22 +281,19 @@ export class UserDataAccessorImpl implements UserDataAccessor {
             let queryBuilder = this.knex
                 .select(
                     `${TabNameUserServiceUser}.${ColNameUserServiceUserId}`,
-                    ColNameUserServiceUserUsername,
-                    ColNameUserServiceUserDisplayName,
-                    ColNameUserServiceUserFullTextSearchDocument,
-                    ColNameUserServiceUserHasUserRoleUserRoleId,
-                    ColNameUserServiceUserHasUserTagUserTagId
+                    `${TabNameUserServiceUser}.${ColNameUserServiceUserUsername}`,
+                    `${TabNameUserServiceUser}.${ColNameUserServiceUserDisplayName}`
                 )
                 .from(TabNameUserServiceUser)
                 .leftOuterJoin(
                     TabNameUserServiceUserHasUserRole,
                     `${TabNameUserServiceUser}.${ColNameUserServiceUserId}`,
-                    `${TabNameUserServiceUserHasUserRole}.${ColNameUserServiceUserHasUserRoleId}`
+                    `${TabNameUserServiceUserHasUserRole}.${ColNameUserServiceUserHasUserRoleUserId}`
                 )
                 .leftOuterJoin(
                     TabNameUserServiceUserHasUserTag,
                     `${TabNameUserServiceUser}.${ColNameUserServiceUserId}`,
-                    `${TabNameUserServiceUserHasUserTag}.${ColNameUserServiceUserHasUserTagId}`
+                    `${TabNameUserServiceUserHasUserTag}.${ColNameUserServiceUserHasUserTagUserId}`
                 )
                 .offset(offset)
                 .limit(limit);
