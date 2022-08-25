@@ -28,6 +28,7 @@ export interface UserTagManagementOperator {
     ): Promise<{ totalUserTagCount: number; userTagList: UserTag[] }>;
     addUserTagToUser(userId: number, userTagId: number): Promise<void>;
     removeUserTagFromUser(userId: number, userTagId: number): Promise<void>;
+    getUserTagListFromUser(userId: number): Promise<UserTag[]>;
     getUserTagListFromUserList(userIdList: number[]): Promise<UserTag[][]>;
 }
 
@@ -245,6 +246,14 @@ export class UserTagManagementOperatorImpl
             }
             return await dm.deleteUserHasUserTag(userId, userTagId);
         });
+    }
+
+    public async getUserTagListFromUser(
+        userId: number
+    ): Promise<UserTag[]> {
+        return await this.userHasUserTagDM.getUserTagListOfUser(
+            userId
+        );
     }
 
     public async getUserTagListFromUserList(

@@ -783,6 +783,26 @@ export class UserServiceHandlersFactory {
                 }
             },
 
+            GetUserTagListOfUser: async (call, callback) => {
+                const req = call.request;
+                if (req.userId === undefined) {
+                    return callback({
+                        message: "user_id is required",
+                        code: status.INVALID_ARGUMENT,
+                    });
+                }
+
+                try {
+                    const userTagList =
+                        await this.userTagManagementOperator.getUserTagListFromUser(
+                            req.userId
+                        );
+                    return callback(null, { userTagList });
+                } catch (e) {
+                    return this.handleError(e, callback);
+                }
+            },
+
             GetUserTagListOfUserList: async (call, callback) => {
                 const req = call.request;
                 if (req.userIdList === undefined) {
