@@ -12,6 +12,7 @@ export interface UserHasUserTagDataAccessor {
     getUserTagListOfUser(userId: number): Promise<UserTag[]>;
     getUserTagListOfUserList(userIdList: number[]): Promise<UserTag[][]>;
     getUserTagIdListOfUser(userId: number): Promise<number[]>;
+    getUserIdListOfUserTagList(userTagIdList: (number | null)[]): Promise<number[]>;
     getUserHasUserTagWithXLock(
         userId: number,
         userTagId: number
@@ -170,6 +171,28 @@ export class UserHasUserTagDataAccessorImpl
             );
         } catch (error) {
             this.logger.error("failed to get user tag id list of user id", {
+                error,
+            });
+            throw ErrorWithStatus.wrapWithStatus(error, status.INTERNAL);
+        }
+    }
+
+    public async getUserIdListOfUserTagList(
+        userTagIdList: (number | null)[]
+    ): Promise<number[]> {
+        try {
+            const rows = await this.knex    
+                .select()
+                .from(TabNameUserServiceUserHasUserTag)
+                .whereIn(
+                    ColNameUserServiceUserHasUserTagUserTagId,
+                    userTagIdList
+                );
+            return rows.map(
+                (row) => +row[ColNameUserServiceUserHasUserTagUserId]
+            );
+        } catch (error) {
+            this.logger.error("failed to get user id list of user tag id list", {
                 error,
             });
             throw ErrorWithStatus.wrapWithStatus(error, status.INTERNAL);

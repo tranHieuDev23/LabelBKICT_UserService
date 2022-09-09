@@ -131,23 +131,7 @@ export class UserPasswordManagementOperatorImpl
                 status.NOT_FOUND
             );
         }
-
-        const userTagList = await this.userHasUserTagDM.getUserTagListOfUser(
-            user.id
-        );
-        for (const userTag of userTagList) {
-            if (
-                userTag.displayName ===
-                USER_TAG_DISPLAY_NAME_OF_DISABLED_STATUS_USER
-            ) {
-                this.logger.error("user is disabled", { username });
-                throw new ErrorWithStatus(
-                    `user ${username} is disabled`,
-                    status.UNAUTHENTICATED
-                );
-            }
-        }
-
+        
         const hash = await this.userPasswordDM.getUserPasswordHash(user.id);
         if (hash === null) {
             this.logger.error("user doesn't have password", {

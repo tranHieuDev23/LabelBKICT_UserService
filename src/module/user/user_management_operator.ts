@@ -4,9 +4,13 @@ import validator from "validator";
 import { Logger } from "winston";
 import {
     UserDataAccessor,
+    UserHasUserRoleDataAccessor,
+    UserHasUserTagDataAccessor,
     UserListFilterOptions as DMUserListFilterOptions,
     UserListSortOrder,
     USER_DATA_ACCESSOR_TOKEN,
+    USER_HAS_USER_ROLE_DATA_ACCESSOR_TOKEN,
+    USER_HAS_USER_TAG_DATA_ACCESSOR_TOKEN,
 } from "../../dataaccess/db";
 import { User } from "../../proto/gen/User";
 import { _UserListSortOrder_Values } from "../../proto/gen/UserListSortOrder";
@@ -33,6 +37,8 @@ export interface UserManagementOperator {
 export class UserManagementOperatorImpl implements UserManagementOperator {
     constructor(
         private readonly userDM: UserDataAccessor,
+        private readonly userHasUserRoleDM: UserHasUserRoleDataAccessor,
+        private readonly userHasUserTagDM: UserHasUserTagDataAccessor,
         private readonly logger: Logger
     ) {}
 
@@ -162,6 +168,15 @@ export class UserManagementOperatorImpl implements UserManagementOperator {
         const dmFilterOptions = await this.getDMUserListFilterOptions(
             filterOptions
         );
+
+        const userIdListOfUserTagList = await this.userHasUserTagDM.getUserIdListOfUserTagList(
+            dmFilterOptions.userTagIdList
+        );
+        const userIdListOfUSerRoleList = await this.userHasUserRoleDM.getUserIdListOfUserRoleList(
+            dmFilterOptions.userRoleIdList
+        );
+        dmFilterOptions.userIdList = [...new Set([...userIdListOfUserTagList ,...userIdListOfUSerRoleList])];
+
         const dmSortOrder = this.getUserListSortOrder(sortOrder);
         const dmResults = await Promise.all([
             this.userDM.getUserCount(),
@@ -252,14 +267,26 @@ export class UserManagementOperatorImpl implements UserManagementOperator {
         dmFilterOptions.userTagIdList = (filterOptions.userTagIdList || []).map(
             (userTagId) => (userTagId === 0 ? null : userTagId)
         );
+        dmFilterOptions.userTagIdList = dmFilterOptions.userTagIdList.filter(element => {
+            return element !== null;
+        });
         dmFilterOptions.userRoleIdList = (
             filterOptions.userRoleIdList || []
         ).map((userRoleId) => (userRoleId === 0 ? null : userRoleId));
+        dmFilterOptions.userRoleIdList = dmFilterOptions.userRoleIdList.filter(element => {
+            return element !== null;
+        });
         return dmFilterOptions;
     }
 }
 
-injected(UserManagementOperatorImpl, USER_DATA_ACCESSOR_TOKEN, LOGGER_TOKEN);
+injected(
+    UserManagementOperatorImpl, 
+    USER_DATA_ACCESSOR_TOKEN, 
+    USER_HAS_USER_ROLE_DATA_ACCESSOR_TOKEN, 
+    USER_HAS_USER_TAG_DATA_ACCESSOR_TOKEN,
+    LOGGER_TOKEN
+);
 
 export const USER_MANAGEMENT_OPERATOR_TOKEN = token<UserManagementOperator>(
     "UserManagementOperator"

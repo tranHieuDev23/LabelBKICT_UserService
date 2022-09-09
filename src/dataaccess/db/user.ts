@@ -26,6 +26,7 @@ export class UserListFilterOptions {
     public usernameQuery = "";
     public userTagIdList: (number | null)[] = [];
     public userRoleIdList: (number | null)[] = [];
+    public userIdList: number[] = [];
 }
 
 export interface UserDataAccessor {
@@ -285,16 +286,6 @@ export class UserDataAccessorImpl implements UserDataAccessor {
                     `${TabNameUserServiceUser}.${ColNameUserServiceUserDisplayName}`
                 )
                 .from(TabNameUserServiceUser)
-                .leftOuterJoin(
-                    TabNameUserServiceUserHasUserRole,
-                    `${TabNameUserServiceUser}.${ColNameUserServiceUserId}`,
-                    `${TabNameUserServiceUserHasUserRole}.${ColNameUserServiceUserHasUserRoleUserId}`
-                )
-                .leftOuterJoin(
-                    TabNameUserServiceUserHasUserTag,
-                    `${TabNameUserServiceUser}.${ColNameUserServiceUserId}`,
-                    `${TabNameUserServiceUserHasUserTag}.${ColNameUserServiceUserHasUserTagUserId}`
-                )
                 .offset(offset)
                 .limit(limit);
             queryBuilder = this.applyUserListOrderByClause(
@@ -412,33 +403,11 @@ export class UserDataAccessorImpl implements UserDataAccessor {
                 filterOptions.usernameQuery
             );
         }
-        if (filterOptions.userTagIdList.length > 0) {
-            const hasNullUserTag =
-                filterOptions.userTagIdList.findIndex(
-                    (userTagId) => userTagId === null
-                ) !== -1;
+        if (filterOptions.userIdList.length > 0) {
             qb.whereIn(
-                `${ColNameUserServiceUserHasUserTagUserTagId}`,
-                filterOptions.userTagIdList
+                `${ColNameUserServiceUserId}`,
+                filterOptions.userIdList
             );
-            if (hasNullUserTag) {
-                qb.orWhereNull(`${ColNameUserServiceUserHasUserTagUserTagId}`);
-            }
-        }
-        if (filterOptions.userRoleIdList.length > 0) {
-            const hasNullUserRole =
-                filterOptions.userRoleIdList.findIndex(
-                    (userRoleId) => userRoleId === null
-                ) !== -1;
-            qb.whereIn(
-                `${ColNameUserServiceUserHasUserRoleUserRoleId}`,
-                filterOptions.userRoleIdList
-            );
-            if (hasNullUserRole) {
-                qb.orWhereNull(
-                    `${ColNameUserServiceUserHasUserRoleUserRoleId}`
-                );
-            }
         }
         return qb;
     }

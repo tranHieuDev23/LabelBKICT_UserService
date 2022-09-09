@@ -11,6 +11,7 @@ export interface UserHasUserRoleDataAccessor {
     deleteUserHasUserRole(userId: number, userRoleId: number): Promise<void>;
     getUserRoleListOfUserList(userIdList: number[]): Promise<UserRole[][]>;
     getUserRoleIdListOfUser(userId: number): Promise<number[]>;
+    getUserIdListOfUserRoleList(userRoleIdList: (number | null)[]): Promise<number[]>
     getUserHasUserRoleWithXLock(
         userId: number,
         userRoleId: number
@@ -148,6 +149,28 @@ export class UserHasUserRoleDataAccessorImpl
             );
         } catch (error) {
             this.logger.error("failed to get user role id list of user id", {
+                error,
+            });
+            throw ErrorWithStatus.wrapWithStatus(error, status.INTERNAL);
+        }
+    }
+
+    public async getUserIdListOfUserRoleList(
+        userRoleIdList: (number | null)[]
+    ): Promise<number[]> {
+        try {
+            const rows = await this.knex    
+                .select()
+                .from(TabNameUserServiceUserHasUserRole)
+                .whereIn(
+                    ColNameUserServiceUserHasUserRoleUserRoleId,
+                    userRoleIdList
+                );
+            return rows.map(
+                (row) => +row[ColNameUserServiceUserHasUserRoleUserId]
+            );
+        } catch (error) {
+            this.logger.error("failed to get user id list of user role id list", {
                 error,
             });
             throw ErrorWithStatus.wrapWithStatus(error, status.INTERNAL);
