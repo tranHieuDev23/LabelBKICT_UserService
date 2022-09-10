@@ -24,8 +24,6 @@ export enum UserListSortOrder {
 
 export class UserListFilterOptions {
     public usernameQuery = "";
-    public userTagIdList: (number | null)[] = [];
-    public userRoleIdList: (number | null)[] = [];
     public userIdList: number[] = [];
 }
 
@@ -59,14 +57,6 @@ const ColNameUserServiceUserUsername = "username";
 const ColNameUserServiceUserDisplayName = "display_name";
 const ColNameUserServiceUserFullTextSearchDocument =
     "full_text_search_document";
-
-const TabNameUserServiceUserHasUserRole = "user_service_user_has_user_role_tab";
-const ColNameUserServiceUserHasUserRoleUserId = "user_id";
-const ColNameUserServiceUserHasUserRoleUserRoleId = "user_role_id";
-
-const TabNameUserServiceUserHasUserTag = "user_service_user_has_user_tag_tab";
-const ColNameUserServiceUserHasUserTagUserId = "user_id";
-const ColNameUserServiceUserHasUserTagUserTagId = "user_tag_id";
 
 export class UserDataAccessorImpl implements UserDataAccessor {
     constructor(

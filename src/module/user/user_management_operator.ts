@@ -169,14 +169,6 @@ export class UserManagementOperatorImpl implements UserManagementOperator {
             filterOptions
         );
 
-        const userIdListOfUserTagList = await this.userHasUserTagDM.getUserIdListOfUserTagList(
-            dmFilterOptions.userTagIdList
-        );
-        const userIdListOfUSerRoleList = await this.userHasUserRoleDM.getUserIdListOfUserRoleList(
-            dmFilterOptions.userRoleIdList
-        );
-        dmFilterOptions.userIdList = [...new Set([...userIdListOfUserTagList ,...userIdListOfUSerRoleList])];
-
         const dmSortOrder = this.getUserListSortOrder(sortOrder);
         const dmResults = await Promise.all([
             this.userDM.getUserCount(),
@@ -264,18 +256,28 @@ export class UserManagementOperatorImpl implements UserManagementOperator {
             return dmFilterOptions;
         }
         dmFilterOptions.usernameQuery = filterOptions.usernameQuery || "";
-        dmFilterOptions.userTagIdList = (filterOptions.userTagIdList || []).map(
+
+        let userTagIdList = (filterOptions.userTagIdList || []).map(
             (userTagId) => (userTagId === 0 ? null : userTagId)
         );
-        dmFilterOptions.userTagIdList = dmFilterOptions.userTagIdList.filter(element => {
+        userTagIdList = userTagIdList.filter(element => {
             return element !== null;
         });
-        dmFilterOptions.userRoleIdList = (
+        const userIdListOfUserTagList = await this.userHasUserTagDM.getUserIdListOfUserTagList(
+            userTagIdList
+        );
+
+        let userRoleIdList = (
             filterOptions.userRoleIdList || []
         ).map((userRoleId) => (userRoleId === 0 ? null : userRoleId));
-        dmFilterOptions.userRoleIdList = dmFilterOptions.userRoleIdList.filter(element => {
+        userRoleIdList = userRoleIdList.filter(element => {
             return element !== null;
         });
+        const userIdListOfUSerRoleList = await this.userHasUserRoleDM.getUserIdListOfUserRoleList(
+            userRoleIdList
+        );
+
+        dmFilterOptions.userIdList = [...new Set([...userIdListOfUserTagList ,...userIdListOfUSerRoleList])];
         return dmFilterOptions;
     }
 }
