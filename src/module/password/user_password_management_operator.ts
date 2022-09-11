@@ -4,18 +4,14 @@ import { Logger } from "winston";
 import validator from "validator";
 import {
     UserDataAccessor,
-    UserHasUserTagDataAccessor,
     UserPasswordDataAccessor,
     USER_DATA_ACCESSOR_TOKEN,
-    USER_HAS_USER_TAG_DATA_ACCESSOR_TOKEN,
     USER_PASSWORD_DATA_ACCESSOR_TOKEN,
 } from "../../dataaccess/db";
 import { User } from "../../proto/gen/User";
 import { ErrorWithStatus, LOGGER_TOKEN } from "../../utils";
 import { Hasher, HASHER_TOKEN } from "./hasher";
 import { TokenGenerator, TOKEN_GENERATOR_TOKEN } from "../token/generator";
-
-const USER_TAG_DISPLAY_NAME_OF_DISABLED_STATUS_USER = "Disabled";
 
 export interface UserPasswordManagementOperator {
     createUserPassword(userId: number, password: string): Promise<void>;
@@ -32,7 +28,6 @@ export class UserPasswordManagementOperatorImpl
     constructor(
         private readonly userPasswordDM: UserPasswordDataAccessor,
         private readonly userDM: UserDataAccessor,
-        private readonly userHasUserTagDM: UserHasUserTagDataAccessor,
         private readonly hasher: Hasher,
         private readonly tokenGenerator: TokenGenerator,
         private readonly logger: Logger
@@ -131,7 +126,7 @@ export class UserPasswordManagementOperatorImpl
                 status.NOT_FOUND
             );
         }
-        
+
         const hash = await this.userPasswordDM.getUserPasswordHash(user.id);
         if (hash === null) {
             this.logger.error("user doesn't have password", {
@@ -163,7 +158,6 @@ injected(
     UserPasswordManagementOperatorImpl,
     USER_PASSWORD_DATA_ACCESSOR_TOKEN,
     USER_DATA_ACCESSOR_TOKEN,
-    USER_HAS_USER_TAG_DATA_ACCESSOR_TOKEN,
     HASHER_TOKEN,
     TOKEN_GENERATOR_TOKEN,
     LOGGER_TOKEN
