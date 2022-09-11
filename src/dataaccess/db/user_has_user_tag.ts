@@ -12,14 +12,12 @@ export interface UserHasUserTagDataAccessor {
     getUserTagListOfUser(userId: number): Promise<UserTag[]>;
     getUserTagListOfUserList(userIdList: number[]): Promise<UserTag[][]>;
     getUserTagIdListOfUser(userId: number): Promise<number[]>;
-    getUserIdListOfUserTagList(userTagIdList: (number | null)[]): Promise<number[]>;
+    getUserIdListOfUserTagList(userTagIdList: number[]): Promise<number[]>;
     getUserHasUserTagWithXLock(
         userId: number,
         userTagId: number
     ): Promise<{ userId: number; userTagId: number } | null>;
-    withTransaction<T>(
-        execFunc: (dataAccessor: UserHasUserTagDataAccessor) => Promise<T>
-    ): Promise<T>;
+    withTransaction<T>(execFunc: (dataAccessor: UserHasUserTagDataAccessor) => Promise<T>): Promise<T>;
 }
 
 const TabNameUserServiceUserHasUserTag = "user_service_user_has_user_tag_tab";
@@ -31,18 +29,10 @@ const ColNameUserServiceUserTagId = "user_tag_id";
 const ColNameUserServiceUserTagDisplayName = "display_name";
 const ColNameUserServiceUserTagDescription = "description";
 
-export class UserHasUserTagDataAccessorImpl
-    implements UserHasUserTagDataAccessor
-{
-    constructor(
-        private readonly knex: Knex<any, any[]>,
-        private readonly logger: Logger
-    ) {}
+export class UserHasUserTagDataAccessorImpl implements UserHasUserTagDataAccessor {
+    constructor(private readonly knex: Knex<any, any[]>, private readonly logger: Logger) {}
 
-    public async createUserHasUserTag(
-        userId: number,
-        userTagId: number
-    ): Promise<void> {
+    public async createUserHasUserTag(userId: number, userTagId: number): Promise<void> {
         try {
             await this.knex
                 .insert({
@@ -58,10 +48,7 @@ export class UserHasUserTagDataAccessorImpl
         }
     }
 
-    public async deleteUserHasUserTag(
-        userId: number,
-        userTagId: number
-    ): Promise<void> {
+    public async deleteUserHasUserTag(userId: number, userTagId: number): Promise<void> {
         let deletedCount: number;
         try {
             deletedCount = await this.knex
@@ -78,11 +65,7 @@ export class UserHasUserTagDataAccessorImpl
             throw ErrorWithStatus.wrapWithStatus(error, status.INTERNAL);
         }
         if (deletedCount === 0) {
-            this.logger.debug(
-                "no user has user tag relation found",
-                { userId },
-                { userTagId }
-            );
+            this.logger.debug("no user has user tag relation found", { userId }, { userTagId });
             throw new ErrorWithStatus(
                 `no user has user tag relation found with user_id ${userId}, user_tag_id ${userTagId}`,
                 status.NOT_FOUND
@@ -117,9 +100,7 @@ export class UserHasUserTagDataAccessorImpl
         }
     }
 
-    public async getUserTagListOfUserList(
-        userIdList: number[]
-    ): Promise<UserTag[][]> {
+    public async getUserTagListOfUserList(userIdList: number[]): Promise<UserTag[][]> {
         try {
             const rows = await this.knex
                 .select()
@@ -138,9 +119,7 @@ export class UserHasUserTagDataAccessorImpl
                 if (!userIdToUserTagList.has(userId)) {
                     userIdToUserTagList.set(userId, []);
                 }
-                userIdToUserTagList
-                    .get(userId)
-                    ?.push(this.getUserTagFromRow(row));
+                userIdToUserTagList.get(userId)?.push(this.getUserTagFromRow(row));
             }
 
             const results: UserTag[][] = [];
@@ -166,9 +145,7 @@ export class UserHasUserTagDataAccessorImpl
                     [ColNameUserServiceUserHasUserTagUserId]: userId,
                 });
 
-            return rows.map(
-                (row) => +row[ColNameUserServiceUserHasUserTagUserTagId]
-            );
+            return rows.map((row) => +row[ColNameUserServiceUserHasUserTagUserTagId]);
         } catch (error) {
             this.logger.error("failed to get user tag id list of user id", {
                 error,
@@ -177,20 +154,13 @@ export class UserHasUserTagDataAccessorImpl
         }
     }
 
-    public async getUserIdListOfUserTagList(
-        userTagIdList: (number | null)[]
-    ): Promise<number[]> {
+    public async getUserIdListOfUserTagList(userTagIdList: number[]): Promise<number[]> {
         try {
-            const rows = await this.knex    
+            const rows = await this.knex
                 .select()
                 .from(TabNameUserServiceUserHasUserTag)
-                .whereIn(
-                    ColNameUserServiceUserHasUserTagUserTagId,
-                    userTagIdList
-                );
-            return rows.map(
-                (row) => +row[ColNameUserServiceUserHasUserTagUserId]
-            );
+                .whereIn(ColNameUserServiceUserHasUserTagUserTagId, userTagIdList);
+            return rows.map((row) => +row[ColNameUserServiceUserHasUserTagUserId]);
         } catch (error) {
             this.logger.error("failed to get user id list of user tag id list", {
                 error,
@@ -214,23 +184,13 @@ export class UserHasUserTagDataAccessorImpl
                 .forUpdate();
 
             if (rows.length == 0) {
-                this.logger.debug(
-                    "no user has user tag relation found",
-                    { userId },
-                    { userTagId }
-                );
+                this.logger.debug("no user has user tag relation found", { userId }, { userTagId });
                 return null;
             }
 
             if (rows.length > 1) {
-                this.logger.error(
-                    "more than one user has user tag relation found",
-                    { userId, userTagId }
-                );
-                throw new ErrorWithStatus(
-                    "more than one user has user tag relation found",
-                    status.INTERNAL
-                );
+                this.logger.error("more than one user has user tag relation found", { userId, userTagId });
+                throw new ErrorWithStatus("more than one user has user tag relation found", status.INTERNAL);
             }
 
             return {
@@ -245,14 +205,9 @@ export class UserHasUserTagDataAccessorImpl
         }
     }
 
-    public async withTransaction<T>(
-        cb: (dataAccessor: UserHasUserTagDataAccessor) => Promise<T>
-    ): Promise<T> {
+    public async withTransaction<T>(cb: (dataAccessor: UserHasUserTagDataAccessor) => Promise<T>): Promise<T> {
         return this.knex.transaction(async (tx) => {
-            const txDataAccessor = new UserHasUserTagDataAccessorImpl(
-                tx,
-                this.logger
-            );
+            const txDataAccessor = new UserHasUserTagDataAccessorImpl(tx, this.logger);
             return cb(txDataAccessor);
         });
     }
@@ -268,5 +223,4 @@ export class UserHasUserTagDataAccessorImpl
 
 injected(UserHasUserTagDataAccessorImpl, KNEX_INSTANCE_TOKEN, LOGGER_TOKEN);
 
-export const USER_HAS_USER_TAG_DATA_ACCESSOR_TOKEN =
-    token<UserHasUserTagDataAccessor>("UserHasUserTagDataAccessor");
+export const USER_HAS_USER_TAG_DATA_ACCESSOR_TOKEN = token<UserHasUserTagDataAccessor>("UserHasUserTagDataAccessor");
