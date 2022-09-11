@@ -27,11 +27,7 @@ export interface UserManagementOperator {
         filterOptions: UserListFilterOptions | undefined
     ): Promise<{ totalUserCount: number; userList: User[] }>;
     getUser(userId: number): Promise<User>;
-    searchUser(
-        query: string,
-        limit: number,
-        includedUserIdList: number[]
-    ): Promise<User[]>;
+    searchUser(query: string, limit: number, includedUserIdList: number[]): Promise<User[]>;
 }
 
 export class UserManagementOperatorImpl implements UserManagementOperator {
@@ -42,25 +38,16 @@ export class UserManagementOperatorImpl implements UserManagementOperator {
         private readonly logger: Logger
     ) {}
 
-    public async createUser(
-        username: string,
-        displayName: string
-    ): Promise<User> {
+    public async createUser(username: string, displayName: string): Promise<User> {
         if (!this.isValidUsername(username)) {
             this.logger.error("invalid username", { username });
-            throw new ErrorWithStatus(
-                `invalid username ${username}`,
-                status.INVALID_ARGUMENT
-            );
+            throw new ErrorWithStatus(`invalid username ${username}`, status.INVALID_ARGUMENT);
         }
 
         displayName = this.sanitizeDisplayName(displayName);
         if (!this.isValidDisplayName(displayName)) {
             this.logger.error("invalid display name", { displayName });
-            throw new ErrorWithStatus(
-                `invalid display name ${displayName}`,
-                status.INVALID_ARGUMENT
-            );
+            throw new ErrorWithStatus(`invalid display name ${displayName}`, status.INVALID_ARGUMENT);
         }
 
         return this.userDM.withTransaction<User>(async (dm) => {
@@ -69,10 +56,7 @@ export class UserManagementOperatorImpl implements UserManagementOperator {
                 this.logger.error("username has already been taken", {
                     username,
                 });
-                throw new ErrorWithStatus(
-                    `username ${username} has already been taken`,
-                    status.ALREADY_EXISTS
-                );
+                throw new ErrorWithStatus(`username ${username} has already been taken`, status.ALREADY_EXISTS);
             }
 
             const createdUserId = await dm.createUser(username, displayName);
@@ -87,10 +71,7 @@ export class UserManagementOperatorImpl implements UserManagementOperator {
     public async updateUser(user: User): Promise<User> {
         if (user.id === undefined) {
             this.logger.error("user.id is required");
-            throw new ErrorWithStatus(
-                `user.id is required`,
-                status.INVALID_ARGUMENT
-            );
+            throw new ErrorWithStatus(`user.id is required`, status.INVALID_ARGUMENT);
         }
         const userId = user.id;
 
@@ -99,10 +80,7 @@ export class UserManagementOperatorImpl implements UserManagementOperator {
                 this.logger.error("invalid username", {
                     username: user.username,
                 });
-                throw new ErrorWithStatus(
-                    `invalid username ${user.username}`,
-                    status.INVALID_ARGUMENT
-                );
+                throw new ErrorWithStatus(`invalid username ${user.username}`, status.INVALID_ARGUMENT);
             }
         }
 
@@ -112,10 +90,7 @@ export class UserManagementOperatorImpl implements UserManagementOperator {
                 this.logger.error("invalid username", {
                     displayName: user.displayName,
                 });
-                throw new ErrorWithStatus(
-                    `invalid display name ${user.displayName}`,
-                    status.INVALID_ARGUMENT
-                );
+                throw new ErrorWithStatus(`invalid display name ${user.displayName}`, status.INVALID_ARGUMENT);
             }
         }
 
@@ -125,19 +100,12 @@ export class UserManagementOperatorImpl implements UserManagementOperator {
                 this.logger.error("no user with user_id found", {
                     userId: user.id,
                 });
-                throw new ErrorWithStatus(
-                    `no user with id ${user.id} found`,
-                    status.NOT_FOUND
-                );
+                throw new ErrorWithStatus(`no user with id ${user.id} found`, status.NOT_FOUND);
             }
 
             if (user.username !== undefined) {
-                const userWithUsernameRecord =
-                    await dm.getUserByUsernameWithXLock(user.username);
-                if (
-                    userWithUsernameRecord !== null &&
-                    userWithUsernameRecord.id !== userId
-                ) {
+                const userWithUsernameRecord = await dm.getUserByUsernameWithXLock(user.username);
+                if (userWithUsernameRecord !== null && userWithUsernameRecord.id !== userId) {
                     this.logger.error("username has already been taken", {
                         username: user.username,
                     });
@@ -165,19 +133,11 @@ export class UserManagementOperatorImpl implements UserManagementOperator {
         sortOrder: _UserListSortOrder_Values,
         filterOptions: UserListFilterOptions | undefined
     ): Promise<{ totalUserCount: number; userList: User[] }> {
-        const dmFilterOptions = await this.getDMUserListFilterOptions(
-            filterOptions
-        );
-
         const dmSortOrder = this.getUserListSortOrder(sortOrder);
+        const dmFilterOptions = await this.getDMUserListFilterOptions(filterOptions);
         const dmResults = await Promise.all([
-            this.userDM.getUserCount(),
-            this.userDM.getUserList(
-                offset,
-                limit,
-                dmSortOrder,
-                dmFilterOptions
-            ),
+            this.userDM.getUserCount(dmFilterOptions),
+            this.userDM.getUserList(offset, limit, dmSortOrder, dmFilterOptions),
         ]);
         return {
             totalUserCount: dmResults[0],
@@ -189,19 +149,12 @@ export class UserManagementOperatorImpl implements UserManagementOperator {
         const user = await this.userDM.getUserByUserId(userId);
         if (user === null) {
             this.logger.error("no user with user_id found", { userId });
-            throw new ErrorWithStatus(
-                `no user with user_id ${userId} found`,
-                status.NOT_FOUND
-            );
+            throw new ErrorWithStatus(`no user with user_id ${userId} found`, status.NOT_FOUND);
         }
         return user;
     }
 
-    public async searchUser(
-        query: string,
-        limit: number,
-        includedUserIdList: number[]
-    ): Promise<User[]> {
+    public async searchUser(query: string, limit: number, includedUserIdList: number[]): Promise<User[]> {
         if (query === "") {
             return [];
         }
@@ -213,19 +166,14 @@ export class UserManagementOperatorImpl implements UserManagementOperator {
     }
 
     private isValidUsername(username: string): boolean {
-        return (
-            validator.isLength(username, { min: 6, max: 64 }) &&
-            validator.isAlphanumeric(username)
-        );
+        return validator.isLength(username, { min: 6, max: 64 }) && validator.isAlphanumeric(username);
     }
 
     private isValidDisplayName(displayName: string): boolean {
         return validator.isLength(displayName, { min: 1, max: 256 });
     }
 
-    private getUserListSortOrder(
-        sortOrder: _UserListSortOrder_Values
-    ): UserListSortOrder {
+    private getUserListSortOrder(sortOrder: _UserListSortOrder_Values): UserListSortOrder {
         switch (sortOrder) {
             case _UserListSortOrder_Values.ID_ASCENDING:
                 return UserListSortOrder.ID_ASCENDING;
@@ -241,10 +189,7 @@ export class UserManagementOperatorImpl implements UserManagementOperator {
                 return UserListSortOrder.DISPLAY_NAME_DESCENDING;
             default:
                 this.logger.error("invalid sort_order value", { sortOrder });
-                throw new ErrorWithStatus(
-                    `invalid sort_order value ${sortOrder}`,
-                    status.INVALID_ARGUMENT
-                );
+                throw new ErrorWithStatus(`invalid sort_order value ${sortOrder}`, status.INVALID_ARGUMENT);
         }
     }
 
@@ -255,41 +200,49 @@ export class UserManagementOperatorImpl implements UserManagementOperator {
         if (filterOptions === undefined) {
             return dmFilterOptions;
         }
+
+        let userIdSet = new Set<number>();
+        if (this.shouldUseListFilterOptions(filterOptions.userTagIdList)) {
+            const userIdList = await this.userHasUserTagDM.getUserIdListOfUserTagList(
+                filterOptions.userTagIdList || []
+            );
+            if (dmFilterOptions.shouldFilterByUserIdList) {
+                const intersectedUserIdSet = new Set<number>(userIdList.filter((userId) => userIdSet.has(userId)));
+                userIdSet = intersectedUserIdSet;
+            } else {
+                dmFilterOptions.shouldFilterByUserIdList = true;
+                userIdSet = new Set<number>(userIdList);
+            }
+        }
+        if (this.shouldUseListFilterOptions(filterOptions.userRoleIdList)) {
+            const userIdList = await this.userHasUserRoleDM.getUserIdListOfUserRoleList(
+                filterOptions.userRoleIdList || []
+            );
+            if (dmFilterOptions.shouldFilterByUserIdList) {
+                const intersectedUserIdSet = new Set<number>(userIdList.filter((userId) => userIdSet.has(userId)));
+                userIdSet = intersectedUserIdSet;
+            } else {
+                dmFilterOptions.shouldFilterByUserIdList = true;
+                userIdSet = new Set<number>(userIdList);
+            }
+        }
+
+        dmFilterOptions.userIdList = Array.from(userIdSet);
         dmFilterOptions.usernameQuery = filterOptions.usernameQuery || "";
-
-        let userTagIdList = (filterOptions.userTagIdList || []).map(
-            (userTagId) => (userTagId === 0 ? null : userTagId)
-        );
-        userTagIdList = userTagIdList.filter(element => {
-            return element !== null;
-        });
-        const userIdListOfUserTagList = await this.userHasUserTagDM.getUserIdListOfUserTagList(
-            userTagIdList
-        );
-
-        let userRoleIdList = (
-            filterOptions.userRoleIdList || []
-        ).map((userRoleId) => (userRoleId === 0 ? null : userRoleId));
-        userRoleIdList = userRoleIdList.filter(element => {
-            return element !== null;
-        });
-        const userIdListOfUSerRoleList = await this.userHasUserRoleDM.getUserIdListOfUserRoleList(
-            userRoleIdList
-        );
-
-        dmFilterOptions.userIdList = [...new Set([...userIdListOfUserTagList ,...userIdListOfUSerRoleList])];
         return dmFilterOptions;
+    }
+
+    private shouldUseListFilterOptions(filterOptionsList: any[] | undefined): boolean {
+        return filterOptionsList !== undefined && filterOptionsList.length > 0;
     }
 }
 
 injected(
-    UserManagementOperatorImpl, 
-    USER_DATA_ACCESSOR_TOKEN, 
-    USER_HAS_USER_ROLE_DATA_ACCESSOR_TOKEN, 
+    UserManagementOperatorImpl,
+    USER_DATA_ACCESSOR_TOKEN,
+    USER_HAS_USER_ROLE_DATA_ACCESSOR_TOKEN,
     USER_HAS_USER_TAG_DATA_ACCESSOR_TOKEN,
     LOGGER_TOKEN
 );
 
-export const USER_MANAGEMENT_OPERATOR_TOKEN = token<UserManagementOperator>(
-    "UserManagementOperator"
-);
+export const USER_MANAGEMENT_OPERATOR_TOKEN = token<UserManagementOperator>("UserManagementOperator");

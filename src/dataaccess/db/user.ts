@@ -6,11 +6,7 @@ import { ErrorWithStatus, LOGGER_TOKEN } from "../../utils";
 import { KNEX_INSTANCE_TOKEN } from "./knex";
 
 export class User {
-    constructor(
-        public id: number,
-        public username: string,
-        public displayName: string
-    ) {}
+    constructor(public id: number, public username: string, public displayName: string) {}
 }
 
 export enum UserListSortOrder {
@@ -23,8 +19,9 @@ export enum UserListSortOrder {
 }
 
 export class UserListFilterOptions {
-    public usernameQuery = "";
+    public shouldFilterByUserIdList = false;
     public userIdList: number[] = [];
+    public usernameQuery = "";
 }
 
 export interface UserDataAccessor {
@@ -34,40 +31,27 @@ export interface UserDataAccessor {
     getUserByUserIdWithXLock(userId: number): Promise<User | null>;
     getUserByUsername(username: string): Promise<User | null>;
     getUserByUsernameWithXLock(username: string): Promise<User | null>;
-    getUserCount(): Promise<number>;
+    getUserCount(filterOptions: UserListFilterOptions): Promise<number>;
     getUserList(
         offset: number,
         limit: number,
         sortOrder: UserListSortOrder,
         filterOptions: UserListFilterOptions
     ): Promise<User[]>;
-    searchUser(
-        query: string,
-        limit: number,
-        includedUserIdList: number[]
-    ): Promise<User[]>;
-    withTransaction<T>(
-        cb: (dataAccessor: UserDataAccessor) => Promise<T>
-    ): Promise<T>;
+    searchUser(query: string, limit: number, includedUserIdList: number[]): Promise<User[]>;
+    withTransaction<T>(cb: (dataAccessor: UserDataAccessor) => Promise<T>): Promise<T>;
 }
 
 const TabNameUserServiceUser = "user_service_user_tab";
 const ColNameUserServiceUserId = "user_id";
 const ColNameUserServiceUserUsername = "username";
 const ColNameUserServiceUserDisplayName = "display_name";
-const ColNameUserServiceUserFullTextSearchDocument =
-    "full_text_search_document";
+const ColNameUserServiceUserFullTextSearchDocument = "full_text_search_document";
 
 export class UserDataAccessorImpl implements UserDataAccessor {
-    constructor(
-        private readonly knex: Knex<any, any[]>,
-        private readonly logger: Logger
-    ) {}
+    constructor(private readonly knex: Knex<any, any[]>, private readonly logger: Logger) {}
 
-    public async createUser(
-        username: string,
-        displayName: string
-    ): Promise<number> {
+    public async createUser(username: string, displayName: string): Promise<number> {
         try {
             const rows = await this.knex
                 .insert({
@@ -130,18 +114,13 @@ export class UserDataAccessorImpl implements UserDataAccessor {
             this.logger.error("more than one user with user_id found", {
                 userId,
             });
-            throw new ErrorWithStatus(
-                "more than one user was found",
-                status.INTERNAL
-            );
+            throw new ErrorWithStatus("more than one user was found", status.INTERNAL);
         }
 
         return this.getUserFromRow(rows[0]);
     }
 
-    public async getUserByUserIdWithXLock(
-        userId: number
-    ): Promise<User | null> {
+    public async getUserByUserIdWithXLock(userId: number): Promise<User | null> {
         let rows: Record<string, any>[];
         try {
             rows = await this.knex
@@ -168,10 +147,7 @@ export class UserDataAccessorImpl implements UserDataAccessor {
             this.logger.error("more than one user with user_id found", {
                 userId,
             });
-            throw new ErrorWithStatus(
-                "more than one user was found",
-                status.INTERNAL
-            );
+            throw new ErrorWithStatus("more than one user was found", status.INTERNAL);
         }
 
         return this.getUserFromRow(rows[0]);
@@ -203,18 +179,13 @@ export class UserDataAccessorImpl implements UserDataAccessor {
             this.logger.error("more than one user with username found", {
                 username,
             });
-            throw new ErrorWithStatus(
-                "more than one user was found",
-                status.INTERNAL
-            );
+            throw new ErrorWithStatus("more than one user was found", status.INTERNAL);
         }
 
         return this.getUserFromRow(rows[0]);
     }
 
-    public async getUserByUsernameWithXLock(
-        username: string
-    ): Promise<User | null> {
+    public async getUserByUsernameWithXLock(username: string): Promise<User | null> {
         let rows: Record<string, any>[];
         try {
             rows = await this.knex
@@ -241,24 +212,23 @@ export class UserDataAccessorImpl implements UserDataAccessor {
             this.logger.error("more than one user with username found", {
                 username,
             });
-            throw new ErrorWithStatus(
-                "more than one user was found",
-                status.INTERNAL
-            );
+            throw new ErrorWithStatus("more than one user was found", status.INTERNAL);
         }
 
         return this.getUserFromRow(rows[0]);
     }
 
-    public async getUserCount(): Promise<number> {
+    public async getUserCount(filterOptions: UserListFilterOptions): Promise<number> {
         let rows: Record<string, any>[];
         try {
-            rows = await this.knex.count().from(TabNameUserServiceUser);
+            rows = await this.knex
+                .count()
+                .from(TabNameUserServiceUser)
+                .where((qb) => this.getUserListFilterOptionsWhereClause(qb, filterOptions));
         } catch (error) {
             this.logger.error("failed to get user count", { error });
             throw ErrorWithStatus.wrapWithStatus(error, status.INTERNAL);
         }
-
         return +rows[0]["count"];
     }
 
@@ -278,13 +248,8 @@ export class UserDataAccessorImpl implements UserDataAccessor {
                 .from(TabNameUserServiceUser)
                 .offset(offset)
                 .limit(limit);
-            queryBuilder = this.applyUserListOrderByClause(
-                queryBuilder,
-                sortOrder
-            );
-            queryBuilder = queryBuilder.where((qb) =>
-                this.getUserListFilterOptionsWhereClause(qb, filterOptions)
-            );
+            queryBuilder = this.applyUserListOrderByClause(queryBuilder, sortOrder);
+            queryBuilder = queryBuilder.where((qb) => this.getUserListFilterOptionsWhereClause(qb, filterOptions));
             const rows = await queryBuilder;
             return rows.map((row) => this.getUserFromRow(row));
         } catch (error) {
@@ -299,27 +264,15 @@ export class UserDataAccessorImpl implements UserDataAccessor {
         }
     }
 
-    public async searchUser(
-        query: string,
-        limit: number,
-        includedUserIdList: number[]
-    ): Promise<User[]> {
+    public async searchUser(query: string, limit: number, includedUserIdList: number[]): Promise<User[]> {
         let qb = this.knex
             .select()
             .from(TabNameUserServiceUser)
-            .whereRaw(
-                `${ColNameUserServiceUserFullTextSearchDocument} @@ plainto_tsquery (?)`,
-                query
-            )
-            .orderByRaw(
-                `ts_rank(${ColNameUserServiceUserFullTextSearchDocument}, plainto_tsquery (?)) DESC`,
-                query
-            )
+            .whereRaw(`${ColNameUserServiceUserFullTextSearchDocument} @@ plainto_tsquery (?)`, query)
+            .orderByRaw(`ts_rank(${ColNameUserServiceUserFullTextSearchDocument}, plainto_tsquery (?)) DESC`, query)
             .limit(limit);
         if (includedUserIdList.length > 0) {
-            qb = qb.andWhere((qb) =>
-                qb.whereIn(ColNameUserServiceUserId, includedUserIdList)
-            );
+            qb = qb.andWhere((qb) => qb.whereIn(ColNameUserServiceUserId, includedUserIdList));
         }
 
         try {
@@ -333,9 +286,7 @@ export class UserDataAccessorImpl implements UserDataAccessor {
         }
     }
 
-    public async withTransaction<T>(
-        cb: (dataAccessor: UserDataAccessor) => Promise<T>
-    ): Promise<T> {
+    public async withTransaction<T>(cb: (dataAccessor: UserDataAccessor) => Promise<T>): Promise<T> {
         return this.knex.transaction(async (tx) => {
             const txDataAccessor = new UserDataAccessorImpl(tx, this.logger);
             return cb(txDataAccessor);
@@ -350,36 +301,22 @@ export class UserDataAccessorImpl implements UserDataAccessor {
         );
     }
 
-    private applyUserListOrderByClause(
-        qb: Knex.QueryBuilder,
-        sortOption: UserListSortOrder
-    ): Knex.QueryBuilder {
+    private applyUserListOrderByClause(qb: Knex.QueryBuilder, sortOption: UserListSortOrder): Knex.QueryBuilder {
         switch (sortOption) {
             case UserListSortOrder.ID_ASCENDING:
                 return qb.orderBy(ColNameUserServiceUserId, "asc");
             case UserListSortOrder.ID_DESCENDING:
                 return qb.orderBy(ColNameUserServiceUserId, "desc");
             case UserListSortOrder.USERNAME_ASCENDING:
-                return qb
-                    .orderBy(ColNameUserServiceUserUsername, "asc")
-                    .orderBy(ColNameUserServiceUserId, "asc");
+                return qb.orderBy(ColNameUserServiceUserUsername, "asc").orderBy(ColNameUserServiceUserId, "asc");
             case UserListSortOrder.USERNAME_DESCENDING:
-                return qb
-                    .orderBy(ColNameUserServiceUserUsername, "desc")
-                    .orderBy(ColNameUserServiceUserId, "desc");
+                return qb.orderBy(ColNameUserServiceUserUsername, "desc").orderBy(ColNameUserServiceUserId, "desc");
             case UserListSortOrder.DISPLAY_NAME_ASCENDING:
-                return qb
-                    .orderBy(ColNameUserServiceUserDisplayName, "asc")
-                    .orderBy(ColNameUserServiceUserId, "asc");
+                return qb.orderBy(ColNameUserServiceUserDisplayName, "asc").orderBy(ColNameUserServiceUserId, "asc");
             case UserListSortOrder.DISPLAY_NAME_DESCENDING:
-                return qb
-                    .orderBy(ColNameUserServiceUserDisplayName, "desc")
-                    .orderBy(ColNameUserServiceUserId, "desc");
+                return qb.orderBy(ColNameUserServiceUserDisplayName, "desc").orderBy(ColNameUserServiceUserId, "desc");
             default:
-                throw new ErrorWithStatus(
-                    "invalid user list sort order",
-                    status.INVALID_ARGUMENT
-                );
+                throw new ErrorWithStatus("invalid user list sort order", status.INVALID_ARGUMENT);
         }
     }
 
@@ -387,16 +324,13 @@ export class UserDataAccessorImpl implements UserDataAccessor {
         qb: Knex.QueryBuilder,
         filterOptions: UserListFilterOptions
     ): Knex.QueryBuilder {
+        if (filterOptions.shouldFilterByUserIdList && filterOptions.userIdList.length > 0) {
+            qb.whereIn(`${ColNameUserServiceUserId}`, filterOptions.userIdList);
+        }
         if (filterOptions.usernameQuery !== "") {
             qb.whereRaw(
                 `${ColNameUserServiceUserFullTextSearchDocument} @@ plainto_tsquery (?)`,
                 filterOptions.usernameQuery
-            );
-        }
-        if (filterOptions.userIdList.length > 0) {
-            qb.whereIn(
-                `${ColNameUserServiceUserId}`,
-                filterOptions.userIdList
             );
         }
         return qb;
@@ -405,5 +339,4 @@ export class UserDataAccessorImpl implements UserDataAccessor {
 
 injected(UserDataAccessorImpl, KNEX_INSTANCE_TOKEN, LOGGER_TOKEN);
 
-export const USER_DATA_ACCESSOR_TOKEN =
-    token<UserDataAccessor>("UserDataAccessor");
+export const USER_DATA_ACCESSOR_TOKEN = token<UserDataAccessor>("UserDataAccessor");
