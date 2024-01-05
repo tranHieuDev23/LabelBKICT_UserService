@@ -12,7 +12,7 @@ import * as user from "../module/user";
 import * as tag from "../module/tag";
 import * as service from "../service";
 
-export function startGRPCServer(dotenvPath: string) {
+export async function startGRPCServer(dotenvPath: string): Promise<void> {
     dotenv.config({
         path: dotenvPath,
     });
@@ -22,10 +22,10 @@ export function startGRPCServer(dotenvPath: string) {
     config.bindToContainer(container);
     db.bindToContainer(container);
     elasticsearch.bindToContainer(container);
+    await token.bindToContainer(container);
     password.bindToContainer(container);
     permission.bindToContainer(container);
     role.bindToContainer(container);
-    token.bindToContainer(container);
     user.bindToContainer(container);
     tag.bindToContainer(container);
     service.bindToContainer(container);

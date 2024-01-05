@@ -5,11 +5,11 @@ import { deleteExpiredBlacklistedToken } from "./cmd/delete_expired_blacklisted_
 
 const args = minimist(process.argv);
 if (args["start_grpc_server"]) {
-    startGRPCServer(".env");
+    startGRPCServer(".env").then();
 } else if (args["initialize"]) {
-    initialize(".env");
+    initialize(".env").then();
 } else if (args["delete_expired_blacklisted_token"]) {
-    deleteExpiredBlacklistedToken(".env");
+    deleteExpiredBlacklistedToken(".env").then();
 } else {
     console.log("no component was selected, exiting...");
 }

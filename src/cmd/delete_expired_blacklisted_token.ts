@@ -11,7 +11,7 @@ import * as token from "../module/token";
 import * as user from "../module/user";
 import * as jobs from "../jobs";
 
-export function deleteExpiredBlacklistedToken(dotenvPath: string) {
+export async function deleteExpiredBlacklistedToken(dotenvPath: string): Promise<void> {
     dotenv.config({
         path: dotenvPath,
     });
@@ -21,10 +21,10 @@ export function deleteExpiredBlacklistedToken(dotenvPath: string) {
     config.bindToContainer(container);
     db.bindToContainer(container);
     elasticsearch.bindToContainer(container);
+    await token.bindToContainer(container);
     password.bindToContainer(container);
     permission.bindToContainer(container);
     role.bindToContainer(container);
-    token.bindToContainer(container);
     user.bindToContainer(container);
     jobs.bindToContainer(container);
 
