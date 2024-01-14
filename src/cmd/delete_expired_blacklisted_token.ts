@@ -2,6 +2,7 @@ import { Container } from "brandi";
 import dotenv from "dotenv";
 import * as utils from "../utils";
 import * as config from "../config";
+import * as cache from "../dataaccess/cache";
 import * as db from "../dataaccess/db";
 import * as elasticsearch from "../dataaccess/elasticsearch";
 import * as password from "../module/password";
@@ -19,6 +20,7 @@ export async function deleteExpiredBlacklistedToken(dotenvPath: string): Promise
     const container = new Container();
     utils.bindToContainer(container);
     config.bindToContainer(container);
+    cache.bindToContainer(container);
     db.bindToContainer(container);
     elasticsearch.bindToContainer(container);
     await token.bindToContainer(container);

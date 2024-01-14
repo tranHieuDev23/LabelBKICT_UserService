@@ -7,6 +7,7 @@ import { ErrorWithStatus, LOGGER_TOKEN, ID_GENERATOR_TOKEN } from "../../utils";
 import { IdGenerator } from "../../utils/id";
 import { TOKEN_PUBLIC_KEY_DATA_ACCESSOR_TOKEN, TokenPublicKeyDataAccessor } from "../../dataaccess/db";
 import { generateKeyPairSync } from "crypto";
+import { TOKEN_PUBLIC_KEY_CACHE_DM_TOKEN, TokenPublicKeyCacheDM } from "../../dataaccess/cache/token_public_key";
 
 export class DecodeTokenResult {
     constructor(public readonly tokenId: number, public readonly userId: number, public readonly expireAt: number) {}
@@ -23,6 +24,7 @@ export class JWTGenerator implements TokenGenerator {
 
     private constructor(
         private readonly tokenPublicKeyDataAccessor: TokenPublicKeyDataAccessor,
+        private readonly tokenPublicKeyCacheDM: TokenPublicKeyCacheDM,
         private readonly idGenerator: IdGenerator,
         private readonly tokenConfig: TokenConfig,
         private readonly logger: Logger
@@ -30,11 +32,18 @@ export class JWTGenerator implements TokenGenerator {
 
     public static async New(
         tokenPublicKeyDataAccessor: TokenPublicKeyDataAccessor,
+        tokenPublicKeyCacheDM: TokenPublicKeyCacheDM,
         idGenerator: IdGenerator,
         tokenConfig: TokenConfig,
         logger: Logger
     ): Promise<JWTGenerator> {
-        const jwtGenerator = new JWTGenerator(tokenPublicKeyDataAccessor, idGenerator, tokenConfig, logger);
+        const jwtGenerator = new JWTGenerator(
+            tokenPublicKeyDataAccessor,
+            tokenPublicKeyCacheDM,
+            idGenerator,
+            tokenConfig,
+            logger
+        );
 
         const keyPair = generateKeyPairSync("rsa", {
             modulusLength: 2048,
@@ -75,6 +84,28 @@ export class JWTGenerator implements TokenGenerator {
         });
     }
 
+    private async getTokenPublicKey(keyID: number): Promise<string> {
+        try {
+            const tokenPublicKey = await this.tokenPublicKeyCacheDM.get(keyID);
+            return tokenPublicKey;
+        } catch (error) {
+            this.logger.warn("failed to get token public key from cache, falling back to db", { keyID, error });
+        }
+
+        const tokenPublicKey = await this.tokenPublicKeyDataAccessor.getTokenPublicKey(keyID);
+        if (tokenPublicKey === null) {
+            throw new ErrorWithStatus("no token public key found", status.UNAUTHENTICATED);
+        }
+
+        try {
+            await this.tokenPublicKeyCacheDM.set(keyID, tokenPublicKey.data);
+        } catch (error) {
+            this.logger.warn("failed to set token public key into cache", { keyID, error });
+        }
+
+        return tokenPublicKey.data;
+    }
+
     public async decode(token: string): Promise<DecodeTokenResult> {
         const verifyOptions: VerifyOptions = {
             algorithms: ["RS512"],
@@ -88,18 +119,12 @@ export class JWTGenerator implements TokenGenerator {
                         return;
                     }
 
-                    const keyId = +headers.kid;
-                    this.tokenPublicKeyDataAccessor.getTokenPublicKey(keyId).then(
+                    this.getTokenPublicKey(+headers.kid).then(
                         (tokenPublicKey) => {
-                            if (tokenPublicKey === null) {
-                                callback(new ErrorWithStatus("no token public key found", status.UNAUTHENTICATED));
-                                return;
-                            }
-
-                            callback(null, tokenPublicKey.data);
+                            callback(null, tokenPublicKey);
                         },
-                        (err) => {
-                            callback(err);
+                        (error) => {
+                            callback(error);
                         }
                     );
                 },
@@ -120,7 +145,14 @@ export class JWTGenerator implements TokenGenerator {
     }
 }
 
-injected(JWTGenerator.New, TOKEN_PUBLIC_KEY_DATA_ACCESSOR_TOKEN, ID_GENERATOR_TOKEN, TOKEN_CONFIG_TOKEN, LOGGER_TOKEN);
+injected(
+    JWTGenerator.New,
+    TOKEN_PUBLIC_KEY_DATA_ACCESSOR_TOKEN,
+    TOKEN_PUBLIC_KEY_CACHE_DM_TOKEN,
+    ID_GENERATOR_TOKEN,
+    TOKEN_CONFIG_TOKEN,
+    LOGGER_TOKEN
+);
 
 export const TOKEN_GENERATOR_TOKEN = token<TokenGenerator>("TokenGenerator");
 export const TOKEN_GENERATOR_FACTORY_TOKEN = token<AsyncFactory<TokenGenerator>>("AsyncFactory<TokenGenerator>");
