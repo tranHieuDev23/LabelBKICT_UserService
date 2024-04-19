@@ -4,7 +4,6 @@ import * as utils from "../utils";
 import * as config from "../config";
 import * as cache from "../dataaccess/cache";
 import * as db from "../dataaccess/db";
-import * as elasticsearch from "../dataaccess/elasticsearch";
 import * as password from "../module/password";
 import * as permission from "../module/permission";
 import * as role from "../module/role";
@@ -22,7 +21,6 @@ export async function deleteExpiredBlacklistedToken(dotenvPath: string): Promise
     config.bindToContainer(container);
     cache.bindToContainer(container);
     db.bindToContainer(container);
-    elasticsearch.bindToContainer(container);
     await token.bindToContainer(container);
     password.bindToContainer(container);
     permission.bindToContainer(container);
